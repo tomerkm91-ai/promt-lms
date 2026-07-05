@@ -221,7 +221,7 @@ const modulesDatabase = [
 ];
 
 // 🔗 קישור ל-SheetDB (נקרא מקובץ .env, עם גיבוי)
-const SHEETDB_URL = process.env.SHEETDB_URL || "https://sheetdb.io/api/v1/1-J7KAmzH78TjJkQWgGsnKXYFlXn63I909DCXK-eK6pA";
+const SHEETDB_URL = process.env.SHEETDB_URL || "https://sheetdb.io/api/v1/7omaxiolxnslz";
 
 // 📝 תשובות נכונות לכל מודול (בשימוש בנתיב /api/submissions)
 const MODULE_ANSWERS = {
