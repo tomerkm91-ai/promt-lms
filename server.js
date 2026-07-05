@@ -279,12 +279,13 @@ app.post('/api/submissions', async (req, res) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     data: [{
-                        id: Date.now().toString(),
-                        studentName: studentName,
-                        moduleNumber: num,
-                        score: score,
-                        feedback: feedbackString,
-                        submittedAt: formattedDate
+                        "id": Date.now().toString(),
+                        "שם": studentName,
+                        "מספר מודל": num,
+                        "שאלה": "זה יישמר ריק כרגע",   // אם אין לך מידע על השאלה
+                        "תשובה": JSON.stringify(answers), // שומר את כל התשובות
+                        "feedback": feedbackString,
+                        "ציון": score,
                     }]
                 })
             });
