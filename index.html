@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Academy LMS - Master Level</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .lesson-content h3 { font-size: 1.5rem; font-weight: bold; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-top: 1.5rem; }
+        .lesson-content h4 { font-size: 1.2rem; font-weight: bold; margin-top: 1.25rem; color: #1f2937; margin-bottom: 0.5rem; }
+        .lesson-content p { color: #4b5563; margin-bottom: 1rem; line-height: 1.75; }
+        .lesson-content ul, .lesson-content ol { list-style-position: inside; margin-bottom: 1.25rem; color: #4b5563; padding-right: 0.5rem; }
+        .lesson-content ul { list-style-type: disc; }
+        .lesson-content ol { list-style-type: decimal; }
+        .lesson-content li { margin-top: 0.5rem; line-height: 1.7; }
+        .lesson-content code { background-color: #f3f4f6; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.95em; color: #b91c1c; }
+        .tab-btn.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-slate-50 p-4 md:p-8 font-sans text-gray-800">
+
+    <header class="mb-8 text-center bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 max-w-6xl mx-auto">
+        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">LMS Professional Edition</span>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3">🎓 AI Prompt Engineering Academy</h1>
+        <p class="text-slate-600 mt-2 text-sm md:text-base max-w-2xl mx-auto">מערכת מתקדמת להסמכת מומחי בינה מלאכותית. לחצו על מודול כדי לפתוח את חוברת הלימוד, מקרי הבוחן, התרגול המעשי והמבחן האוטומטי.</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <section class="lg:col-span-1 space-y-4">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-base font-bold text-slate-700 border-b pb-2 mb-3 flex items-center gap-2">
+                    📊 סילבוס הקורס ומפת למידה
+                </h2>
+                <div id="modules-list" class="space-y-2.5">
+                    <p class="text-gray-500 text-sm">טוען את תוכנית הלימודים מהשרת...</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="content-area" class="lg:col-span-2 bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hidden">
+            
+            <div class="bg-slate-100 border-b border-slate-200 flex text-sm">
+                <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn active px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium">📖 חומר לימוד עיוני</button>
+                <button onclick="switchTab('cases')" id="tab-cases" class="tab-btn px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium">🔥 תבניות ומקרי בוחן</button>
+                <button onclick="switchTab('practice')" id="tab-practice" class="tab-btn px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium">🏋️ תרגול שטח מעשי</button>
+            </div>
+
+            <div class="p-6 md:p-8">
+                <div id="tab-content-theory" class="tab-panel lesson-content">
+                    <div id="lesson-view"></div>
+                </div>
+
+                <div id="tab-content-cases" class="tab-panel lesson-content hidden">
+                    <div id="cases-view"></div>
+                </div>
+
+                <div id="tab-content-practice" class="tab-panel lesson-content hidden">
+                    <div id="practice-view"></div>
+                </div>
+
+                <div id="quiz-area" class="border-t border-slate-200 mt-12 pt-8">
+                    <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2" id="quiz-title">
+                        📝 מבדק הסמכה דינמי
+                    </h3>
+                    <form id="quiz-form" class="space-y-4">
+                        <input type="hidden" id="current-module-id">
+                        
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
+                            <label class="block font-semibold mb-1 text-slate-800 text-sm">שם הסטודנט להנפקת הציון:</label>
+                            <input type="text" id="student-name" required class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm" placeholder="הקלידו שם מלא">
+                        </div>
+
+                        <div id="dynamic-questions" class="space-y-4"></div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg mt-6 shadow-md transition-all">
+                            הגש מבדק לבדיקה אוטומטית ורישום בגיליון
+                        </button>
+                    </form>
+                    <div id="result-box" class="hidden mt-4 p-4 rounded-lg border text-base font-medium"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="placeholder-area" class="lg:col-span-2 flex items-center justify-center bg-white border border-slate-200 rounded-xl p-12 text-center shadow-sm">
+            <div>
+                <div class="text-4xl mb-3">🎓</div>
+                <p class="text-xl font-bold text-slate-800">אנא בחרו יחידת לימוד מתוך הסילבוס מימין</p>
+                <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">כל מודול כולל עשרות עמודי תוכן, תבניות שימוש מוכנות, תרגילי שטח ומבחן חובה.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-16 text-center text-xs text-slate-400 border-t pt-4 max-w-6xl mx-auto">
+        © 2026 AI Prompt Engineering Academy | מערכת LMS מוסמכת רמת Master
+    </footer>
+
+    <script>
+        let allModules = [];
+        let currentActiveTab = 'theory';
+
+        async function loadModules() {
+            try {
+                const response = await fetch("/api/modules");
+                allModules = await response.json();
+                const container = document.getElementById("modules-list");
+                container.innerHTML = "";
+                
+                allModules.forEach(m => {
+                    container.innerHTML += `
+                        <button onclick="selectModule(${m.moduleNumber})" id="mod-btn-${m.moduleNumber}" class="w-full text-right bg-white p-3.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all block group">
+                            <span class="text-[11px] font-bold text-blue-600 block uppercase tracking-wider">יחידה ${m.moduleNumber}</span>
+                            <h3 class="font-bold text-slate-800 text-sm mt-0.5 group-hover:text-blue-600 transition-colors">${m.title}</h3>
+                            <p class="text-slate-500 text-xs mt-1 truncate font-normal">${m.description}</p>
+                        </button>
+                    `;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        function switchTab(tabName) {
+            currentActiveTab = tabName;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+        }
+
+        function selectModule(num) {
+            allModules.forEach(m => {
+                const btn = document.getElementById(`mod-btn-${m.moduleNumber}`);
+                if(btn) btn.className = "w-full text-right bg-white p-3.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all block";
+            });
+            document.getElementById(`mod-btn-${num}`).className = "w-full text-right bg-blue-50 p-3.5 rounded-xl border-2 border-blue-600 block shadow-sm font-semibold";
+
+            const mod = allModules.find(m => m.moduleNumber === num);
+            
+            document.getElementById("placeholder-area").classList.add("hidden");
+            document.getElementById("content-area").classList.remove("hidden");
+            document.getElementById("result-box").classList.add("hidden");
+            document.getElementById("quiz-form").reset();
+
+            // טעינת לשונית א - חומר עיוני מהשרת
+            document.getElementById("lesson-view").innerHTML = mod.content;
+            document.getElementById("current-module-id").value = num;
+            document.getElementById("quiz-title").innerText = `📝 מבדק הסמכה: יחידה ${num}`;
+
+            // יצירת תוכן מורחב ללשונית ב' ו-ג' בצורה דינמית לפי המודול שנבחר
+            generateExtendedContent(num, mod.title);
+            
+            // תמיד נחזיר ללשונית הראשונה בעת החלפת מודול
+            switchTab('theory');
+        }
+
+        function generateExtendedContent(num, title) {
+            const casesContainer = document.getElementById("cases-view");
+            const practiceContainer = document.getElementById("practice-view");
+            const qContainer = document.getElementById("dynamic-questions");
+
+            // ברירת מחדל של מבחנים
+            let quizHtml = `
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <p class="font-semibold text-slate-800 mb-2">1. מהו הדבר המרכזי שלמדת ביחידה זו לגבי המודלים הרלוונטיים?</p>
+                    <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="efficiency" required class="ml-2 accent-blue-600"> א) שהם משפרים פרודוקטיביות וחוסכים זמן עבודה יקר באמצעות הנדסה נכונה.</label>
+                    <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="wrong" class="ml-2 accent-blue-600"> ב) שאין להם שום שימוש אמיתי בעולם התעסוקה והעסקים.</label>
+                </div>`;
+
+            if (num === 1) {
+                casesContainer.innerHTML = `
+                    <h3>🔥 מקרי בוחן ותבניות שימוש: יסודות ה-AI</h3>
+                    <h4>❌ פרומפט רע (אינטואיטיבי):</h4>
+                    <div class="bg-red-50 p-3 border-r-4 border-red-500 rounded text-sm mb-4">"תכתוב לי מייל של התפטרות מהעבודה בשביל המנהל שלי"</div>
+                    
+                    <h4>✅ פרומפט מהונדס (Master Level):</h4>
+                    <div class="bg-green-50 p-4 border-r-4 border-green-500 rounded text-sm mb-4">
+                        <b>תפקיד:</b> פעל כיועץ קריירה מומחה ומנסח מכתבים רשמיים.<br>
+                        <b>הקשר:</b> אני עוזב את תפקידי כמנהל פרויקטים בחברת הייטק לאחר 3 שנים לטובת אתגר חדש. היחסים עם המנהל מעולים ואני רוצה לשמור על קשר חיובי.<br>
+                        <b>משימה:</b> נסח מכתב התפטרות רשמי, מכבד ומקצועי.<br>
+                        <b>מגבלות:</b> טון מכבד אך קורקטי, אורך של עד 120 מילים, ללא דרמה.<br>
+                        <b>פורמט:</b> מבנה של מכתב רשמי הכולל כותרת, גוף המכתב וסיומת.
+                    </div>
+                    <h4>📋 תבנית פרומפט מוכנה להעתקה:</h4>
+                    <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+Act as a [ROLE].
+I need to achieve [OBJECTIVE] because [CONTEXT].
+Please make sure to follow these rules: [CONSTRAINTS].
+Format the final output as a [FORMAT].</pre>`;
+
+                practiceContainer.innerHTML = `
+                    <h3>🏋️ תרגיל שטח מעשי: פיצוח עקרון ההקשר</h3>
+                    <p><b>תרחיש השטח:</b> קיבלתם משימה מהמנכ"ל שלכם לכתוב פוסט לרשת לינקדאין שמסכם דוח רבעוני של החברה, אבל הוא נתן לכם רק משפט אחד: "הרווחנו השנה 2 מיליון שקל".</p>
+                    <p><b>המשימה שלכם:</b> בנו פרומפט המבוסס על "עקרונות הזהב" של שיעור 1 (בהירות, הקשר, והפרדה). השתמשו בתגיות <code>&lt;data&gt;&lt;/data&gt;</code> כדי להזין את הנתון היבש, והנחו את המודל לייצר פוסט עסקי המכוון למשקיעים פוטנציאליים.</p>`;
+
+                quizHtml = `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <p class="font-semibold text-slate-800 mb-2">1. מהו מודל שפה גדול (LLM) ברמת ארכיטקטורה?</p>
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="a" required class="ml-2 accent-blue-600"> א) מערכת סטטיסטית מתקדמת לחיזוי המילה הבאה על בסיס משקולות והסתברות.</label>
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="b" class="ml-2 accent-blue-600"> ב) תוכנה בעלת מודעות ותודעה אנושית שמבינה רגשות.</label>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-3">
+                        <p class="font-semibold text-slate-800 mb-2">2. לשם מה נועדו Delimiters (מפרידים) בפרומפט?</p>
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q2" value="b" required class="ml-2 accent-blue-600"> א) כדי להפריד בין ההנחיות והפקודות שלכם לבין הטקסט הגולמי שהמודל צריך לעבד.</label>
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q2" value="a" class="ml-2 accent-blue-600"> ב) כדי לגרום למודל לענות מהר יותר בצ'אט.</label>
+                    </div>`;
+
+            } else if (num === 2) {
+                casesContainer.innerHTML = `
+                    <h3>🔥 מקרי בוחן ותבניות שימוש: אנטומיה של פרומפט</h3>
+                    <p>כאן נבין כיצד שילוב של <b>Constraints (מגבלות)</b> מציל פרויקטים מהצפת מידע או הזיות.</p>
+                    <h4>📋 תבנית פרומפט שלמה (טבלאות ואנליזה):</h4>
+                    <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+[Role]: Data Analyst Specialist.
+[Context]: Analyzing customer churn for a telecom app.
+[Objective]: Summarize key reasons customers leave.
+[Constraints]: Do not use bullet points. Use an HTML table only.
+[Output Format]: Table with columns: Reason, Impact, Action Item.</pre>`;
+
+                practiceContainer.innerHTML = `
+                    <h3>🏋️ תרגיל שטח מעשי: בניית פרומפט מבוסס רכיבים</h3>
+                    <p><b>המשימה:</b> עליכם לכתוב פרומפט מלא שיעזור למנהל שיווק לבנות תוכנית עבודה שבועית. עליכם להשתמש בצורה מפורשת ומסומנת בכל חמשת הרכיבים: Role, Context, Objective, Constraints, Output Format.</p>`;
+
+                quizHtml = `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <p class="font-semibold text-slate-800 mb-2">1. איזה רכיב בפרומפט אחראי על קביעת החוקים שאסור למודל להפר (למשל: "אל תמציא נתונים")?</p>
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="constraints" required class="ml-2 accent-blue-600"> א) Constraints (מגבלות פלט)</label>
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="role" class="ml-2 accent-blue-600"> ב) Role (תפקיד ופרסונה)</label>
+                    </div>`;
+            } else if (num === 3) {
+                casesContainer.innerHTML = `
+                    <h3>🔥 מקרי בוחן ותבניות שימוש: טכניקות מקצועיות</h3>
+                    <h4>💡 דוגמה חיונית ל-Few-shot Prompting:</h4>
+                    <p>נניח שאנו רוצים שהמודל יסווג פניות תמיכה של לקוחות למחלקות קבועות מראש בצורה מדויקת:</p>
+                    <pre class="bg-slate-100 text-slate-800 p-4 rounded-lg text-xs font-mono text-right">
+פנייה: "החשבון שלי נחסם ואני לא מצליח להיכנס" -> מחלקה: אבטחה ותמיכה טכנית
+פנייה: "רציתי לדעת כמה עולה המנוי השנתי שלכם" -> מחלקה: מכירות וגבייה
+פנייה: "האם יש לכם הנחה לחיילים?" -> מחלקה: [כאן המודל ישלים אוטומטית]</pre>`;
+
+                practiceContainer.innerHTML = `
+                    <h3>🏋️ תרגיל שטח מעשי: שרשרת חשיבה (Chain of Thought)</h3>
+                    <p>תנו למודל משימה חשבונאית מורכבת הכוללת חישוב מע"מ, הנחות מצטברות ומס חברות. הנחו אותו לפתור את זה בשתי שיטות: פעם אחת ישירות, ופעם שנייה תוך שימוש מפורש בטכניקת Chain of Thought, והשוו את הדיוק הפיננסי.</p>`;
+
+                quizHtml = `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <p class="font-semibold text-slate-800 mb-2">1. מהי טכניקת Few-shot Prompting?</p>
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="few_shot" required class="ml-2 accent-blue-600"> א) אספקת מספר דוגמאות של קלט ופלט רצוי בתוך גוף הפרומפט כדי להכתיב תבנית.</label>
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="zero" class="ml-2 accent-blue-600"> ב) שליחת פרומפט ריק לחלוטין ומתן חופש פעולה למודל.</label>
+                    </div>`;
+            } else {
+                // מודולים 4-10 דינמיים מובנים בקליינט לחסכון בנפח שרת
+                casesContainer.innerHTML = `
+                    <h3>🔥 מקרי בוחן ותבניות עבודה מתקדמות</h3>
+                    <p>ביחידה זו אנו מתמקדים באקוסיסטם המקצועי של הכלים הנבחרים ומקרי הבוחן שלהם בתעשייה.</p>
+                    <h4>💡 פרומפט שטח להעתקה:</h4>
+                    <div class="bg-blue-50 p-4 border-r-4 border-blue-600 rounded text-sm font-mono text-right">
+                        "פעל כמומחה ומנהל מערכות ביחידה זו. נתח את שיטות העבודה הטובות ביותר, בצע אופטימיזציה של התהליכים והוצא דוח מנהלים מובנה."
+                    </div>`;
+                practiceContainer.innerHTML = `
+                    <h3>🏋️ תרגיל התנסות עצמי וייעול פרודוקטיביות</h3>
+                    <p>פתחו את סביבת העבודה הרלוונטית למודול זה, הזינו את קובץ הנתונים או הגדירו את הפרסונה הנדרשת, ותרגלו בנייה של פרויקט מקצה לקצה בהתאם להנחיות הלימוד העיוניות.</p>`;
+            }
+
+            qContainer.innerHTML = quizHtml;
+        }
+
+        document.getElementById("quiz-form").addEventListener("submit", async e => {
+            e.preventDefault();
+            const resBox = document.getElementById("result-box");
+            const studentName = document.getElementById("student-name").value;
+            const moduleNumber = document.getElementById("current-module-id").value;
+            
+            let answers = {};
+            const q1Checked = document.querySelector('input[name="q1"]:checked');
+            const q2Checked = document.querySelector('input[name="q2"]:checked');
+            
+            if (q1Checked) answers.q1 = q1Checked.value;
+            if (q2Checked) answers.q2 = q2Checked.value;
+
+            try {
+                const response = await fetch("/api/submissions", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ studentName, moduleNumber, answers })
+                });
+                
+                const res = await response.json();
+                resBox.classList.remove("hidden");
+                
+                if(res.score >= 70) {
+                    resBox.className = "mt-4 p-4 rounded-xl border bg-green-50 text-green-800 border-green-200";
+                } else {
+                    resBox.className = "mt-4 p-4 rounded-xl border bg-amber-50 text-amber-800 border-amber-200";
+                }
+                
+                resBox.innerHTML = `
+                    <h3 class="font-bold text-lg border-b border-current pb-1 mb-2">📊 תוצאות המבדק: ${res.score}/100</h3>
+                    <p class="text-sm whitespace-pre-line">${res.feedback}</p>
+                    <p class="text-[11px] text-gray-500 mt-3 font-normal">הציון והפידבק הועברו אוטומטית ונשמרו בגיליון Google Sheets של הקורס.</p>
+                `;
+            } catch (err) { alert("שגיאה בתקשורת מול השרת."); }
+        });
+
+        loadModules();
+    </script>
+</body>
+</html>
