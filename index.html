@@ -247,36 +247,115 @@ Format the final output as a [FORMAT].</pre>`;
                         <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="zero" class="ml-2 accent-blue-600"> ב) שליחת פרומפט ריק לחלוטין ומתן חופש פעולה למודל.</label>
                     </div>`;
             } else {
-                // מודולים 4-10 דינמיים מובנים בקליינט לחסכון בנפח שרת
-                casesContainer.innerHTML = `
-                    <h3>🔥 מקרי בוחן ותבניות עבודה מתקדמות</h3>
-                    <p>ביחידה זו אנו מתמקדים באקוסיסטם המקצועי של הכלים הנבחרים ומקרי הבוחן שלהם בתעשייה.</p>
-                    <h4>💡 פרומפט שטח להעתקה:</h4>
-                    <div class="bg-blue-50 p-4 border-r-4 border-blue-600 rounded text-sm font-mono text-right">
-                        "פעל כמומחה ומנהל מערכות ביחידה זו. נתח את שיטות העבודה הטובות ביותר, בצע אופטימיזציה של התהליכים והוצא דוח מנהלים מובנה."
-                    </div>`;
-                practiceContainer.innerHTML = `
-                    <h3>🏋️ תרגיל התנסות עצמי וייעול פרודוקטיביות</h3>
-                    <p>פתחו את סביבת העבודה הרלוונטית למודול זה, הזינו את קובץ הנתונים או הגדירו את הפרסונה הנדרשת, ותרגלו בנייה של פרויקט מקצה לקצה בהתאם להנחיות הלימוד העיוניות.</p>`;
-
-                // שאלת מבדק ייעודית לכל מודול, עם ערכי radio התואמים בדיוק ל-MODULE_ANSWERS בשרת
-                const moduleQuizzes = {
-                    4: { question: 'באיזו שפת תכנות משתמש ChatGPT מאחורי הקלעים כדי לנתח קבצי Excel/CSV ולהפיק גרפים?', correctValue: 'python', correctLabel: 'Python, בתוך סביבת קוד מבודדת (Advanced Data Analysis).', wrongLabel: 'Java, ישירות בדפדפן המשתמש.' },
-                    5: { question: 'איך נקראת התכונה ב-Claude שפותחת חלונית נפרדת עם אפליקציה או קוד הרצים בזמן אמת?', correctValue: 'artifacts', correctLabel: 'Artifacts', wrongLabel: 'Projects' },
-                    6: { question: 'מהו שם הכלי מבית גוגל, המבוסס על Gemini, שהופך למומחה פרטי למסמכים שהעליתם ומייצר גם פודקאסט קולי?', correctValue: 'notebooklm', correctLabel: 'NotebookLM', wrongLabel: 'Google Docs' },
-                    7: { question: 'איך נקראים מודלי החשיבה של DeepSeek (כגון R1) המריצים תהליך "Thought" פנימי וארוך לפני מתן התשובה הסופית?', correctValue: 'reasoning', correctLabel: 'Reasoning Models (מודלי חשיבה)', wrongLabel: 'Chat Models רגילים' },
-                    8: { question: 'לפי מטריצת ההשוואה, איזה מודל מומלץ בעיקר לבניית אפליקציות וכתיבת קוד מאפס?', correctValue: 'claude', correctLabel: 'Claude (Anthropic)', wrongLabel: 'DeepSeek-R1' },
-                    9: { question: 'מהי אחת התועלות המרכזיות של הטמעת AI ביישומים עסקיים בעולם האמיתי?', correctValue: 'efficiency', correctLabel: 'שיפור יעילות וחיסכון בזמן עבודה יקר.', wrongLabel: 'האטת קצב העבודה של הצוות.' },
-                    10: { question: 'מהו המונח לתיאור מערכת שבה מספר מודלי AI פועלים יחד בלולאה אוטונומית כדי להשיג מטרה מורכבת?', correctValue: 'agents', correctLabel: 'Multi-Agent Systems (סוכנים)', wrongLabel: 'Single Prompting חד-פעמי' }
+                // תוכן ייעודי (מקרי בוחן, תרגול ומבדק) לכל אחד ממודולים 4-10
+                const moduleContent = {
+                    4: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: ChatGPT ככלי אנליטי</h3>
+                                <h4>💡 בניית Custom GPT לניתוח חוזים משפטיים:</h4>
+                                <p>חברה רוצה שכל עובד יוכל להעלות חוזה ולקבל בדיקה מהירה מול רשימת סעיפים אסורים, מבלי לחשוף את מדיניות החברה מחדש בכל שיחה.</p>
+                                <h4>📋 תבנית הנחיית מערכת (System Instructions) ל-Custom GPT:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+You are a Contract Compliance Assistant for [Company Name].
+Always check uploaded contracts against this list of forbidden clauses: [list].
+If a forbidden clause is found, quote it and explain the risk in plain language.
+Never approve a contract yourself - always end with "Escalate to Legal: Yes/No".</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: ניתוח נתונים אוטומטי</h3>
+                                <p><b>המשימה:</b> העלו ל-ChatGPT קובץ Excel או CSV עם נתוני מכירות (אמיתי או מומצא), ובקשו ממנו לפעול כאנליסט נתונים בכיר: לזהות את שלושת המגמות המרכזיות, לחשב שיעור צמיחה חודשי, ולהפיק גרף המדגים את הממצא המשמעותי ביותר.</p>`,
+                        question: 'באיזו שפת תכנות משתמש ChatGPT מאחורי הקלעים כדי לנתח קבצי Excel/CSV ולהפיק גרפים?', correctValue: 'python', correctLabel: 'Python, בתוך סביבת קוד מבודדת (Advanced Data Analysis).', wrongLabel: 'Java, ישירות בדפדפן המשתמש.'
+                    },
+                    5: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: Claude לכתיבת קוד ולניתוח מסמכים</h3>
+                                <h4>💡 ניתוח חוזה ארוך של 80 עמודים בבת אחת:</h4>
+                                <p>הודות לחלון הקשר הענק, ניתן להדביק מסמך משפטי שלם ל-Claude ולבקש ממנו לאתר סתירות פנימיות בין סעיפים שונים, במקום לפצל אותו לחלקים.</p>
+                                <h4>📋 תבנית פרומפט לבניית Artifact חי:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+Act as a senior frontend developer.
+Build a single-file HTML/JS/Tailwind widget that [describe feature].
+Requirements: fully interactive, no external dependencies, mobile responsive.
+Open it as an Artifact so I can test it live.</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: בניית כלי אינטראקטיבי</h3>
+                                <p><b>המשימה:</b> בקשו מ-Claude לבנות עבורכם מחשבון טיפים (Tip Calculator) אינטראקטיבי ב-HTML ו-Tailwind CSS. עקבו אחרי חלונית ה-Artifacts שנפתחת, ולאחר מכן בקשו שינוי עיצובי (למשל שינוי צבע) וראו כיצד הוא מעדכן את הקוד החי מיידית.</p>`,
+                        question: 'איך נקראת התכונה ב-Claude שפותחת חלונית נפרדת עם אפליקציה או קוד הרצים בזמן אמת?', correctValue: 'artifacts', correctLabel: 'Artifacts', wrongLabel: 'Projects'
+                    },
+                    6: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: Gemini ו-Google Workspace</h3>
+                                <h4>💡 סיכום שרשור מיילים ארוך לפני ישיבה:</h4>
+                                <p>באמצעות <code>@Google Drive</code> ניתן לבקש מ-Gemini לסכם קובץ או שרשור ארוך לשלוש נקודות פעולה, בלי לפתוח אותו בעצמכם.</p>
+                                <h4>📋 תבנית פרומפט עם תוסף Workspace:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+@Google Drive summarize the file "[file name]".
+List only the 3 open action items and who owns each one.
+Format as a checklist.</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: בניית מדריך לימוד ב-NotebookLM</h3>
+                                <p><b>המשימה:</b> העלו ל-NotebookLM מאמר או פרק לימוד, בקשו ממנו לייצר "Study Guide" הכולל שאלות ותשובות, ולבסוף הפעילו את תכונת ה-Audio Overview כדי לשמוע כיצד שתי דמויות ה-AI מסכמות את החומר בקול.</p>`,
+                        question: 'מהו שם הכלי מבית גוגל, המבוסס על Gemini, שהופך למומחה פרטי למסמכים שהעליתם ומייצר גם פודקאסט קולי?', correctValue: 'notebooklm', correctLabel: 'NotebookLM', wrongLabel: 'Google Docs'
+                    },
+                    7: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: DeepSeek ומודלי חשיבה</h3>
+                                <h4>💡 דיבאגינג קוד שבור בעזרת Reasoning:</h4>
+                                <p>כאשר מודל רגיל "מנחש" תיקון שגוי לבאג, מודל Reasoning עובר על כל שורת קוד בתהליך המחשבה הגלוי שלו לפני שהוא מציע פתרון - וכך מפחית משמעותית טעויות.</p>
+                                <h4>📋 תבנית פרומפט לדיבאגינג עמוק:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+Here is a function that throws an error: [paste code].
+Think step by step through the execution before answering.
+Identify the exact line causing the failure and explain why, then provide the fixed code.</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: השוואת מודל רגיל מול מודל חשיבה</h3>
+                                <p><b>המשימה:</b> קחו חידת לוגיקה מתמטית לא טריוויאלית, הריצו אותה מול מודל רגיל (Zero-shot) ומול DeepSeek-R1 במצב Reasoning. עקבו אחרי תהליך ה-"Thought" של R1 ובדקו האם השיטתיות שלו הובילה לתשובה מדויקת יותר.</p>`,
+                        question: 'איך נקראים מודלי החשיבה של DeepSeek (כגון R1) המריצים תהליך "Thought" פנימי וארוך לפני מתן התשובה הסופית?', correctValue: 'reasoning', correctLabel: 'Reasoning Models (מודלי חשיבה)', wrongLabel: 'Chat Models רגילים'
+                    },
+                    8: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: בחירת המודל הנכון למשימה</h3>
+                                <h4>💡 תרחיש: פרויקט מעורב הדורש כמה סוגי עבודה</h4>
+                                <p>צוות מוצר צריך לנתח קובץ Excel של נתוני משתמשים, לכתוב קוד לדשבורד, ולסכם ספר מדיניות שלם. כל שלב מנותב למודל המתאים לו ביותר, במקום להשתמש במודל אחד לכל המשימות.</p>
+                                <h4>📋 תבנית לניתוב משימות בין מודלים:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+Step 1 (ChatGPT): Analyze users.csv and extract 3 key trends.
+Step 2 (Claude): Build the dashboard UI code based on Step 1's findings.
+Step 3 (Gemini): Summarize the 200-page policy document via Drive.</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: מיפוי משימה למודל אופטימלי</h3>
+                                <p><b>המשימה:</b> קחו פרויקט אמיתי מהעבודה שלכם ופרקו אותו לשלבים. עבור כל שלב, קבעו איזה מודל (Claude / ChatGPT / Gemini / DeepSeek) הכי מתאים לפי חוזקות הליבה שנלמדו, ונמקו את הבחירה.</p>`,
+                        question: 'לפי מטריצת ההשוואה, איזה מודל מומלץ בעיקר לבניית אפליקציות וכתיבת קוד מאפס?', correctValue: 'claude', correctLabel: 'Claude (Anthropic)', wrongLabel: 'DeepSeek-R1'
+                    },
+                    9: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: AI בסביבת עבודה אמיתית</h3>
+                                <h4>💡 בניית לוח תוכן חודשי לרשתות חברתיות:</h4>
+                                <p>מנהלת שיווק מזינה פרסונת קהל יעד ומגבלות מותג קשוחות, והמודל מפיק טבלה מלאה של רעיונות, כותרות וטקסטים מוכנים לפרסום עבור כל שבועות החודש.</p>
+                                <h4>📋 תבנית פרומפט לתוכנית תוכן:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+[Role]: Social media strategist for a [industry] brand.
+[Context]: Target audience is [persona]. Brand tone is [tone].
+[Objective]: Build a 4-week content calendar (Instagram + LinkedIn).
+[Output Format]: Table with columns: Week, Platform, Headline, Post Copy.</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: אוטומציה של משימה חוזרת</h3>
+                                <p><b>המשימה:</b> זהו משימה חוזרת ומייגעת מהעבודה או הלימודים שלכם (למשל: מענה למיילים דומים, סיווג פניות, כתיבת סיכומי ישיבות). בנו פרומפט מהונדס שיהפוך את המשימה הזו לתהליך של דקה אחת במקום עשרים.</p>`,
+                        question: 'מהי אחת התועלות המרכזיות של הטמעת AI ביישומים עסקיים בעולם האמיתי?', correctValue: 'efficiency', correctLabel: 'שיפור יעילות וחיסכון בזמן עבודה יקר.', wrongLabel: 'האטת קצב העבודה של הצוות.'
+                    },
+                    10: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: מערכות Multi-Agent</h3>
+                                <h4>💡 צוות AI לפיתוח פיצ'ר מקצה לקצה:</h4>
+                                <p>במקום פרומפט בודד, שלושה סוכנים עובדים ברצף: סוכן אחד כותב קוד, סוכן שני בודק אבטחה ולוגיקה, וסוכן שלישי מוודא התאמה לדרישות המוצר - ומחזיר משוב לתיקון אם צריך.</p>
+                                <h4>📋 תבנית להגדרת תפקידי סוכנים:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+Agent 1 (Developer): Write the code for [feature].
+Agent 2 (QA): Review Agent 1's code for bugs and security issues. List them.
+Agent 3 (Product Manager): Check if the fixed code meets the original requirements.
+If not, send it back to Agent 1 with specific feedback.</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: תכנון זרימת סוכנים</h3>
+                                <p><b>המשימה:</b> תכננו זרימת עבודה של 3 סוכני AI למשימה מהעבודה שלכם. הגדירו לכל סוכן: תפקיד, קלט שהוא מקבל, ופלט שהוא מעביר הלאה. הריצו את הזרימה ידנית מול מודל אחד (פותחים שיחה חדשה לכל "סוכן") ובדקו אם התוצאה הסופית טובה יותר משאלה בודדת.</p>`,
+                        question: 'מהו המונח לתיאור מערכת שבה מספר מודלי AI פועלים יחד בלולאה אוטונומית כדי להשיג מטרה מורכבת?', correctValue: 'agents', correctLabel: 'Multi-Agent Systems (סוכנים)', wrongLabel: 'Single Prompting חד-פעמי'
+                    }
                 };
 
-                const q = moduleQuizzes[num];
-                if (q) {
+                const m = moduleContent[num];
+                if (m) {
+                    casesContainer.innerHTML = m.cases;
+                    practiceContainer.innerHTML = m.practice;
+                    // ערך ה-radio התקין תואם בדיוק ל-MODULE_ANSWERS בשרת
                     quizHtml = `
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <p class="font-semibold text-slate-800 mb-2">1. ${q.question}</p>
-                            <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="${q.correctValue}" required class="ml-2 accent-blue-600"> א) ${q.correctLabel}</label>
-                            <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="wrong" class="ml-2 accent-blue-600"> ב) ${q.wrongLabel}</label>
+                            <p class="font-semibold text-slate-800 mb-2">1. ${m.question}</p>
+                            <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="${m.correctValue}" required class="ml-2 accent-blue-600"> א) ${m.correctLabel}</label>
+                            <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="wrong" class="ml-2 accent-blue-600"> ב) ${m.wrongLabel}</label>
                         </div>`;
                 }
             }
