@@ -1,7 +1,7 @@
 {
   "name": "prompt-optimizer-lms",
   "version": "1.0.0",
-  "description": "AI Prompt Engineering Academy LMS",
+  "description": "AI Tools Academy LMS",
   "main": "server.js",
   "author": "Tomer Meshulam",
   "scripts": {

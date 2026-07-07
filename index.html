@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Academy LMS - Master Level</title>
+    <title>AI Tools Academy LMS - Master Level</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .lesson-content h3 { font-size: 1.5rem; font-weight: bold; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-top: 1.5rem; }
@@ -21,7 +21,7 @@
 
     <header class="mb-8 text-center bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 max-w-6xl mx-auto">
         <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">LMS Professional Edition</span>
-        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3">🎓 AI Prompt Engineering Academy</h1>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3">🎓 קורס הבנת כלי ה-AI</h1>
         <p class="text-slate-600 mt-2 text-sm md:text-base max-w-2xl mx-auto">מערכת מתקדמת להסמכת מומחי בינה מלאכותית. לחצו על מודול כדי לפתוח את חוברת הלימוד, מקרי הבוחן, התרגול המעשי והמבחן האוטומטי.</p>
     </header>
 
@@ -103,7 +103,7 @@
     </main>
 
     <footer class="mt-16 text-center text-xs text-slate-400 border-t pt-4 max-w-6xl mx-auto">
-        © 2026 תומר משולם (Tomer Meshulam) - כל הזכויות שמורות | AI Prompt Engineering Academy | מערכת LMS מוסמכת רמת Master
+        © 2026 תומר משולם (Tomer Meshulam) - כל הזכויות שמורות | קורס הבנת כלי ה-AI | מערכת LMS מוסמכת רמת Master
     </footer>
 
     <script>
@@ -357,6 +357,60 @@ If not, send it back to Agent 1 with specific feedback.</pre>`,
                         practice: `<h3>🏋️ תרגיל שטח מעשי: תכנון זרימת סוכנים</h3>
                                 <p><b>המשימה:</b> תכננו זרימת עבודה של 3 סוכני AI למשימה מהעבודה שלכם. הגדירו לכל סוכן: תפקיד, קלט שהוא מקבל, ופלט שהוא מעביר הלאה. הריצו את הזרימה ידנית מול מודל אחד (פותחים שיחה חדשה לכל "סוכן") ובדקו אם התוצאה הסופית טובה יותר משאלה בודדת.</p>`,
                         question: 'מהו המונח לתיאור מערכת שבה מספר מודלי AI פועלים יחד בלולאה אוטונומית כדי להשיג מטרה מורכבת?', correctValue: 'agents', correctLabel: 'Multi-Agent Systems (סוכנים)', wrongLabel: 'Single Prompting חד-פעמי'
+                    },
+                    11: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: API ואינטגרציה</h3>
+                                <h4>💡 חיבור אפליקציה פנימית ל-API של מודל שפה:</h4>
+                                <p>חברה רוצה שכל בקשת תמיכה שנכנסת למערכת ה-CRM תסווג אוטומטית על ידי מודל שפה, בלי מגע יד אדם - זה נעשה על ידי קריאת API אוטומטית מהשרת של החברה לספק המודל.</p>
+                                <h4>📋 תבנית לבקשת API סטנדרטית:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+POST /v1/messages
+Headers: { "x-api-key": "[SECRET_KEY]", "content-type": "application/json" }
+Body: { "model": "[model-name]", "max_tokens": 200,
+        "messages": [{"role": "user", "content": "[הטקסט שלכם]"}] }</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: קריאה ל-API בפועל</h3>
+                                <p><b>המשימה:</b> פתחו את תיעוד ה-API (Documentation) של אחד ממודלי ה-AI שלמדתם עליהם, ונסו לזהות: מהי כתובת ה-Endpoint, אילו כותרות (Headers) חובה לשלוח, ואיך בדיוק המפתח הסודי (API Key) מועבר בבקשה.</p>`,
+                        question: 'מהו API?', correctValue: 'api', correctLabel: 'ממשק מוסכם וקבוע שמאפשר לשתי תוכנות שונות לתקשר ביניהן בצורה מובנית.', wrongLabel: 'שם נוסף לממשק המשתמש הגרפי (הצ\'אט) שרואים על המסך.'
+                    },
+                    12: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: MCP</h3>
+                                <h4>💡 סוכן AI שקורא בעצמו מגיליון נתונים חי:</h4>
+                                <p>במקום להעתיק ולהדביק נתונים ידנית, מחברים את המודל לשרת MCP שחושף לו גישה ל-Google Sheets - והוא יכול לקרוא ולעדכן את הגיליון ישירות, בעצמו, לפי הצורך.</p>
+                                <h4>📋 תבנית להגדרת הרשאות סוכן מול שרת MCP:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+Available MCP tools: [Google Sheets: read-only, Gmail: read-only].
+Task: Summarize this week's sales numbers from the sheet and draft (do not send) a summary email.
+Never use a tool that is not explicitly listed above.</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: מיפוי כלים לחיבור MCP</h3>
+                                <p><b>המשימה:</b> רשמו 3 כלים או מערכות מהעבודה היומיומית שלכם (יומן, מייל, CRM וכו') שהייתם רוצים שסוכן AI יוכל לגשת אליהם ישירות דרך MCP, ותארו איזו משימה קונקרטית זה היה חוסך לכם.</p>`,
+                        question: 'מה המונח לתיאור השרתים הקטנים שכל אחד מהם חושף למודל AI גישה ליכולת מסוימת (למשל: קריאה מ-GitHub)?', correctValue: 'mcp', correctLabel: 'שרתי MCP (MCP Servers)', wrongLabel: 'מודלי שפה משניים (Sub-models)'
+                    },
+                    13: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: Skills</h3>
+                                <h4>💡 בניית Skill קבועה לבדיקת חוזים:</h4>
+                                <p>במקום להסביר בכל שיחה מחדש אילו סעיפים אסורים בחוזה, בונים Skill קבועה בשם <code>contract-check</code> שכבר "יודעת" את כל הכללים - וקוראים לה בשם בכל פעם שצריך.</p>
+                                <h4>📋 תבנית להגדרת Skill חדשה:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+Skill name: contract-check
+Trigger: when the user uploads a contract or asks to review one.
+Instructions: check against this list of forbidden clauses: [list].
+Output: quote the risky clause and explain it in plain language.</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: תכנון Skill אישית</h3>
+                                <p><b>המשימה:</b> חשבו על משימה חוזרת מהעבודה או הלימודים שלכם, ותארו איך הייתם בונים ממנה Skill: מה יהיה שם ה-Skill, מתי היא תופעל, ואילו הוראות מדויקות היא תכיל.</p>`,
+                        question: 'במה Skill שונה מפרומפט חד-פעמי רגיל?', correctValue: 'skills', correctLabel: 'היא חבילת הוראות שמורה וניתנת לשימוש חוזר, שנטענת לפי שם או הקשר.', wrongLabel: 'אין הבדל אמיתי, זה רק שם שיווקי אחר לאותו הדבר.'
+                    },
+                    14: {
+                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: פלאגינים והרחבות</h3>
+                                <h4>💡 הרחבת יכולות בלי לבנות הכל מאפס:</h4>
+                                <p>במקום לפתח בעצמכם יכולת חיפוש מלונות, מתקינים פלאגין קיים בכלי ה-AI שמספק את זה מוכן - בדיוק כמו שמתקינים תוסף לדפדפן.</p>
+                                <h4>📋 תבנית להשוואת פתרון: פלאגין קיים מול MCP עצמאי:</h4>
+                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
+Need: connect our internal CRM to the chat assistant.
+Option A (Plugin): use the vendor's existing marketplace plugin - fast, but locked to that vendor.
+Option B (MCP server): build a small MCP server for our CRM - more work, but works with any MCP client.</pre>`,
+                        practice: `<h3>🏋️ תרגיל שטח מעשי: סקירת פלאגין קיים</h3>
+                                <p><b>המשימה:</b> גשו לחנות הפלאגינים/הרחבות של כלי ה-AI שאתם משתמשים בו, מצאו פלאגין אחד רלוונטי לעבודה שלכם, ותארו איזו בעיה קונקרטית הוא פותר.</p>`,
+                        question: 'מה ההבדל המרכזי בין Plugin ל-MCP?', correctValue: 'plugins', correctLabel: 'Plugin הוא לרוב מנגנון קנייני של ספק ספציפי, בעוד MCP הוא פרוטוקול פתוח ולא תלוי ספק.', wrongLabel: 'אין ביניהם שום הבדל, שני המונחים מתארים בדיוק את אותו הדבר.'
                     }
                 };
 
@@ -418,6 +472,26 @@ If not, send it back to Agent 1 with specific feedback.</pre>`,
                 'תכננו זרימת עבודה של 3 סוכנים (מתכנת, QA ומנהל מוצר) לפיתוח פיצ\'ר חדש.',
                 'תכננו זרימת סוכנים לתהליך גיוס עובדים אוטומטי מקצה לקצה.',
                 'תכננו זרימת סוכנים ליצירת קמפיין שיווקי מקצה לקצה.'
+            ],
+            11: [
+                'כתבו פרומפט שמנחה סוכן AI לקרוא ל-API חיצוני של מזג אוויר ולסכם את התחזית להיום.',
+                'כתבו פרומפט שמסביר מה זה API Key ומתי אסור לחשוף אותו, כאילו אתם מסבירים למתכנת מתחיל.',
+                'כתבו פרומפט שמבקש ממודל לבנות תיעוד (Documentation) קצר לנקודת קצה (Endpoint) של API קיים.'
+            ],
+            12: [
+                'כתבו פרומפט שמגדיר לסוכן AI אילו שרתי MCP (כלים) מותר לו להשתמש בהם למשימה נתונה, ואילו אסור.',
+                'כתבו פרומפט שמבקש מהמודל להסביר להנהלה, בשפה עסקית ולא טכנית, למה כדאי לחבר את הצ\'אטבוט הארגוני ל-MCP.',
+                'כתבו פרומפט לתכנון שרת MCP חדש שיחשוף למודל גישה למערכת CRM פנימית.'
+            ],
+            13: [
+                'כתבו פרומפט שמגדיר Skill חדשה: שם, מתי היא מופעלת, ואילו הוראות היא כוללת, עבור משימה חוזרת מהעבודה שלכם.',
+                'כתבו פרומפט שמשווה בין שימוש בפרומפט חד פעמי לבין בניית Skill קבועה לאותה משימה, ומסביר מתי כל אחד מתאים יותר.',
+                'כתבו פרומפט שמבקש מהמודל לבדוק Skill קיימת ולהציע לה שיפור.'
+            ],
+            14: [
+                'כתבו פרומפט שבודק אילו פלאגינים/הרחבות קיימים לכלי AI מסוים ומסכם את שלושת השימושיים ביותר לצרכים שלכם.',
+                'כתבו פרומפט שמסביר את ההבדל בין Plugin קנייני (Proprietary) לבין כלי מבוסס MCP פתוח.',
+                'כתבו פרומפט שמתכנן פלאגין חדש (רעיון בלבד) שהיה פותר לכם בעיה יומיומית בעבודה.'
             ]
         };
 
