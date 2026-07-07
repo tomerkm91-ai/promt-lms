@@ -258,6 +258,27 @@ Format the final output as a [FORMAT].</pre>`;
                 practiceContainer.innerHTML = `
                     <h3>🏋️ תרגיל התנסות עצמי וייעול פרודוקטיביות</h3>
                     <p>פתחו את סביבת העבודה הרלוונטית למודול זה, הזינו את קובץ הנתונים או הגדירו את הפרסונה הנדרשת, ותרגלו בנייה של פרויקט מקצה לקצה בהתאם להנחיות הלימוד העיוניות.</p>`;
+
+                // שאלת מבדק ייעודית לכל מודול, עם ערכי radio התואמים בדיוק ל-MODULE_ANSWERS בשרת
+                const moduleQuizzes = {
+                    4: { question: 'באיזו שפת תכנות משתמש ChatGPT מאחורי הקלעים כדי לנתח קבצי Excel/CSV ולהפיק גרפים?', correctValue: 'python', correctLabel: 'Python, בתוך סביבת קוד מבודדת (Advanced Data Analysis).', wrongLabel: 'Java, ישירות בדפדפן המשתמש.' },
+                    5: { question: 'איך נקראת התכונה ב-Claude שפותחת חלונית נפרדת עם אפליקציה או קוד הרצים בזמן אמת?', correctValue: 'artifacts', correctLabel: 'Artifacts', wrongLabel: 'Projects' },
+                    6: { question: 'מהו שם הכלי מבית גוגל, המבוסס על Gemini, שהופך למומחה פרטי למסמכים שהעליתם ומייצר גם פודקאסט קולי?', correctValue: 'notebooklm', correctLabel: 'NotebookLM', wrongLabel: 'Google Docs' },
+                    7: { question: 'איך נקראים מודלי החשיבה של DeepSeek (כגון R1) המריצים תהליך "Thought" פנימי וארוך לפני מתן התשובה הסופית?', correctValue: 'reasoning', correctLabel: 'Reasoning Models (מודלי חשיבה)', wrongLabel: 'Chat Models רגילים' },
+                    8: { question: 'לפי מטריצת ההשוואה, איזה מודל מומלץ בעיקר לבניית אפליקציות וכתיבת קוד מאפס?', correctValue: 'claude', correctLabel: 'Claude (Anthropic)', wrongLabel: 'DeepSeek-R1' },
+                    9: { question: 'מהי אחת התועלות המרכזיות של הטמעת AI ביישומים עסקיים בעולם האמיתי?', correctValue: 'efficiency', correctLabel: 'שיפור יעילות וחיסכון בזמן עבודה יקר.', wrongLabel: 'האטת קצב העבודה של הצוות.' },
+                    10: { question: 'מהו המונח לתיאור מערכת שבה מספר מודלי AI פועלים יחד בלולאה אוטונומית כדי להשיג מטרה מורכבת?', correctValue: 'agents', correctLabel: 'Multi-Agent Systems (סוכנים)', wrongLabel: 'Single Prompting חד-פעמי' }
+                };
+
+                const q = moduleQuizzes[num];
+                if (q) {
+                    quizHtml = `
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <p class="font-semibold text-slate-800 mb-2">1. ${q.question}</p>
+                            <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="${q.correctValue}" required class="ml-2 accent-blue-600"> א) ${q.correctLabel}</label>
+                            <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="wrong" class="ml-2 accent-blue-600"> ב) ${q.wrongLabel}</label>
+                        </div>`;
+                }
             }
 
             qContainer.innerHTML = quizHtml;
