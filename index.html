@@ -79,6 +79,17 @@
                     </form>
                     <div id="result-box" class="hidden mt-4 p-4 rounded-lg border text-base font-medium"></div>
                 </div>
+
+                <div id="prompt-practice-area" class="border-t border-slate-200 mt-12 pt-8 hidden">
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">✍️ תרגול כתיבת פרומפט אישי</h3>
+                    <p class="text-sm text-slate-600 mb-4">בחרו אחד משלושת התרחישים, כתבו פרומפט מהונדס משלכם על בסיסו, ולחצו על "בדיקת הפרומפט" לקבלת משוב אוטומטי מיידי.</p>
+                    <div id="prompt-scenarios" class="grid sm:grid-cols-3 gap-3 mb-4"></div>
+                    <textarea id="student-prompt-input" rows="6" class="w-full p-3 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="כתבו כאן את הפרומפט המהונדס שלכם..."></textarea>
+                    <button type="button" id="check-prompt-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg mt-4 shadow-md transition-all">
+                        בדיקת הפרומפט
+                    </button>
+                    <div id="prompt-check-result" class="hidden mt-4 p-4 rounded-lg border text-sm"></div>
+                </div>
             </div>
         </section>
 
@@ -148,7 +159,10 @@
 
             // יצירת תוכן מורחב ללשונית ב' ו-ג' בצורה דינמית לפי המודול שנבחר
             generateExtendedContent(num, mod.title);
-            
+
+            // תרגול כתיבת פרומפט אישי - זמין החל ממודול 3
+            renderPromptPractice(num);
+
             // תמיד נחזיר ללשונית הראשונה בעת החלפת מודול
             switchTab('theory');
         }
@@ -362,6 +376,120 @@ If not, send it back to Agent 1 with specific feedback.</pre>`,
 
             qContainer.innerHTML = quizHtml;
         }
+
+        // תרגילי כתיבת פרומפט אישי - זמין החל ממודול 3, שלושה תרחישים לבחירה לכל מודול
+        const promptScenarios = {
+            3: [
+                'בקשו ממודל לסווג פניות שירות לקוחות לקטגוריות קבועות מראש (שירות/מכירות/תלונה) באמצעות Few-shot Prompting.',
+                'בקשו ממודל לפתור בעיה חשבונאית מורכבת (מע"מ, הנחה מצטברת ומס חברות) באמצעות Chain of Thought.',
+                'בקשו ממודל לשכתב פסקה שיווקית משפה יבשה לשפה משכנעת, בשני שלבים נפרדים (Chain Prompting).'
+            ],
+            4: [
+                'בקשו מ-ChatGPT לנתח קובץ Excel של נתוני מכירות ולהפיק תובנות מרכזיות וגרף.',
+                'בנו הנחיית מערכת (System Instructions) ל-Custom GPT שבודק חוזים מול רשימת סעיפים אסורים.',
+                'בקשו מ-ChatGPT ליצור תמונה שיווקית למוצר חדש לפי בריף מדויק.'
+            ],
+            5: [
+                'בקשו מ-Claude לבנות אפליקציית מחשבון תקציב חודשי אינטראקטיבית ב-HTML ו-Tailwind.',
+                'תארו מסמך משפטי ארוך ובקשו מ-Claude לאתר סתירות פנימיות בין סעיפים.',
+                'בקשו מ-Claude לנתח קוד קיים ולאתר בו פרצת אבטחה אפשרית.'
+            ],
+            6: [
+                'בקשו מ-Gemini לסכם שרשור מיילים ארוך מ-Gmail לשלוש נקודות פעולה.',
+                'תארו מאמר שהעליתם ל-NotebookLM ובקשו מדריך לימוד הכולל שאלות ותשובות.',
+                'בקשו מ-Gemini לנתח קובץ Google Sheets ולהפיק ממנו תובנות עסקיות.'
+            ],
+            7: [
+                'בקשו מ-DeepSeek-R1 לפתור חידת לוגיקה מורכבת במצב Reasoning.',
+                'בקשו דיבאגינג עמוק לקוד שבור, עם הסבר שורה-שורה לפני מתן הפתרון.',
+                'בנו פרומפט שמשווה בין תשובת מודל רגיל לתשובת מודל Reasoning על אותה בעיה מתמטית.'
+            ],
+            8: [
+                'כתבו פרומפט המנתב משימה מורכבת (ניתוח נתונים, כתיבת קוד וסיכום מסמך) בין כמה מודלים שונים.',
+                'בחרו את המודל הנכון למשימת כתיבת קוד מאפס ונמקו את הבחירה בפרומפט עצמו.',
+                'בחרו את המודל הנכון למשימת סיכום ספר מדיניות ענק ונמקו את הבחירה בפרומפט עצמו.'
+            ],
+            9: [
+                'בנו לוח תוכן חודשי לרשתות חברתיות, עם פרסונת קהל יעד ומגבלות מותג קשוחות.',
+                'בנו פרומפט לאוטומציה של מענה למיילים חוזרים בשירות לקוחות.',
+                'בנו פרומפט לניתוח נתוני מכירות רבעוניים והפקת דוח מנהלים מובנה.'
+            ],
+            10: [
+                'תכננו זרימת עבודה של 3 סוכנים (מתכנת, QA ומנהל מוצר) לפיתוח פיצ\'ר חדש.',
+                'תכננו זרימת סוכנים לתהליך גיוס עובדים אוטומטי מקצה לקצה.',
+                'תכננו זרימת סוכנים ליצירת קמפיין שיווקי מקצה לקצה.'
+            ]
+        };
+
+        function renderPromptPractice(num) {
+            const area = document.getElementById("prompt-practice-area");
+            const scenarios = promptScenarios[num];
+
+            document.getElementById("student-prompt-input").value = "";
+            document.getElementById("prompt-check-result").classList.add("hidden");
+
+            if (!scenarios) {
+                area.classList.add("hidden");
+                return;
+            }
+            area.classList.remove("hidden");
+
+            document.getElementById("prompt-scenarios").innerHTML = scenarios.map((s, i) => `
+                <label class="block p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm cursor-pointer hover:border-blue-400 transition-all">
+                    <input type="radio" name="prompt-scenario" value="${i}" class="ml-2 accent-blue-600"> ${s}
+                </label>`).join('');
+        }
+
+        // בדיקה חוקתית (heuristic) - ללא קריאה למודל AI חיצוני.
+        // מזהה נוכחות של 5 מרכיבי הליבה שנלמדו בקורס (Role, Context, Objective, Constraints, Output Format)
+        // בטקסט הפרומפט, בעברית ובאנגלית, ומחזירה משוב על מה חסר.
+        function evaluatePromptQuality(text) {
+            const trimmed = text.trim();
+            const wordCount = trimmed.split(/\s+/).filter(Boolean).length;
+
+            const components = [
+                { label: 'הגדרת תפקיד/פרסונה (Role)', patterns: [/\bact as\b/i, /\byou are\b/i, /role\s*[:\-]/i, /פעל\s*כ/, /תפקידך/, /בתור\s/, /כמומחה/] },
+                { label: 'הקשר ורקע (Context)', patterns: [/\bcontext\b/i, /\bbackground\b/i, /\bbecause\b/i, /context\s*[:\-]/i, /הקשר/, /רקע/, /מכיוון ש/, /לאור\s/] },
+                { label: 'הגדרת המשימה (Objective)', patterns: [/objective\s*[:\-]/i, /task\s*[:\-]/i, /\b(write|analyze|create|generate|summarize|build)\b/i, /המשימה/, /נתח|כתוב|בנה|צור|סכם|הפק/] },
+                { label: 'מגבלות (Constraints)', patterns: [/constraints?\s*[:\-]/i, /\b(do not|don't|must not|no more than|maximum|max)\b/i, /מגבלות|אל תכלול|אל תוסיף|לכל היותר|מקסימום|עד\s*\d/] },
+                { label: 'פורמט פלט (Output Format)', patterns: [/format\s*[:\-]/i, /\b(table|bullet|json|list)\b/i, /פורמט|טבלה|רשימה|נקודות/] }
+            ];
+
+            const missing = [];
+            components.forEach(c => {
+                if (!c.patterns.some(p => p.test(trimmed))) missing.push(c.label);
+            });
+
+            const found = components.length - missing.length;
+            const tooShort = wordCount < 15;
+            const isGood = found >= 4 && !tooShort;
+
+            return { isGood, missing, tooShort, wordCount, found, total: components.length };
+        }
+
+        document.getElementById("check-prompt-btn").addEventListener("click", () => {
+            const text = document.getElementById("student-prompt-input").value;
+            const resultBox = document.getElementById("prompt-check-result");
+            resultBox.classList.remove("hidden");
+
+            if (!text.trim()) {
+                resultBox.className = "mt-4 p-4 rounded-lg border text-sm bg-amber-50 text-amber-800 border-amber-200";
+                resultBox.innerHTML = "לפני הבדיקה, כתבו קודם את הפרומפט שלכם בתיבת הטקסט.";
+                return;
+            }
+
+            const result = evaluatePromptQuality(text);
+            if (result.isGood) {
+                resultBox.className = "mt-4 p-4 rounded-lg border text-sm bg-green-50 text-green-800 border-green-200";
+                resultBox.innerHTML = `<b>✅ פרומפט טוב!</b><p class="mt-1">הפרומפט שלכם כולל ${result.found} מתוך ${result.total} מרכיבי ליבה, ובאורך מספק (${result.wordCount} מילים). עבודה מצוינת!</p>`;
+            } else {
+                resultBox.className = "mt-4 p-4 rounded-lg border text-sm bg-amber-50 text-amber-800 border-amber-200";
+                let issuesHtml = "";
+                if (result.tooShort) issuesHtml += `<li>הפרומפט קצר מדי (${result.wordCount} מילים) - נסו לפרט יותר.</li>`;
+                result.missing.forEach(m => issuesHtml += `<li>חסר מרכיב: ${m}</li>`);
+                resultBox.innerHTML = `<b>⚠️ עוד לא מושלם</b><p class="mt-1">נמצאו ${result.found} מתוך ${result.total} מרכיבי ליבה. הבעיות שנמצאו:</p><ul class="list-disc pr-5 mt-1 space-y-0.5">${issuesHtml}</ul>`;
+            }
+        });
 
         document.getElementById("quiz-form").addEventListener("submit", async e => {
             e.preventDefault();
