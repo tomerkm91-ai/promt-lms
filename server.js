@@ -248,7 +248,10 @@ app.get('/api/modules', (req, res) => {
 
 app.post('/api/submissions', async (req, res) => {
     try {
-        const { studentName, moduleNumber, answers } = req.body;
+        const { studentName, moduleNumber, answers = {} } = req.body;
+        if (!studentName || moduleNumber === undefined) {
+            return res.status(400).json({ error: 'נא לספק שם סטודנט ומספר מודול' });
+        }
         let score = 0;
         let feedbackPoints = [];
         const num = Number(moduleNumber);
