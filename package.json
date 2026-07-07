@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "AI Prompt Engineering Academy LMS",
   "main": "server.js",
+  "author": "Tomer Meshulam",
   "scripts": {
     "start": "node server.js",
     "seed": "node seed.js"
