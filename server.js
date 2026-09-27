@@ -2,6 +2,8 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const { publicQuiz, gradeQuiz, PASSING_SCORE } = require('./quiz');
+const { MODULE_EXTRAS } = require('./moduleExtras');
+const { createAccessPolicy } = require('./access');
 
 const app = express();
 // Render (וכל שירות אירוח מאחורי פרוקסי) - כדי ש-req.ip יחזיר את כתובת הגולש האמיתית
@@ -25,7 +27,7 @@ if (ALLOWED_ORIGIN) {
         res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Access-Code');
         if (req.method === 'OPTIONS') return res.sendStatus(204);
         next();
     });
@@ -330,26 +332,68 @@ if (!SHEETDB_URL) {
     console.warn('⚠️ SHEETDB_URL לא הוגדר - ציונים ייבדקו אך לא יישמרו בגיליון.');
 }
 
-// הגבלת קצב פשוטה בזיכרון: מונעת הצפה של הגיליון בהגשות אוטומטיות
+// הגבלת קצב פשוטה בזיכרון (לכל כתובת IP)
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
-const RATE_LIMIT_MAX = 30;
-const submissionLog = new Map();
 
-function isRateLimited(ip) {
-    const now = Date.now();
-    const recent = (submissionLog.get(ip) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS);
-    recent.push(now);
-    submissionLog.set(ip, recent);
-    return recent.length > RATE_LIMIT_MAX;
+function createRateLimiter(max) {
+    const log = new Map();
+    // ניקוי תקופתי כדי שהמפה לא תגדל ללא הגבלה
+    setInterval(() => {
+        const now = Date.now();
+        for (const [ip, times] of log) {
+            if (times.every(t => now - t >= RATE_LIMIT_WINDOW_MS)) log.delete(ip);
+        }
+    }, RATE_LIMIT_WINDOW_MS).unref();
+
+    return function isRateLimited(ip) {
+        const now = Date.now();
+        const recent = (log.get(ip) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+        recent.push(now);
+        log.set(ip, recent);
+        return recent.length > max;
+    };
 }
 
-// ניקוי תקופתי כדי שהמפה לא תגדל ללא הגבלה
-setInterval(() => {
-    const now = Date.now();
-    for (const [ip, times] of submissionLog) {
-        if (times.every(t => now - t >= RATE_LIMIT_WINDOW_MS)) submissionLog.delete(ip);
-    }
-}, RATE_LIMIT_WINDOW_MS).unref();
+// הגשות מבחן: מונע הצפה של הגיליון
+const isSubmissionRateLimited = createRateLimiter(30);
+// בדיקת קודי גישה: מונע ניחוש קודים בכוח
+const isCodeCheckRateLimited = createRateLimiter(10);
+
+// 🔒 חומת תשלום: FREE_MODULES מודולים ראשונים חינם, השאר נפתחים עם קוד מ-ACCESS_CODES
+const access = createAccessPolicy({
+    accessCodes: process.env.ACCESS_CODES,
+    freeModules: process.env.FREE_MODULES,
+    checkoutUrl: process.env.CHECKOUT_URL
+});
+if (!access.enabled) {
+    console.warn('ℹ️ ACCESS_CODES לא הוגדר - חומת התשלום כבויה וכל המודולים פתוחים.');
+}
+
+function accessCodeOf(req) {
+    return req.get('X-Access-Code') || '';
+}
+
+// מה שהדפדפן מקבל על מודול: מודול נעול נשלח בלי התוכן עצמו
+function publicModule(mod, code) {
+    const base = {
+        moduleNumber: mod.moduleNumber,
+        title: mod.title,
+        description: mod.description,
+        free: !access.enabled || mod.moduleNumber <= access.freeModules
+    };
+    if (access.isLocked(mod.moduleNumber, code)) return { ...base, locked: true };
+    const extras = MODULE_EXTRAS[mod.moduleNumber] || {};
+    return {
+        ...base,
+        locked: false,
+        content: mod.content,
+        cases: extras.cases || '',
+        practice: extras.practice || '',
+        promptScenarios: extras.promptScenarios || []
+    };
+}
+
+const LOCKED_ERROR = { error: 'המודול הזה זמין לרוכשי הקורס המלא. הזינו קוד גישה כדי לפתוח אותו.', locked: true };
 
 async function saveToSheet(row) {
     if (!SHEETDB_URL) return false;
@@ -374,14 +418,34 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.get('/api/config', (req, res) => {
+    res.json({
+        paywallEnabled: access.enabled,
+        freeModules: access.freeModules,
+        checkoutUrl: access.checkoutUrl
+    });
+});
+
 app.get('/api/modules', (req, res) => {
-    res.json(modulesDatabase);
+    const code = accessCodeOf(req);
+    res.json(modulesDatabase.map(mod => publicModule(mod, code)));
+});
+
+// בדיקת קוד גישה שהמשתמש הקליד
+app.post('/api/access/verify', (req, res) => {
+    if (isCodeCheckRateLimited(req.ip)) {
+        return res.status(429).json({ error: 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.' });
+    }
+    const code = req.body && typeof req.body.code === 'string' ? req.body.code : '';
+    res.json({ valid: access.isValidCode(code) });
 });
 
 // שאלות המבחן של מודול - ללא התשובות הנכונות
 app.get('/api/modules/:num/quiz', (req, res) => {
-    const questions = publicQuiz(Number(req.params.num));
+    const num = Number(req.params.num);
+    const questions = publicQuiz(num);
     if (!questions) return res.status(404).json({ error: 'מודול לא נמצא' });
+    if (access.isLocked(num, accessCodeOf(req))) return res.status(403).json(LOCKED_ERROR);
     res.json({ passingScore: PASSING_SCORE, questions });
 });
 
@@ -394,7 +458,10 @@ app.post('/api/submissions', async (req, res) => {
         if (!name || name.length > 80) {
             return res.status(400).json({ error: 'נא להזין שם מלא (עד 80 תווים)' });
         }
-        if (isRateLimited(req.ip)) {
+        if (access.isLocked(num, accessCodeOf(req))) {
+            return res.status(403).json(LOCKED_ERROR);
+        }
+        if (isSubmissionRateLimited(req.ip)) {
             return res.status(429).json({ error: 'יותר מדי הגשות בזמן קצר. נסו שוב בעוד כמה דקות.' });
         }
 
@@ -434,5 +501,10 @@ app.post('/api/submissions', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 שרת דלוק ומלא בתוכן בפורט ${PORT}`));
+module.exports = app;
+
+// הרצה ישירה (npm start). בבדיקות האוטומטיות השרת נטען בלי להאזין לפורט קבוע.
+if (require.main === module) {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`🚀 שרת דלוק ומלא בתוכן בפורט ${PORT}`));
+}
