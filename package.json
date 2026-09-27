@@ -6,7 +6,8 @@
   "author": "Tomer Meshulam",
   "scripts": {
     "start": "node server.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "test": "node --test"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

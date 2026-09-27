@@ -1,16 +1,35 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
-const app = express();
-app.use(express.json());
+const { publicQuiz, gradeQuiz, PASSING_SCORE } = require('./quiz');
 
-// מניעת חסימות דפדפן (CORS)
+const app = express();
+// Render (וכל שירות אירוח מאחורי פרוקסי) - כדי ש-req.ip יחזיר את כתובת הגולש האמיתית
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+app.use(express.json({ limit: '10kb' }));
+
+// כותרות אבטחה בסיסיות
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    if (req.method === 'OPTIONS') return res.sendStatus(200);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     next();
 });
+
+// CORS: האתר והשרת יושבים על אותו דומיין, ולכן כברירת מחדל אין צורך לפתוח גישה לאתרים אחרים.
+// אם יש צורך אמיתי (למשל אתר נחיתה בדומיין אחר) - מגדירים ALLOWED_ORIGIN בקובץ .env
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN;
+if (ALLOWED_ORIGIN) {
+    app.use((req, res, next) => {
+        res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+        res.setHeader('Vary', 'Origin');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        if (req.method === 'OPTIONS') return res.sendStatus(204);
+        next();
+    });
+}
 
 // 14 מודולים מלאים - תוכן לימודי מורחב, תרגילי התנסות ומבחנים
 const modulesDatabase = [
@@ -305,29 +324,53 @@ Body: { "model": "claude-x", "max_tokens": 300, "messages": [{"role":"user","con
     }
 ];
 
-// 🔗 קישור ל-SheetDB (נקרא מקובץ .env, עם גיבוי)
-const SHEETDB_URL = process.env.SHEETDB_URL || "https://sheetdb.io/api/v1/z43gbaiw4u75l";
+// 🔗 קישור ל-SheetDB - נקרא אך ורק ממשתני סביבה (לעולם לא בקוד שנדחף ל-GitHub)
+const SHEETDB_URL = process.env.SHEETDB_URL;
+if (!SHEETDB_URL) {
+    console.warn('⚠️ SHEETDB_URL לא הוגדר - ציונים ייבדקו אך לא יישמרו בגיליון.');
+}
 
-// 📝 תשובות נכונות לכל מודול (בשימוש בנתיב /api/submissions)
-const MODULE_ANSWERS = {
-    1: { q1: 'a', q2: 'b' },
-    2: { q1: 'constraints' },
-    3: { q1: 'few_shot' },
-    4: { q1: 'python' },
-    5: { q1: 'artifacts' },
-    6: { q1: 'notebooklm' },
-    7: { q1: 'reasoning' },
-    8: { q1: 'claude' },
-    9: { q1: 'efficiency' },
-    10: { q1: 'agents' },
-    11: { q1: 'api' },
-    12: { q1: 'mcp' },
-    13: { q1: 'skills' },
-    14: { q1: 'plugins' }
-};
+// הגבלת קצב פשוטה בזיכרון: מונעת הצפה של הגיליון בהגשות אוטומטיות
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const RATE_LIMIT_MAX = 30;
+const submissionLog = new Map();
+
+function isRateLimited(ip) {
+    const now = Date.now();
+    const recent = (submissionLog.get(ip) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+    recent.push(now);
+    submissionLog.set(ip, recent);
+    return recent.length > RATE_LIMIT_MAX;
+}
+
+// ניקוי תקופתי כדי שהמפה לא תגדל ללא הגבלה
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, times] of submissionLog) {
+        if (times.every(t => now - t >= RATE_LIMIT_WINDOW_MS)) submissionLog.delete(ip);
+    }
+}, RATE_LIMIT_WINDOW_MS).unref();
+
+async function saveToSheet(row) {
+    if (!SHEETDB_URL) return false;
+    try {
+        const response = await fetch(SHEETDB_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: [row] })
+        });
+        if (!response.ok) {
+            console.error('❌ שגיאה בשליחה לשיטס (קוד ' + response.status + '):', await response.text());
+            return false;
+        }
+        return true;
+    } catch (sheetError) {
+        console.error('שגיאה בשליחה לשיטס:', sheetError);
+        return false;
+    }
+}
 
 app.get('/', (req, res) => {
-    const path = require('path');
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -335,65 +378,55 @@ app.get('/api/modules', (req, res) => {
     res.json(modulesDatabase);
 });
 
+// שאלות המבחן של מודול - ללא התשובות הנכונות
+app.get('/api/modules/:num/quiz', (req, res) => {
+    const questions = publicQuiz(Number(req.params.num));
+    if (!questions) return res.status(404).json({ error: 'מודול לא נמצא' });
+    res.json({ passingScore: PASSING_SCORE, questions });
+});
+
 app.post('/api/submissions', async (req, res) => {
     try {
-        const { studentName, moduleNumber, answers = {} } = req.body;
-        if (!studentName || moduleNumber === undefined) {
-            return res.status(400).json({ error: 'נא לספק שם סטודנט ומספר מודול' });
-        }
-        let score = 0;
-        let feedbackPoints = [];
+        const { studentName, moduleNumber, answers = {} } = req.body || {};
+        const name = typeof studentName === 'string' ? studentName.trim() : '';
         const num = Number(moduleNumber);
 
-        const correctAnswers = MODULE_ANSWERS[num];
-        if (correctAnswers) {
-            const questionKeys = Object.keys(correctAnswers);
-            const pointsPerQuestion = 100 / questionKeys.length;
-            questionKeys.forEach(key => {
-                if (answers[key] && answers[key] === correctAnswers[key]) {
-                    score += pointsPerQuestion;
-                    feedbackPoints.push(`✅ שאלה ${key.slice(1)} נכונה!`);
-                } else {
-                    feedbackPoints.push(`❌ שאלה ${key.slice(1)} שגויה. התשובה הנכונה היא: ${correctAnswers[key]}`);
-                }
-            });
-        } else {
-            feedbackPoints.push("⚠️ מודול לא מזוהה במערכת.");
+        if (!name || name.length > 80) {
+            return res.status(400).json({ error: 'נא להזין שם מלא (עד 80 תווים)' });
+        }
+        if (isRateLimited(req.ip)) {
+            return res.status(429).json({ error: 'יותר מדי הגשות בזמן קצר. נסו שוב בעוד כמה דקות.' });
         }
 
-        const feedbackString = feedbackPoints.join(" | ");
-        const formattedDate = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
-
-        // שליחה ל-SheetDB
-        try {
-            const response = await fetch(SHEETDB_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    data: [{
-                        "id": Date.now().toString(),
-                        "שם": studentName,
-                        "מספר מודל": num,
-                        "שאלה": "זה יישמר ריק כרגע",   // אם אין לך מידע על השאלה
-                        "תשובה": JSON.stringify(answers), // שומר את כל התשובות
-                        "feedback": feedbackString,
-                        "ציון": score,
-                    }]
-                })
-            });
-            if (response.ok) {
-                console.log("📊 נשלח בהצלחה לשיטס!");
-            } else {
-                console.error("❌ שגיאה בשליחה לשיטס (קוד " + response.status + "):", await response.text());
-            }
-        } catch (sheetError) {
-            console.error("שגיאה בשליחה לשיטס:", sheetError);
+        const graded = gradeQuiz(num, answers);
+        if (!graded) {
+            return res.status(400).json({ error: 'מודול לא מזוהה במערכת' });
         }
+
+        const feedbackString = graded.results
+            .map((r, i) => `${r.isCorrect ? '✅' : '❌'} שאלה ${i + 1}`)
+            .join(' | ');
+
+        // אותם שמות עמודות כמו קודם, כדי לא לשבור את הגיליון הקיים
+        const recorded = await saveToSheet({
+            "id": Date.now().toString(),
+            "שם": name,
+            "מספר מודל": num,
+            "שאלה": `${graded.correctCount}/${graded.total} נכונות`,
+            "תשובה": JSON.stringify(answers).slice(0, 500),
+            "feedback": feedbackString,
+            "ציון": graded.score,
+        });
 
         res.status(201).json({
             message: 'המבחן נבדק!',
-            score: score,
-            feedback: feedbackPoints.join("\n")
+            score: graded.score,
+            passed: graded.passed,
+            passingScore: PASSING_SCORE,
+            correctCount: graded.correctCount,
+            total: graded.total,
+            results: graded.results,
+            recorded
         });
     } catch (error) {
         console.error("שגיאה כללית בשרת:", error);
