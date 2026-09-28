@@ -35,6 +35,16 @@
         
         <section class="lg:col-span-1 space-y-4">
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div id="account-box" class="hidden mb-3 pb-3 border-b">
+                    <div id="account-signed-out">
+                        <p class="text-xs text-slate-600 mb-2">התחברו כדי לפתוח את הקורס המלא בכל מכשיר:</p>
+                        <div id="google-btn-sidebar"></div>
+                    </div>
+                    <div id="account-signed-in" class="hidden flex items-center justify-between gap-2 text-xs">
+                        <span class="text-slate-700 truncate" dir="ltr" id="account-email"></span>
+                        <button type="button" id="logout-btn" class="text-blue-700 hover:underline shrink-0">יציאה</button>
+                    </div>
+                </div>
                 <h2 class="text-base font-bold text-slate-700 border-b pb-2 mb-3 flex items-center gap-2">
                     📊 סילבוס הקורס ומפת למידה
                 </h2>
@@ -122,9 +132,15 @@
                 <div class="text-4xl mb-3">🔒</div>
                 <h2 class="text-xl font-bold text-slate-900" id="locked-title">המודול הזה זמין בקורס המלא</h2>
                 <p class="text-sm text-slate-600 mt-2" id="locked-text"></p>
-                <a id="checkout-link" href="#" target="_blank" rel="noopener" class="hidden mt-6 inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-all">לרכישת הקורס המלא</a>
-                <form id="access-form" class="mt-6 text-right">
-                    <label for="access-code-input" class="block text-sm font-semibold text-slate-800 mb-1">כבר רכשתם? הזינו את קוד הגישה:</label>
+                <div id="locked-signin" class="mt-6">
+                    <p class="text-sm font-semibold text-slate-800 mb-2">שלב 1: התחברו עם חשבון Google</p>
+                    <div id="google-btn-locked" class="flex justify-center"></div>
+                    <p class="text-[11px] text-slate-500 mt-2">הגישה שתרכשו תישמר בחשבון הזה ותעבוד בכל מכשיר.</p>
+                </div>
+                <p id="locked-signed-in-as" class="hidden mt-6 text-sm text-slate-700"></p>
+                <a id="checkout-link" href="#" target="_blank" rel="noopener" class="hidden mt-4 inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-all">לרכישת הקורס המלא</a>
+                <form id="access-form" class="hidden mt-6 text-right">
+                    <label for="access-code-input" class="block text-sm font-semibold text-slate-800 mb-1">קיבלתם קוד גישה אחרי הרכישה? הזינו אותו כאן (פעם אחת בלבד):</label>
                     <div class="flex gap-2">
                         <input id="access-code-input" type="text" maxlength="64" autocomplete="off" spellcheck="false" dir="ltr" class="flex-1 min-w-0 p-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none" placeholder="AI-XXXX-XXXX-XXXX">
                         <button type="submit" id="access-submit" class="bg-slate-900 hover:bg-slate-700 disabled:opacity-50 text-white font-bold px-4 rounded-lg text-sm">פתיחה</button>
@@ -147,24 +163,90 @@
         // --- התקדמות אישית: נשמרת ב-localStorage של הדפדפן (עלול להיות חסום במצב גלישה פרטית) ---
         const PROGRESS_KEY = 'lms-progress-v1';
         const NAME_KEY = 'lms-student-name';
-        const ACCESS_KEY = 'lms-access-code';
-        let siteConfig = { paywallEnabled: false, freeModules: 0, checkoutUrl: null };
+        let siteConfig = { paywallEnabled: false, freeModules: 0, checkoutUrl: null, price: null, googleClientId: null };
+        let currentUser = { email: null, hasFullAccess: true };
 
-        function getAccessCode() {
-            try { return localStorage.getItem(ACCESS_KEY) || ''; } catch (e) { return ''; }
-        }
-        let sessionAccessCode = getAccessCode();
-        function setAccessCode(code) {
-            sessionAccessCode = code;
-            try { localStorage.setItem(ACCESS_KEY, code); } catch (e) { /* אין אחסון - הקוד יישמר עד רענון בלבד */ }
-        }
-
-        // כל קריאה לשרת נושאת את קוד הגישה (אם יש), כדי שמודולים בתשלום ייפתחו
+        // הזיהוי מול השרת נעשה בעוגיית סשן מאובטחת (HttpOnly) שנשלחת אוטומטית
         function apiFetch(url, options = {}) {
-            const headers = { ...(options.headers || {}) };
-            if (sessionAccessCode) headers['X-Access-Code'] = sessionAccessCode;
-            return fetch(url, { ...options, headers });
+            return fetch(url, { credentials: 'same-origin', ...options });
         }
+
+        // --- התחברות עם Google ---
+        let googleScriptPromise = null;
+        function loadGoogleScript() {
+            if (!googleScriptPromise) {
+                googleScriptPromise = new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://accounts.google.com/gsi/client';
+                    script.async = true;
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Google script failed to load'));
+                    document.head.appendChild(script);
+                });
+            }
+            return googleScriptPromise;
+        }
+
+        async function renderGoogleButtons() {
+            if (!siteConfig.googleClientId || currentUser.email) return;
+            try {
+                await loadGoogleScript();
+                if (!window.googleInitialized) {
+                    google.accounts.id.initialize({ client_id: siteConfig.googleClientId, callback: onGoogleCredential });
+                    window.googleInitialized = true;
+                }
+                ['google-btn-sidebar', 'google-btn-locked'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && !el.hasChildNodes()) {
+                        google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', text: 'signin_with', locale: 'he' });
+                    }
+                });
+            } catch (e) {
+                console.error(e);
+                ['google-btn-sidebar', 'google-btn-locked'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = '<p class="text-xs text-red-700">לא הצלחנו לטעון את כפתור ההתחברות של Google. רעננו את הדף.</p>';
+                });
+            }
+        }
+
+        async function onGoogleCredential(response) {
+            try {
+                const res = await apiFetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+                const data = await res.json();
+                if (!res.ok) { alert(data.error || 'ההתחברות נכשלה.'); return; }
+                const reopen = window.lockedModuleNumber;
+                await loadModules();
+                if (reopen) selectModule(reopen);
+            } catch (e) {
+                alert('שגיאה בתקשורת מול השרת. נסו שוב.');
+            }
+        }
+
+        function renderAccount() {
+            const box = document.getElementById('account-box');
+            if (!siteConfig.paywallEnabled) { box.classList.add('hidden'); return; }
+            box.classList.remove('hidden');
+            const signedIn = Boolean(currentUser.email);
+            document.getElementById('account-signed-out').classList.toggle('hidden', signedIn);
+            document.getElementById('account-signed-in').classList.toggle('hidden', !signedIn);
+            document.getElementById('account-email').innerText = currentUser.email || '';
+            renderGoogleButtons();
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await apiFetch('/api/auth/logout', { method: 'POST' });
+            try { google.accounts.id.disableAutoSelect(); } catch (e) { }
+            window.lockedModuleNumber = null;
+            document.getElementById('content-area').classList.add('hidden');
+            document.getElementById('locked-area').classList.add('hidden');
+            document.getElementById('placeholder-area').classList.remove('hidden');
+            await loadModules();
+        });
 
         function loadProgress() {
             try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch (e) { return {}; }
@@ -221,8 +303,10 @@
         async function loadModules() {
             const container = document.getElementById("modules-list");
             try {
-                const [configRes, response] = await Promise.all([fetch("/api/config"), apiFetch("/api/modules")]);
+                const [configRes, meRes, response] = await Promise.all([fetch("/api/config"), apiFetch("/api/me"), apiFetch("/api/modules")]);
                 if (configRes.ok) siteConfig = await configRes.json();
+                if (meRes.ok) currentUser = await meRes.json();
+                renderAccount();
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 allModules = await response.json();
                 container.innerHTML = allModules.map(m => `
@@ -335,15 +419,24 @@
             document.getElementById("locked-area").classList.remove("hidden");
             document.getElementById("locked-title").innerText = `יחידה ${mod.moduleNumber}: ${mod.title}`;
             document.getElementById("locked-text").innerText =
-                `${siteConfig.freeModules} המודולים הראשונים פתוחים לכולם. המודול הזה ושאר מודולי ההמשך זמינים לרוכשי הקורס המלא.`;
+                `${siteConfig.freeModules} המודולים הראשונים פתוחים לכולם. המודול הזה ושאר מודולי ההמשך זמינים לרוכשי הקורס המלא` +
+                (siteConfig.price ? `, בתשלום חד-פעמי של ${siteConfig.price}.` : '.');
+            const signedIn = Boolean(currentUser.email);
+            document.getElementById("locked-signin").classList.toggle("hidden", signedIn);
+            const who = document.getElementById("locked-signed-in-as");
+            who.classList.toggle("hidden", !signedIn);
+            who.innerHTML = signedIn ? `מחוברים כ-<bdi dir="ltr">${escapeHtml(currentUser.email)}</bdi>. הרכישה תיפתח לחשבון הזה.` : '';
+            document.getElementById("access-form").classList.toggle("hidden", !signedIn);
             const link = document.getElementById("checkout-link");
-            if (siteConfig.checkoutUrl) {
+            if (siteConfig.checkoutUrl && signedIn) {
                 link.href = siteConfig.checkoutUrl;
+                link.innerText = siteConfig.price ? `לרכישת הקורס המלא (${siteConfig.price})` : 'לרכישת הקורס המלא';
                 link.classList.remove("hidden");
             } else {
                 link.classList.add("hidden");
             }
             document.getElementById("access-message").classList.add("hidden");
+            renderGoogleButtons();
             if (window.innerWidth < 1024) {
                 document.getElementById("locked-area").scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
@@ -361,21 +454,20 @@
             msg.className = "text-sm mt-2 text-slate-600";
             msg.innerText = "בודק...";
             try {
-                const response = await fetch("/api/access/verify", {
+                const response = await apiFetch("/api/access/redeem", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ code })
                 });
                 const res = await response.json();
-                if (!response.ok || !res.valid) {
+                if (!response.ok) {
                     msg.className = "text-sm mt-2 text-red-700";
-                    msg.innerText = !response.ok ? (res.error || "אירעה שגיאה. נסו שוב.") : "הקוד לא תקין. בדקו שהעתקתם אותו במלואו.";
+                    msg.innerText = res.error || "אירעה שגיאה. נסו שוב.";
                     return;
                 }
-                setAccessCode(code);
                 input.value = "";
                 msg.className = "text-sm mt-2 text-green-700";
-                msg.innerText = "✅ הקוד אושר! כל המודולים פתוחים.";
+                msg.innerText = "✅ הקוד אושר ונשמר בחשבון שלכם! כל המודולים פתוחים.";
                 const reopen = window.lockedModuleNumber;
                 await loadModules();
                 if (reopen) selectModule(reopen);

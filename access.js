@@ -1,39 +1,44 @@
-// 🔒 הרשאות גישה למודולים בתשלום.
-// המודל: X המודולים הראשונים חינם, השאר נפתחים עם קוד גישה שהקונה מקבל אחרי תשלום.
-// אם לא הוגדרו קודי גישה בכלל - חומת התשלום כבויה וכל התוכן פתוח (כמו לפני השינוי).
+// 🔒 מדיניות גישה למודולים בתשלום.
+// המודל: FREE_MODULES המודולים הראשונים חינם, השאר פתוחים רק לחשבון Google שמופיע ברשימת הרוכשים.
+// חומת התשלום פעילה רק כשהוגדר PAYWALL=on וכל ההגדרות הנדרשות קיימות - אחרת כל התוכן פתוח
+// (עדיף תוכן פתוח זמנית מאשר לנעול קונים שכבר שילמו בגלל הגדרה חסרה).
 
-function parseCodes(raw) {
+function parseList(raw, normalize) {
     return new Set(
         String(raw || '')
             .split(',')
-            .map(c => c.trim().toUpperCase())
+            .map(s => normalize(s.trim()))
             .filter(Boolean)
     );
 }
 
-function createAccessPolicy({ accessCodes, freeModules, checkoutUrl }) {
-    const codes = parseCodes(accessCodes);
-    const parsedFree = Number.parseInt(freeModules, 10);
-    const free = Number.isFinite(parsedFree) && parsedFree >= 0 ? parsedFree : 3;
-    const enabled = codes.size > 0;
+const parseCodes = raw => parseList(raw, s => s.toUpperCase());
+const parseEmails = raw => parseList(raw, s => s.toLowerCase());
 
-    function isValidCode(code) {
-        return typeof code === 'string' && codes.has(code.trim().toUpperCase());
-    }
+function createAccessPolicy(env = {}) {
+    const parsedFree = Number.parseInt(env.FREE_MODULES, 10);
+    const freeModules = Number.isFinite(parsedFree) && parsedFree >= 0 ? parsedFree : 3;
+    const codes = parseCodes(env.ACCESS_CODES);
+    const owners = parseEmails(env.OWNER_EMAILS);
 
-    function isLocked(moduleNumber, code) {
-        if (!enabled) return false;
-        if (moduleNumber <= free) return false;
-        return !isValidCode(code);
+    const requested = String(env.PAYWALL || '').toLowerCase() === 'on';
+    const missing = ['GOOGLE_CLIENT_ID', 'SESSION_SECRET', 'SHEETDB_URL'].filter(k => !env[k]);
+    if (env.SESSION_SECRET && env.SESSION_SECRET.length < 32 && !missing.includes('SESSION_SECRET')) {
+        missing.push('SESSION_SECRET (לפחות 32 תווים)');
     }
+    const enabled = requested && missing.length === 0;
 
     return {
         enabled,
-        freeModules: free,
-        checkoutUrl: checkoutUrl || null,
-        isValidCode,
-        isLocked
+        requested,
+        missing,
+        freeModules,
+        checkoutUrl: env.CHECKOUT_URL || null,
+        price: env.COURSE_PRICE || null,
+        isFree: moduleNumber => !enabled || moduleNumber <= freeModules,
+        isOwner: email => Boolean(email) && owners.has(String(email).toLowerCase()),
+        isValidCode: code => typeof code === 'string' && codes.has(code.trim().toUpperCase())
     };
 }
 
-module.exports = { parseCodes, createAccessPolicy };
+module.exports = { parseCodes, parseEmails, createAccessPolicy };
