@@ -1,16 +1,14 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
-const app = express();
-app.use(express.json());
-
-// מניעת חסימות דפדפן (CORS)
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    if (req.method === 'OPTIONS') return res.sendStatus(200);
-    next();
-});
+const { publicQuiz, gradeQuiz, PASSING_SCORE } = require('./quiz');
+const { MODULE_EXTRAS } = require('./moduleExtras');
+const { createAccessPolicy } = require('./access');
+const {
+    SESSION_COOKIE, SESSION_DAYS, createGoogleVerifier,
+    createSessionToken, readSessionToken, parseCookies, sessionCookie
+} = require('./auth');
+const { createSheetPurchaseStore, normalizeEmail } = require('./purchases');
 
 // 14 מודולים מלאים - תוכן לימודי מורחב, תרגילי התנסות ומבחנים
 const modulesDatabase = [
@@ -302,104 +300,363 @@ Body: { "model": "claude-x", "max_tokens": 300, "messages": [{"role":"user","con
                   <div style="background-color:#f0fdf4; border-right:4px solid #16a34a; padding:10px; margin-top:15px; border-radius:4px;">
                       <b>🏋️ תרגיל התנסות עצמי:</b> גשו לחנות הפלאגינים/הרחבות של כלי ה-AI שאתם משתמשים בו, ומצאו פלאגין אחד רלוונטי לעבודה שלכם. תארו איזו בעיה קונקרטית הוא פותר, ואיך הייתם משתמשים בו במשימה אמיתית.
                   </div>`
+    },
+    {
+        moduleNumber: 15,
+        title: 'בדיקת עובדות והזיות (Hallucinations)',
+        description: 'איך לזהות תשובה מומצאת, לבקש מקורות ולאמת אותם לפני שסומכים על AI.',
+        // תזמון פרסום: עד התאריך הזה המודול מוצג כ"בקרוב" (בעלי הקורס רואים אותו מראש)
+        availableFrom: '2026-10-18',
+        content: `<h3>📘 שיעור 15: למה AI ממציא, ואיך לא ליפול בזה</h3>
+                  <p><b>הזיה (Hallucination)</b> היא תשובה שנשמעת בטוחה ומקצועית - אבל שגויה או מומצאת לגמרי: עובדה שלא קיימת, מספר לא נכון, ציטוט שאף אחד לא אמר, או מקור שלא קיים בכלל. הבעיה איננה שהמודל "משקר" בכוונה, אלא שהוא מנוסח באותו ביטחון גם כשהוא צודק וגם כשהוא טועה.</p>
+
+                  <h4>💡 למה זה קורה?</h4>
+                  <p>כפי שלמדנו בשיעור 1, מודל שפה מחשב את ההמשך הסביר ביותר לטקסט - הוא לא בודק אותו מול מאגר עובדות. בשנת 2025 פרסמו חוקרים מ-OpenAI מאמר בשם <i>Why Language Models Hallucinate</i>, שבו הם טוענים שחלק גדול מהבעיה נובע מהאופן שבו מאמנים ובודקים מודלים: שיטות ההערכה המקובלות מתגמלות <b>ניחוש</b> יותר מאשר הודאה ב"אני לא יודע". בדומה לתלמיד במבחן אמריקאי שמעדיף לנחש מאשר להשאיר שאלה ריקה - גם המודל "לומד" שעדיף לנחש.</p>
+
+                  <h4>🚨 איפה ההזיות מסוכנות במיוחד</h4>
+                  <ul>
+                      <li><b>מקורות וציטוטים:</b> שמות של מאמרים, פסקי דין, ספרים וקישורים שנראים אמינים לגמרי - ולא קיימים.</li>
+                      <li><b>מספרים ותאריכים:</b> נתונים סטטיסטיים, מחירים, שנים ואחוזים.</li>
+                      <li><b>מידע עדכני:</b> דברים שקרו אחרי שהמודל אומן, או מחירים ותנאים שמשתנים.</li>
+                      <li><b>נושאים נישתיים:</b> ככל שיש פחות מידע על נושא, גדל הסיכוי שהמודל "ימלא חורים".</li>
+                  </ul>
+
+                  <h4>🛡️ חמשת כללי ההגנה</h4>
+                  <ol>
+                      <li><b>תנו למודל רשות להגיד "לא יודע":</b> כתבו במפורש "אם אינך בטוח, כתוב שאינך יודע - אל תנחש".</li>
+                      <li><b>תנו לו את החומר בעצמכם (Grounding):</b> הדביקו את המסמך והנחו "ענה אך ורק על סמך הטקסט המצורף". זה הרבה יותר אמין מלשאול "מהזיכרון".</li>
+                      <li><b>בקשו ציטוט מדויק:</b> "צטט את המשפט המדויק מהמסמך שעליו מבוססת התשובה" - ואז בדקו שהמשפט באמת נמצא שם.</li>
+                      <li><b>אמתו כל מקור בעצמכם:</b> פתחו כל קישור, חפשו כל מאמר או פסק דין. מקור שלא מצאתם - לא קיים מבחינתכם.</li>
+                      <li><b>ככל שהסיכון גבוה יותר - כך הבדיקה צריכה להיות קפדנית יותר:</b> רעיון לפוסט לא דורש אימות; ייעוץ משפטי, רפואי או פיננסי - תמיד דורש בדיקה מול מקור אמין או איש מקצוע.</li>
+                  </ol>
+
+                  <div style="background-color:#f0fdf4; border-right:4px solid #16a34a; padding:10px; margin-top:15px; border-radius:4px;">
+                      <b>🏋️ תרגיל התנסות עצמי:</b> שאלו מודל שפה שאלה על נושא נישתי שאתם מכירים לעומק (למשל: פרט טכני מהתחום המקצועי שלכם), ובקשו ממנו לצרף 3 מקורות. בדקו כל מקור: האם הוא קיים? האם הוא באמת אומר את מה שהמודל טען?
+                  </div>`
     }
 ];
 
-// 🔗 קישור ל-SheetDB (נקרא מקובץ .env, עם גיבוי)
-const SHEETDB_URL = process.env.SHEETDB_URL || "https://sheetdb.io/api/v1/z43gbaiw4u75l";
+// הגבלת קצב פשוטה בזיכרון (לכל כתובת IP)
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 
-// 📝 תשובות נכונות לכל מודול (בשימוש בנתיב /api/submissions)
-const MODULE_ANSWERS = {
-    1: { q1: 'a', q2: 'b' },
-    2: { q1: 'constraints' },
-    3: { q1: 'few_shot' },
-    4: { q1: 'python' },
-    5: { q1: 'artifacts' },
-    6: { q1: 'notebooklm' },
-    7: { q1: 'reasoning' },
-    8: { q1: 'claude' },
-    9: { q1: 'efficiency' },
-    10: { q1: 'agents' },
-    11: { q1: 'api' },
-    12: { q1: 'mcp' },
-    13: { q1: 'skills' },
-    14: { q1: 'plugins' }
-};
-
-app.get('/', (req, res) => {
-    const path = require('path');
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.get('/api/modules', (req, res) => {
-    res.json(modulesDatabase);
-});
-
-app.post('/api/submissions', async (req, res) => {
-    try {
-        const { studentName, moduleNumber, answers = {} } = req.body;
-        if (!studentName || moduleNumber === undefined) {
-            return res.status(400).json({ error: 'נא לספק שם סטודנט ומספר מודול' });
+function createRateLimiter(max) {
+    const log = new Map();
+    // ניקוי תקופתי כדי שהמפה לא תגדל ללא הגבלה
+    setInterval(() => {
+        const now = Date.now();
+        for (const [ip, times] of log) {
+            if (times.every(t => now - t >= RATE_LIMIT_WINDOW_MS)) log.delete(ip);
         }
-        let score = 0;
-        let feedbackPoints = [];
-        const num = Number(moduleNumber);
+    }, RATE_LIMIT_WINDOW_MS).unref();
 
-        const correctAnswers = MODULE_ANSWERS[num];
-        if (correctAnswers) {
-            const questionKeys = Object.keys(correctAnswers);
-            const pointsPerQuestion = 100 / questionKeys.length;
-            questionKeys.forEach(key => {
-                if (answers[key] && answers[key] === correctAnswers[key]) {
-                    score += pointsPerQuestion;
-                    feedbackPoints.push(`✅ שאלה ${key.slice(1)} נכונה!`);
-                } else {
-                    feedbackPoints.push(`❌ שאלה ${key.slice(1)} שגויה. התשובה הנכונה היא: ${correctAnswers[key]}`);
-                }
-            });
-        } else {
-            feedbackPoints.push("⚠️ מודול לא מזוהה במערכת.");
+    return function isRateLimited(ip) {
+        const now = Date.now();
+        const recent = (log.get(ip) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+        recent.push(now);
+        log.set(ip, recent);
+        return recent.length > max;
+    };
+}
+
+// התאריך של היום בישראל בפורמט YYYY-MM-DD (כדי שמודול ייפתח בחצות לפי שעון ישראל)
+function israelDate(date) {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(date);
+}
+
+const COMING_SOON_ERROR = { error: 'המודול הזה עוד לא פורסם. הוא ייפתח בקרוב.', comingSoon: true };
+
+const LOCKED_ERROR = { error: 'המודול הזה זמין לרוכשי הקורס המלא. התחברו עם Google ורכשו גישה כדי לפתוח אותו.', locked: true };
+
+// בונה את השרת. options מאפשר לבדיקות להחליף את אימות Google ואת רשימת הרוכשים.
+function createApp(options = {}) {
+    const env = options.env || process.env;
+    const app = express();
+    // Render (וכל שירות אירוח מאחורי פרוקסי) - כדי ש-req.ip יחזיר את כתובת הגולש האמיתית
+    app.set('trust proxy', 1);
+    app.disable('x-powered-by');
+    app.use(express.json({ limit: '10kb' }));
+
+    // כותרות אבטחה בסיסיות
+    app.use((req, res, next) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        next();
+    });
+
+    // CORS: האתר והשרת יושבים על אותו דומיין, ולכן כברירת מחדל אין צורך לפתוח גישה לאתרים אחרים.
+    // אם יש צורך אמיתי (למשל אתר נחיתה בדומיין אחר) - מגדירים ALLOWED_ORIGIN בקובץ .env
+    const ALLOWED_ORIGIN = env.ALLOWED_ORIGIN;
+    if (ALLOWED_ORIGIN) {
+        app.use((req, res, next) => {
+            res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
+            res.setHeader('Vary', 'Origin');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+            if (req.method === 'OPTIONS') return res.sendStatus(204);
+            next();
+        });
+    }
+
+    // 🔗 קישור ל-SheetDB - נקרא אך ורק ממשתני סביבה (לעולם לא בקוד שנדחף ל-GitHub)
+    const SHEETDB_URL = env.SHEETDB_URL;
+    if (!SHEETDB_URL) {
+        console.warn('⚠️ SHEETDB_URL לא הוגדר - ציונים ייבדקו אך לא יישמרו בגיליון.');
+    }
+
+    // 🔒 חומת תשלום + התחברות עם Google
+    const access = createAccessPolicy(env);
+    if (access.requested && !access.enabled) {
+        console.error('❌ PAYWALL=on אבל חסרות הגדרות: ' + access.missing.join(', ') + ' - חומת התשלום כבויה וכל המודולים פתוחים.');
+    } else if (!access.enabled) {
+        console.warn('ℹ️ חומת התשלום כבויה (PAYWALL לא מוגדר ל-on) - כל המודולים פתוחים.');
+    }
+    const verifyGoogleToken = options.verifyGoogleToken
+        || (env.GOOGLE_CLIENT_ID ? createGoogleVerifier(env.GOOGLE_CLIENT_ID) : null);
+    const purchases = options.purchaseStore
+        || (SHEETDB_URL ? createSheetPurchaseStore({ url: SHEETDB_URL }) : null);
+    const SESSION_SECRET = env.SESSION_SECRET;
+    // לבדיקות: אפשר "להזיז את השעון" כדי לבדוק תזמון פרסום
+    const now = options.now || (() => new Date());
+
+    // הגשות מבחן: מונע הצפה של הגיליון
+    const isSubmissionRateLimited = createRateLimiter(30);
+    // התחברות ומימוש קודים: מונע ניחוש קודים בכוח
+    const isAuthRateLimited = createRateLimiter(20);
+    const isRedeemRateLimited = createRateLimiter(10);
+
+    function currentUser(req) {
+        if (!SESSION_SECRET) return null;
+        const token = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+        return readSessionToken(token, SESSION_SECRET);
+    }
+
+    async function hasFullAccess(email) {
+        if (!access.enabled) return true;
+        if (!email) return false;
+        if (access.isOwner(email)) return true;
+        try {
+            return await purchases.hasAccess(email);
+        } catch (e) {
+            console.error('שגיאה בקריאת רשימת הרוכשים:', e.message);
+            return false;
         }
+    }
 
-        const feedbackString = feedbackPoints.join(" | ");
-        const formattedDate = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
+    // 📅 תזמון פרסום: מודול עם availableFrom נפתח לכולם רק מהתאריך הזה (שעון ישראל).
+    // בעלי הקורס (OWNER_EMAILS) רואים אותו מראש כדי לבדוק אותו לפני כולם.
+    function isReleased(mod) {
+        return !mod.availableFrom || israelDate(now()) >= mod.availableFrom;
+    }
 
-        // שליחה ל-SheetDB
+    function canSee(mod, req) {
+        return isReleased(mod) || access.isOwner(currentUser(req));
+    }
+
+    // נעול = בתשלום, והמשתמש לא מחובר או לא ברשימת הרוכשים
+    async function isLocked(moduleNumber, req) {
+        if (access.isFree(moduleNumber)) return false;
+        return !(await hasFullAccess(currentUser(req)));
+    }
+
+    // מה שהדפדפן מקבל על מודול: מודול נעול נשלח בלי התוכן עצמו
+    function publicModule(mod, unlocked, visible) {
+        const base = {
+            moduleNumber: mod.moduleNumber,
+            title: mod.title,
+            description: mod.description,
+            free: access.isFree(mod.moduleNumber)
+        };
+        if (!isReleased(mod)) {
+            base.comingSoon = true;
+            base.availableFrom = mod.availableFrom;
+            if (!visible) return { ...base, locked: true };
+            base.preview = true; // בעל הקורס רואה את המודול לפני הפרסום
+        }
+        if (!base.free && !unlocked) return { ...base, locked: true };
+        const extras = MODULE_EXTRAS[mod.moduleNumber] || {};
+        return {
+            ...base,
+            locked: false,
+            content: mod.content,
+            cases: extras.cases || '',
+            practice: extras.practice || '',
+            promptScenarios: extras.promptScenarios || []
+        };
+    }
+
+    async function saveToSheet(row) {
+        if (!SHEETDB_URL) return false;
         try {
             const response = await fetch(SHEETDB_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    data: [{
-                        "id": Date.now().toString(),
-                        "שם": studentName,
-                        "מספר מודל": num,
-                        "שאלה": "זה יישמר ריק כרגע",   // אם אין לך מידע על השאלה
-                        "תשובה": JSON.stringify(answers), // שומר את כל התשובות
-                        "feedback": feedbackString,
-                        "ציון": score,
-                    }]
-                })
+                body: JSON.stringify({ data: [row] })
             });
-            if (response.ok) {
-                console.log("📊 נשלח בהצלחה לשיטס!");
-            } else {
-                console.error("❌ שגיאה בשליחה לשיטס (קוד " + response.status + "):", await response.text());
+            if (!response.ok) {
+                console.error('❌ שגיאה בשליחה לשיטס (קוד ' + response.status + '):', await response.text());
+                return false;
             }
+            return true;
         } catch (sheetError) {
-            console.error("שגיאה בשליחה לשיטס:", sheetError);
+            console.error('שגיאה בשליחה לשיטס:', sheetError);
+            return false;
         }
-
-        res.status(201).json({
-            message: 'המבחן נבדק!',
-            score: score,
-            feedback: feedbackPoints.join("\n")
-        });
-    } catch (error) {
-        console.error("שגיאה כללית בשרת:", error);
-        res.status(500).json({ error: 'שגיאה בשרת' });
     }
-});
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 שרת דלוק ומלא בתוכן בפורט ${PORT}`));
+    app.get('/', (req, res) => {
+        res.sendFile(path.join(__dirname, 'index.html'));
+    });
+
+    app.get('/api/config', (req, res) => {
+        res.json({
+            paywallEnabled: access.enabled,
+            freeModules: access.freeModules,
+            checkoutUrl: access.checkoutUrl,
+            price: access.price,
+            googleClientId: access.enabled ? env.GOOGLE_CLIENT_ID : null
+        });
+    });
+
+    app.get('/api/me', async (req, res) => {
+        const email = currentUser(req);
+        res.json({ email, hasFullAccess: await hasFullAccess(email) });
+    });
+
+    app.get('/api/modules', async (req, res) => {
+        const email = currentUser(req);
+        const unlocked = await hasFullAccess(email);
+        const owner = access.isOwner(email);
+        res.json(modulesDatabase.map(mod => publicModule(mod, unlocked, owner)));
+    });
+
+    // התחברות: הדפדפן שולח את האסימון שקיבל מ-Google, והשרת מאמת אותו בעצמו
+    app.post('/api/auth/google', async (req, res) => {
+        if (!access.enabled || !verifyGoogleToken) {
+            return res.status(404).json({ error: 'התחברות לא זמינה כרגע' });
+        }
+        if (isAuthRateLimited(req.ip)) {
+            return res.status(429).json({ error: 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.' });
+        }
+        const credential = req.body && typeof req.body.credential === 'string' ? req.body.credential : '';
+        const email = credential ? await verifyGoogleToken(credential) : null;
+        if (!email) {
+            return res.status(401).json({ error: 'ההתחברות עם Google נכשלה. נסו שוב.' });
+        }
+        res.setHeader('Set-Cookie', sessionCookie(createSessionToken(email, SESSION_SECRET), {
+            secure: req.secure,
+            maxAgeSeconds: SESSION_DAYS * 24 * 60 * 60
+        }));
+        res.json({ email, hasFullAccess: await hasFullAccess(email) });
+    });
+
+    app.post('/api/auth/logout', (req, res) => {
+        res.setHeader('Set-Cookie', sessionCookie('', { secure: req.secure, maxAgeSeconds: 0 }));
+        res.json({ ok: true });
+    });
+
+    // מימוש קוד גישה: הקוד נקשר לחשבון Google הראשון שמשתמש בו, ולא יעבוד לאף חשבון אחר
+    app.post('/api/access/redeem', async (req, res) => {
+        if (!access.enabled) return res.status(404).json({ error: 'לא זמין כרגע' });
+        if (isRedeemRateLimited(req.ip)) {
+            return res.status(429).json({ error: 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.' });
+        }
+        const email = currentUser(req);
+        if (!email) return res.status(401).json({ error: 'צריך להתחבר עם Google לפני הזנת הקוד.' });
+
+        const code = req.body && typeof req.body.code === 'string' ? req.body.code.trim().toUpperCase() : '';
+        if (!access.isValidCode(code)) {
+            return res.status(400).json({ error: 'הקוד לא תקין. בדקו שהעתקתם אותו במלואו.' });
+        }
+        try {
+            const existing = await purchases.findByCode(code);
+            if (existing && normalizeEmail(existing.email) !== email) {
+                return res.status(409).json({ error: 'הקוד הזה כבר מומש בחשבון אחר.' });
+            }
+            if (!existing) await purchases.add({ email, code });
+            res.json({ ok: true, email });
+        } catch (e) {
+            console.error('שגיאה במימוש קוד:', e.message);
+            res.status(503).json({ error: 'לא הצלחנו לשמור את הקוד כרגע. נסו שוב בעוד רגע.' });
+        }
+    });
+
+    // שאלות המבחן של מודול - ללא התשובות הנכונות
+    app.get('/api/modules/:num/quiz', async (req, res) => {
+        const num = Number(req.params.num);
+        const questions = publicQuiz(num);
+        const mod = modulesDatabase.find(m => m.moduleNumber === num);
+        if (!questions || !mod) return res.status(404).json({ error: 'מודול לא נמצא' });
+        if (!canSee(mod, req)) return res.status(403).json(COMING_SOON_ERROR);
+        if (await isLocked(num, req)) return res.status(403).json(LOCKED_ERROR);
+        res.json({ passingScore: PASSING_SCORE, questions });
+    });
+
+    app.post('/api/submissions', async (req, res) => {
+        try {
+            const { studentName, moduleNumber, answers = {} } = req.body || {};
+            const name = typeof studentName === 'string' ? studentName.trim() : '';
+            const num = Number(moduleNumber);
+
+            if (!name || name.length > 80) {
+                return res.status(400).json({ error: 'נא להזין שם מלא (עד 80 תווים)' });
+            }
+            const mod = modulesDatabase.find(m => m.moduleNumber === num);
+            if (mod && !canSee(mod, req)) {
+                return res.status(403).json(COMING_SOON_ERROR);
+            }
+            if (await isLocked(num, req)) {
+                return res.status(403).json(LOCKED_ERROR);
+            }
+            if (isSubmissionRateLimited(req.ip)) {
+                return res.status(429).json({ error: 'יותר מדי הגשות בזמן קצר. נסו שוב בעוד כמה דקות.' });
+            }
+
+            const graded = gradeQuiz(num, answers);
+            if (!graded) {
+                return res.status(400).json({ error: 'מודול לא מזוהה במערכת' });
+            }
+
+            const feedbackString = graded.results
+                .map((r, i) => `${r.isCorrect ? '✅' : '❌'} שאלה ${i + 1}`)
+                .join(' | ');
+
+            // אותם שמות עמודות כמו קודם, כדי לא לשבור את הגיליון הקיים
+            const recorded = await saveToSheet({
+                "id": Date.now().toString(),
+                "שם": name,
+                "מספר מודל": num,
+                "שאלה": `${graded.correctCount}/${graded.total} נכונות`,
+                "תשובה": JSON.stringify(answers).slice(0, 500),
+                "feedback": feedbackString,
+                "ציון": graded.score,
+            });
+
+            res.status(201).json({
+                message: 'המבחן נבדק!',
+                score: graded.score,
+                passed: graded.passed,
+                passingScore: PASSING_SCORE,
+                correctCount: graded.correctCount,
+                total: graded.total,
+                results: graded.results,
+                recorded
+            });
+        } catch (error) {
+            console.error("שגיאה כללית בשרת:", error);
+            res.status(500).json({ error: 'שגיאה בשרת' });
+        }
+    });
+
+    return app;
+}
+
+module.exports = createApp;
+
+// הרצה ישירה (npm start). בבדיקות האוטומטיות השרת נבנה בלי להאזין לפורט קבוע.
+if (require.main === module) {
+    const PORT = process.env.PORT || 5000;
+    createApp().listen(PORT, () => console.log(`🚀 שרת דלוק ומלא בתוכן בפורט ${PORT}`));
+}

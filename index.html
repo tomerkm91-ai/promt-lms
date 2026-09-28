@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Tools Academy LMS - Master Level</title>
+    <title>קורס הבנת כלי ה-AI | ChatGPT, Claude, Gemini, MCP ופרומפטינג</title>
+    <meta name="description" content="קורס אינטראקטיבי בעברית להבנת כלי ה-AI: הנדסת פרומפטים, ChatGPT, Claude, Gemini, DeepSeek, API, MCP, Skills ופלאגינים - עם תרגול מעשי ומבחנים עם משוב מיידי.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="קורס הבנת כלי ה-AI">
+    <meta property="og:description" content="14 מודולים בעברית: מפרומפט ראשון ועד סוכנים, API ו-MCP. תרגול מעשי ומבחנים עם משוב מיידי.">
+    <meta property="og:locale" content="he_IL">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .lesson-content h3 { font-size: 1.5rem; font-weight: bold; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-top: 1.5rem; }
@@ -29,9 +35,29 @@
         
         <section class="lg:col-span-1 space-y-4">
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div id="account-box" class="hidden mb-3 pb-3 border-b">
+                    <div id="account-signed-out">
+                        <p class="text-xs text-slate-600 mb-2">התחברו כדי לפתוח את הקורס המלא בכל מכשיר:</p>
+                        <div id="google-btn-sidebar"></div>
+                    </div>
+                    <div id="account-signed-in" class="hidden flex items-center justify-between gap-2 text-xs">
+                        <span class="text-slate-700 truncate" dir="ltr" id="account-email"></span>
+                        <button type="button" id="logout-btn" class="text-blue-700 hover:underline shrink-0">יציאה</button>
+                    </div>
+                </div>
                 <h2 class="text-base font-bold text-slate-700 border-b pb-2 mb-3 flex items-center gap-2">
                     📊 סילבוס הקורס ומפת למידה
                 </h2>
+                <div class="mb-3">
+                    <div class="flex justify-between text-xs text-slate-600 mb-1">
+                        <span>ההתקדמות שלכם</span>
+                        <span id="progress-label">0/0 מודולים הושלמו</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden" role="progressbar" aria-label="התקדמות בקורס" id="progress-track">
+                        <div id="progress-bar" class="h-full bg-emerald-500 transition-all" style="width:0%"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">ההתקדמות נשמרת בדפדפן הזה בלבד.</p>
+                </div>
                 <div id="modules-list" class="space-y-2.5">
                     <p class="text-gray-500 text-sm">טוען את תוכנית הלימודים מהשרת...</p>
                 </div>
@@ -40,7 +66,7 @@
 
         <section id="content-area" class="lg:col-span-2 bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hidden">
             
-            <div class="bg-slate-100 border-b border-slate-200 flex text-sm">
+            <div class="bg-slate-100 border-b border-slate-200 flex text-sm overflow-x-auto whitespace-nowrap">
                 <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn active px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium">📖 חומר לימוד עיוני</button>
                 <button onclick="switchTab('cases')" id="tab-cases" class="tab-btn px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium">🔥 תבניות ומקרי בוחן</button>
                 <button onclick="switchTab('practice')" id="tab-practice" class="tab-btn px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium">🏋️ תרגול שטח מעשי</button>
@@ -68,13 +94,13 @@
                         
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
                             <label class="block font-semibold mb-1 text-slate-800 text-sm">שם הסטודנט להנפקת הציון:</label>
-                            <input type="text" id="student-name" required class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm" placeholder="הקלידו שם מלא">
+                            <input type="text" id="student-name" required maxlength="80" autocomplete="name" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm" placeholder="הקלידו שם מלא">
                         </div>
 
                         <div id="dynamic-questions" class="space-y-4"></div>
 
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg mt-6 shadow-md transition-all">
-                            הגש מבדק לבדיקה אוטומטית ורישום בגיליון
+                        <button type="submit" id="quiz-submit" class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-lg mt-6 shadow-md transition-all">
+                            הגשת המבחן לבדיקה
                         </button>
                     </form>
                     <div id="result-box" class="hidden mt-4 p-4 rounded-lg border text-base font-medium"></div>
@@ -96,8 +122,39 @@
         <section id="placeholder-area" class="lg:col-span-2 flex items-center justify-center bg-white border border-slate-200 rounded-xl p-12 text-center shadow-sm">
             <div>
                 <div class="text-4xl mb-3">🎓</div>
-                <p class="text-xl font-bold text-slate-800">אנא בחרו יחידת לימוד מתוך הסילבוס מימין</p>
+                <p class="text-xl font-bold text-slate-800">בחרו יחידת לימוד מתוך הסילבוס</p>
                 <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">כל מודול כולל עשרות עמודי תוכן, תבניות שימוש מוכנות, תרגילי שטח ומבחן חובה.</p>
+            </div>
+        </section>
+
+        <section id="locked-area" class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-8 md:p-12 text-center shadow-sm hidden">
+            <div class="max-w-md mx-auto">
+                <div class="text-4xl mb-3">🔒</div>
+                <h2 class="text-xl font-bold text-slate-900" id="locked-title">המודול הזה זמין בקורס המלא</h2>
+                <p class="text-sm text-slate-600 mt-2" id="locked-text"></p>
+                <div id="locked-signin" class="mt-6">
+                    <p class="text-sm font-semibold text-slate-800 mb-2">שלב 1: התחברו עם חשבון Google</p>
+                    <div id="google-btn-locked" class="flex justify-center"></div>
+                    <p class="text-[11px] text-slate-500 mt-2">הגישה שתרכשו תישמר בחשבון הזה ותעבוד בכל מכשיר.</p>
+                </div>
+                <p id="locked-signed-in-as" class="hidden mt-6 text-sm text-slate-700"></p>
+                <a id="checkout-link" href="#" target="_blank" rel="noopener" class="hidden mt-4 inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-all">לרכישת הקורס המלא</a>
+                <form id="access-form" class="hidden mt-6 text-right">
+                    <label for="access-code-input" class="block text-sm font-semibold text-slate-800 mb-1">קיבלתם קוד גישה אחרי הרכישה? הזינו אותו כאן (פעם אחת בלבד):</label>
+                    <div class="flex gap-2">
+                        <input id="access-code-input" type="text" maxlength="64" autocomplete="off" spellcheck="false" dir="ltr" class="flex-1 min-w-0 p-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none" placeholder="AI-XXXX-XXXX-XXXX">
+                        <button type="submit" id="access-submit" class="bg-slate-900 hover:bg-slate-700 disabled:opacity-50 text-white font-bold px-4 rounded-lg text-sm">פתיחה</button>
+                    </div>
+                    <p id="access-message" class="text-sm mt-2 hidden" role="status"></p>
+                </form>
+            </div>
+        </section>
+        <section id="coming-soon-area" class="lg:col-span-2 self-start bg-white border border-slate-200 rounded-xl p-8 md:p-12 text-center shadow-sm hidden">
+            <div class="max-w-md mx-auto">
+                <div class="text-4xl mb-3">🗓️</div>
+                <h2 class="text-xl font-bold text-slate-900" id="coming-soon-title"></h2>
+                <p class="text-sm text-slate-600 mt-2" id="coming-soon-description"></p>
+                <p class="text-sm font-semibold text-violet-800 bg-violet-50 border border-violet-200 rounded-lg p-3 mt-5" id="coming-soon-date"></p>
             </div>
         </section>
     </main>
@@ -109,24 +166,197 @@
     <script>
         let allModules = [];
         let currentActiveTab = 'theory';
+        let currentQuiz = null;
+
+        // --- התקדמות אישית: נשמרת ב-localStorage של הדפדפן (עלול להיות חסום במצב גלישה פרטית) ---
+        const PROGRESS_KEY = 'lms-progress-v1';
+        const NAME_KEY = 'lms-student-name';
+        let siteConfig = { paywallEnabled: false, freeModules: 0, checkoutUrl: null, price: null, googleClientId: null };
+        let currentUser = { email: null, hasFullAccess: true };
+
+        // הזיהוי מול השרת נעשה בעוגיית סשן מאובטחת (HttpOnly) שנשלחת אוטומטית
+        function apiFetch(url, options = {}) {
+            return fetch(url, { credentials: 'same-origin', ...options });
+        }
+
+        // --- התחברות עם Google ---
+        let googleScriptPromise = null;
+        function loadGoogleScript() {
+            if (!googleScriptPromise) {
+                googleScriptPromise = new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://accounts.google.com/gsi/client';
+                    script.async = true;
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Google script failed to load'));
+                    document.head.appendChild(script);
+                });
+            }
+            return googleScriptPromise;
+        }
+
+        async function renderGoogleButtons() {
+            if (!siteConfig.googleClientId || currentUser.email) return;
+            try {
+                await loadGoogleScript();
+                if (!window.googleInitialized) {
+                    google.accounts.id.initialize({ client_id: siteConfig.googleClientId, callback: onGoogleCredential });
+                    window.googleInitialized = true;
+                }
+                ['google-btn-sidebar', 'google-btn-locked'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && !el.hasChildNodes()) {
+                        google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', text: 'signin_with', locale: 'he' });
+                    }
+                });
+            } catch (e) {
+                console.error(e);
+                ['google-btn-sidebar', 'google-btn-locked'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = '<p class="text-xs text-red-700">לא הצלחנו לטעון את כפתור ההתחברות של Google. רעננו את הדף.</p>';
+                });
+            }
+        }
+
+        async function onGoogleCredential(response) {
+            try {
+                const res = await apiFetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                });
+                const data = await res.json();
+                if (!res.ok) { alert(data.error || 'ההתחברות נכשלה.'); return; }
+                const reopen = window.lockedModuleNumber;
+                await loadModules();
+                if (reopen) selectModule(reopen);
+            } catch (e) {
+                alert('שגיאה בתקשורת מול השרת. נסו שוב.');
+            }
+        }
+
+        function renderAccount() {
+            const box = document.getElementById('account-box');
+            if (!siteConfig.paywallEnabled) { box.classList.add('hidden'); return; }
+            box.classList.remove('hidden');
+            const signedIn = Boolean(currentUser.email);
+            document.getElementById('account-signed-out').classList.toggle('hidden', signedIn);
+            document.getElementById('account-signed-in').classList.toggle('hidden', !signedIn);
+            document.getElementById('account-email').innerText = currentUser.email || '';
+            renderGoogleButtons();
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await apiFetch('/api/auth/logout', { method: 'POST' });
+            try { google.accounts.id.disableAutoSelect(); } catch (e) { }
+            window.lockedModuleNumber = null;
+            document.getElementById('content-area').classList.add('hidden');
+            document.getElementById('locked-area').classList.add('hidden');
+            document.getElementById('placeholder-area').classList.remove('hidden');
+            await loadModules();
+        });
+
+        function loadProgress() {
+            try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch (e) { return {}; }
+        }
+        function saveProgress(progress) {
+            try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch (e) { /* אין אחסון - ממשיכים בלי */ }
+        }
+        function recordResult(num, score, passed) {
+            const progress = loadProgress();
+            const prev = progress[num] || { best: 0, passed: false };
+            progress[num] = { best: Math.max(prev.best, score), passed: prev.passed || passed };
+            saveProgress(progress);
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        }
+
+        function shuffle(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function renderProgress() {
+            const progress = loadProgress();
+            const released = allModules.filter(m => !m.comingSoon);
+            const done = released.filter(m => progress[m.moduleNumber] && progress[m.moduleNumber].passed).length;
+            const total = released.length;
+            const pct = total ? Math.round((done / total) * 100) : 0;
+            document.getElementById("progress-label").innerText = `${done}/${total} מודולים הושלמו`;
+            document.getElementById("progress-bar").style.width = pct + '%';
+            document.getElementById("progress-track").setAttribute('aria-valuenow', pct);
+
+            allModules.forEach(m => {
+                const badge = document.getElementById(`mod-status-${m.moduleNumber}`);
+                if (!badge) return;
+                const p = progress[m.moduleNumber];
+                if (p && p.passed) {
+                    badge.className = "text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2";
+                    badge.innerText = `✓ עבר (${p.best})`;
+                } else if (p) {
+                    badge.className = "text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2";
+                    badge.innerText = `נוסה (${p.best})`;
+                } else {
+                    badge.className = "hidden";
+                    badge.innerText = "";
+                }
+            });
+        }
 
         async function loadModules() {
+            const container = document.getElementById("modules-list");
             try {
-                const response = await fetch("/api/modules");
+                const [configRes, meRes, response] = await Promise.all([fetch("/api/config"), apiFetch("/api/me"), apiFetch("/api/modules")]);
+                if (configRes.ok) siteConfig = await configRes.json();
+                if (meRes.ok) currentUser = await meRes.json();
+                renderAccount();
+                if (!response.ok) throw new Error('HTTP ' + response.status);
                 allModules = await response.json();
-                const container = document.getElementById("modules-list");
-                container.innerHTML = "";
-                
-                allModules.forEach(m => {
-                    container.innerHTML += `
+                container.innerHTML = allModules.map(m => `
                         <button onclick="selectModule(${m.moduleNumber})" id="mod-btn-${m.moduleNumber}" class="w-full text-right bg-white p-3.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all block group">
-                            <span class="text-[11px] font-bold text-blue-600 block uppercase tracking-wider">יחידה ${m.moduleNumber}</span>
-                            <h3 class="font-bold text-slate-800 text-sm mt-0.5 group-hover:text-blue-600 transition-colors">${m.title}</h3>
-                            <p class="text-slate-500 text-xs mt-1 truncate font-normal">${m.description}</p>
+                            <span class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] font-bold text-blue-600 block uppercase tracking-wider">יחידה ${m.moduleNumber}</span>
+                                ${m.comingSoon
+                                    ? `<span class="text-[11px] font-bold text-violet-700 bg-violet-50 border border-violet-200 rounded-full px-2">${m.preview ? 'תצוגה מקדימה' : 'בקרוב'} · ${formatDate(m.availableFrom)}</span>`
+                                    : m.locked
+                                    ? `<span class="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2">🔒 בתשלום</span>`
+                                    : (siteConfig.paywallEnabled && m.free ? `<span class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2">חינם</span>` : '')}
+                                <span id="mod-status-${m.moduleNumber}" class="hidden"></span>
+                            </span>
+                            <h3 class="font-bold text-slate-800 text-sm mt-0.5 group-hover:text-blue-600 transition-colors">${escapeHtml(m.title)}</h3>
+                            <p class="text-slate-500 text-xs mt-1 truncate font-normal">${escapeHtml(m.description)}</p>
                         </button>
-                    `;
-                });
-            } catch (e) { console.error(e); }
+                    `).join('');
+                renderProgress();
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = `<p class="text-sm text-red-700">לא הצלחנו לטעון את תוכנית הלימודים. רעננו את הדף בעוד רגע (השרת החינמי עשוי להתעורר משינה).</p>`;
+            }
+        }
+
+        // "2026-10-18" -> "18.10.2026"
+        function formatDate(isoDate) {
+            const [y, mo, d] = String(isoDate || '').split('-');
+            return d && mo && y ? `${d}.${mo}.${y}` : '';
+        }
+
+        function showComingSoon(mod) {
+            window.lockedModuleNumber = null;
+            document.getElementById("content-area").classList.add("hidden");
+            document.getElementById("locked-area").classList.add("hidden");
+            document.getElementById("coming-soon-area").classList.remove("hidden");
+            document.getElementById("coming-soon-title").innerText = `יחידה ${mod.moduleNumber}: ${mod.title}`;
+            document.getElementById("coming-soon-description").innerText = mod.description;
+            document.getElementById("coming-soon-date").innerText = `המודול ייפתח ב-${formatDate(mod.availableFrom)}`;
+            if (window.innerWidth < 1024) {
+                document.getElementById("coming-soon-area").scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function switchTab(tabName) {
@@ -146,363 +376,151 @@
             document.getElementById(`mod-btn-${num}`).className = "w-full text-right bg-blue-50 p-3.5 rounded-xl border-2 border-blue-600 block shadow-sm font-semibold";
 
             const mod = allModules.find(m => m.moduleNumber === num);
-            
+
             document.getElementById("placeholder-area").classList.add("hidden");
+            document.getElementById("coming-soon-area").classList.add("hidden");
+
+            if (mod.comingSoon && !mod.preview) {
+                showComingSoon(mod);
+                return;
+            }
+            if (mod.locked) {
+                showLockedModule(mod);
+                return;
+            }
+            document.getElementById("locked-area").classList.add("hidden");
             document.getElementById("content-area").classList.remove("hidden");
             document.getElementById("result-box").classList.add("hidden");
             document.getElementById("quiz-form").reset();
+            try { document.getElementById("student-name").value = localStorage.getItem(NAME_KEY) || ""; } catch (e) { }
 
             // טעינת לשונית א - חומר עיוני מהשרת
             document.getElementById("lesson-view").innerHTML = mod.content;
             document.getElementById("current-module-id").value = num;
             document.getElementById("quiz-title").innerText = `📝 מבדק הסמכה: יחידה ${num}`;
 
-            // יצירת תוכן מורחב ללשונית ב' ו-ג' בצורה דינמית לפי המודול שנבחר
-            generateExtendedContent(num, mod.title);
+            // לשוניות ב' ו-ג' - מקרי בוחן ותרגול שטח (מגיעים מהשרת)
+            document.getElementById("cases-view").innerHTML = mod.cases;
+            document.getElementById("practice-view").innerHTML = mod.practice;
+
+            // מבחן ההסמכה נטען מהשרת (התשובות הנכונות לא נחשפות לדפדפן)
+            loadQuiz(num);
 
             // תרגול כתיבת פרומפט אישי - זמין החל ממודול 3
-            renderPromptPractice(num);
+            renderPromptPractice(mod.promptScenarios);
 
             // תמיד נחזיר ללשונית הראשונה בעת החלפת מודול
             switchTab('theory');
-        }
 
-        function generateExtendedContent(num, title) {
-            const casesContainer = document.getElementById("cases-view");
-            const practiceContainer = document.getElementById("practice-view");
-            const qContainer = document.getElementById("dynamic-questions");
-
-            // ברירת מחדל של מבחנים
-            let quizHtml = `
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <p class="font-semibold text-slate-800 mb-2">1. מהו הדבר המרכזי שלמדת ביחידה זו לגבי המודלים הרלוונטיים?</p>
-                    <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="efficiency" required class="ml-2 accent-blue-600"> א) שהם משפרים פרודוקטיביות וחוסכים זמן עבודה יקר באמצעות הנדסה נכונה.</label>
-                    <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="wrong" class="ml-2 accent-blue-600"> ב) שאין להם שום שימוש אמיתי בעולם התעסוקה והעסקים.</label>
-                </div>`;
-
-            if (num === 1) {
-                casesContainer.innerHTML = `
-                    <h3>🔥 מקרי בוחן ותבניות שימוש: יסודות ה-AI</h3>
-                    <h4>❌ פרומפט רע (אינטואיטיבי):</h4>
-                    <div class="bg-red-50 p-3 border-r-4 border-red-500 rounded text-sm mb-4">"תכתוב לי מייל של התפטרות מהעבודה בשביל המנהל שלי"</div>
-                    
-                    <h4>✅ פרומפט מהונדס (Master Level):</h4>
-                    <div class="bg-green-50 p-4 border-r-4 border-green-500 rounded text-sm mb-4">
-                        <b>תפקיד:</b> פעל כיועץ קריירה מומחה ומנסח מכתבים רשמיים.<br>
-                        <b>הקשר:</b> אני עוזב את תפקידי כמנהל פרויקטים בחברת הייטק לאחר 3 שנים לטובת אתגר חדש. היחסים עם המנהל מעולים ואני רוצה לשמור על קשר חיובי.<br>
-                        <b>משימה:</b> נסח מכתב התפטרות רשמי, מכבד ומקצועי.<br>
-                        <b>מגבלות:</b> טון מכבד אך קורקטי, אורך של עד 120 מילים, ללא דרמה.<br>
-                        <b>פורמט:</b> מבנה של מכתב רשמי הכולל כותרת, גוף המכתב וסיומת.
-                    </div>
-                    <h4>📋 תבנית פרומפט מוכנה להעתקה:</h4>
-                    <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-Act as a [ROLE].
-I need to achieve [OBJECTIVE] because [CONTEXT].
-Please make sure to follow these rules: [CONSTRAINTS].
-Format the final output as a [FORMAT].</pre>`;
-
-                practiceContainer.innerHTML = `
-                    <h3>🏋️ תרגיל שטח מעשי: פיצוח עקרון ההקשר</h3>
-                    <p><b>תרחיש השטח:</b> קיבלתם משימה מהמנכ"ל שלכם לכתוב פוסט לרשת לינקדאין שמסכם דוח רבעוני של החברה, אבל הוא נתן לכם רק משפט אחד: "הרווחנו השנה 2 מיליון שקל".</p>
-                    <p><b>המשימה שלכם:</b> בנו פרומפט המבוסס על "עקרונות הזהב" של שיעור 1 (בהירות, הקשר, והפרדה). השתמשו בתגיות <code>&lt;data&gt;&lt;/data&gt;</code> כדי להזין את הנתון היבש, והנחו את המודל לייצר פוסט עסקי המכוון למשקיעים פוטנציאליים.</p>`;
-
-                quizHtml = `
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <p class="font-semibold text-slate-800 mb-2">1. מהו מודל שפה גדול (LLM) ברמת ארכיטקטורה?</p>
-                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="a" required class="ml-2 accent-blue-600"> א) מערכת סטטיסטית מתקדמת לחיזוי המילה הבאה על בסיס משקולות והסתברות.</label>
-                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="b" class="ml-2 accent-blue-600"> ב) תוכנה בעלת מודעות ותודעה אנושית שמבינה רגשות.</label>
-                    </div>
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-3">
-                        <p class="font-semibold text-slate-800 mb-2">2. לשם מה נועדו Delimiters (מפרידים) בפרומפט?</p>
-                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q2" value="b" required class="ml-2 accent-blue-600"> א) כדי להפריד בין ההנחיות והפקודות שלכם לבין הטקסט הגולמי שהמודל צריך לעבד.</label>
-                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q2" value="a" class="ml-2 accent-blue-600"> ב) כדי לגרום למודל לענות מהר יותר בצ'אט.</label>
-                    </div>`;
-
-            } else if (num === 2) {
-                casesContainer.innerHTML = `
-                    <h3>🔥 מקרי בוחן ותבניות שימוש: אנטומיה של פרומפט</h3>
-                    <p>כאן נבין כיצד שילוב של <b>Constraints (מגבלות)</b> מציל פרויקטים מהצפת מידע או הזיות.</p>
-                    <h4>📋 תבנית פרומפט שלמה (טבלאות ואנליזה):</h4>
-                    <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-[Role]: Data Analyst Specialist.
-[Context]: Analyzing customer churn for a telecom app.
-[Objective]: Summarize key reasons customers leave.
-[Constraints]: Do not use bullet points. Use an HTML table only.
-[Output Format]: Table with columns: Reason, Impact, Action Item.</pre>`;
-
-                practiceContainer.innerHTML = `
-                    <h3>🏋️ תרגיל שטח מעשי: בניית פרומפט מבוסס רכיבים</h3>
-                    <p><b>המשימה:</b> עליכם לכתוב פרומפט מלא שיעזור למנהל שיווק לבנות תוכנית עבודה שבועית. עליכם להשתמש בצורה מפורשת ומסומנת בכל חמשת הרכיבים: Role, Context, Objective, Constraints, Output Format.</p>`;
-
-                quizHtml = `
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <p class="font-semibold text-slate-800 mb-2">1. איזה רכיב בפרומפט אחראי על קביעת החוקים שאסור למודל להפר (למשל: "אל תמציא נתונים")?</p>
-                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="constraints" required class="ml-2 accent-blue-600"> א) Constraints (מגבלות פלט)</label>
-                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="role" class="ml-2 accent-blue-600"> ב) Role (תפקיד ופרסונה)</label>
-                    </div>`;
-            } else if (num === 3) {
-                casesContainer.innerHTML = `
-                    <h3>🔥 מקרי בוחן ותבניות שימוש: טכניקות מקצועיות</h3>
-                    <h4>💡 דוגמה חיונית ל-Few-shot Prompting:</h4>
-                    <p>נניח שאנו רוצים שהמודל יסווג פניות תמיכה של לקוחות למחלקות קבועות מראש בצורה מדויקת:</p>
-                    <pre class="bg-slate-100 text-slate-800 p-4 rounded-lg text-xs font-mono text-right">
-פנייה: "החשבון שלי נחסם ואני לא מצליח להיכנס" -> מחלקה: אבטחה ותמיכה טכנית
-פנייה: "רציתי לדעת כמה עולה המנוי השנתי שלכם" -> מחלקה: מכירות וגבייה
-פנייה: "האם יש לכם הנחה לחיילים?" -> מחלקה: [כאן המודל ישלים אוטומטית]</pre>`;
-
-                practiceContainer.innerHTML = `
-                    <h3>🏋️ תרגיל שטח מעשי: שרשרת חשיבה (Chain of Thought)</h3>
-                    <p>תנו למודל משימה חשבונאית מורכבת הכוללת חישוב מע"מ, הנחות מצטברות ומס חברות. הנחו אותו לפתור את זה בשתי שיטות: פעם אחת ישירות, ופעם שנייה תוך שימוש מפורש בטכניקת Chain of Thought, והשוו את הדיוק הפיננסי.</p>`;
-
-                quizHtml = `
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <p class="font-semibold text-slate-800 mb-2">1. מהי טכניקת Few-shot Prompting?</p>
-                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="few_shot" required class="ml-2 accent-blue-600"> א) אספקת מספר דוגמאות של קלט ופלט רצוי בתוך גוף הפרומפט כדי להכתיב תבנית.</label>
-                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="zero" class="ml-2 accent-blue-600"> ב) שליחת פרומפט ריק לחלוטין ומתן חופש פעולה למודל.</label>
-                    </div>`;
-            } else {
-                // תוכן ייעודי (מקרי בוחן, תרגול ומבדק) לכל אחד ממודולים 4-10
-                const moduleContent = {
-                    4: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: ChatGPT ככלי אנליטי</h3>
-                                <h4>💡 בניית Custom GPT לניתוח חוזים משפטיים:</h4>
-                                <p>חברה רוצה שכל עובד יוכל להעלות חוזה ולקבל בדיקה מהירה מול רשימת סעיפים אסורים, מבלי לחשוף את מדיניות החברה מחדש בכל שיחה.</p>
-                                <h4>📋 תבנית הנחיית מערכת (System Instructions) ל-Custom GPT:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-You are a Contract Compliance Assistant for [Company Name].
-Always check uploaded contracts against this list of forbidden clauses: [list].
-If a forbidden clause is found, quote it and explain the risk in plain language.
-Never approve a contract yourself - always end with "Escalate to Legal: Yes/No".</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: ניתוח נתונים אוטומטי</h3>
-                                <p><b>המשימה:</b> העלו ל-ChatGPT קובץ Excel או CSV עם נתוני מכירות (אמיתי או מומצא), ובקשו ממנו לפעול כאנליסט נתונים בכיר: לזהות את שלושת המגמות המרכזיות, לחשב שיעור צמיחה חודשי, ולהפיק גרף המדגים את הממצא המשמעותי ביותר.</p>`,
-                        question: 'באיזו שפת תכנות משתמש ChatGPT מאחורי הקלעים כדי לנתח קבצי Excel/CSV ולהפיק גרפים?', correctValue: 'python', correctLabel: 'Python, בתוך סביבת קוד מבודדת (Advanced Data Analysis).', wrongLabel: 'Java, ישירות בדפדפן המשתמש.'
-                    },
-                    5: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: Claude לכתיבת קוד ולניתוח מסמכים</h3>
-                                <h4>💡 ניתוח חוזה ארוך של 80 עמודים בבת אחת:</h4>
-                                <p>הודות לחלון הקשר הענק, ניתן להדביק מסמך משפטי שלם ל-Claude ולבקש ממנו לאתר סתירות פנימיות בין סעיפים שונים, במקום לפצל אותו לחלקים.</p>
-                                <h4>📋 תבנית פרומפט לבניית Artifact חי:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-Act as a senior frontend developer.
-Build a single-file HTML/JS/Tailwind widget that [describe feature].
-Requirements: fully interactive, no external dependencies, mobile responsive.
-Open it as an Artifact so I can test it live.</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: בניית כלי אינטראקטיבי</h3>
-                                <p><b>המשימה:</b> בקשו מ-Claude לבנות עבורכם מחשבון טיפים (Tip Calculator) אינטראקטיבי ב-HTML ו-Tailwind CSS. עקבו אחרי חלונית ה-Artifacts שנפתחת, ולאחר מכן בקשו שינוי עיצובי (למשל שינוי צבע) וראו כיצד הוא מעדכן את הקוד החי מיידית.</p>`,
-                        question: 'איך נקראת התכונה ב-Claude שפותחת חלונית נפרדת עם אפליקציה או קוד הרצים בזמן אמת?', correctValue: 'artifacts', correctLabel: 'Artifacts', wrongLabel: 'Projects'
-                    },
-                    6: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: Gemini ו-Google Workspace</h3>
-                                <h4>💡 סיכום שרשור מיילים ארוך לפני ישיבה:</h4>
-                                <p>באמצעות <code>@Google Drive</code> ניתן לבקש מ-Gemini לסכם קובץ או שרשור ארוך לשלוש נקודות פעולה, בלי לפתוח אותו בעצמכם.</p>
-                                <h4>📋 תבנית פרומפט עם תוסף Workspace:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-@Google Drive summarize the file "[file name]".
-List only the 3 open action items and who owns each one.
-Format as a checklist.</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: בניית מדריך לימוד ב-NotebookLM</h3>
-                                <p><b>המשימה:</b> העלו ל-NotebookLM מאמר או פרק לימוד, בקשו ממנו לייצר "Study Guide" הכולל שאלות ותשובות, ולבסוף הפעילו את תכונת ה-Audio Overview כדי לשמוע כיצד שתי דמויות ה-AI מסכמות את החומר בקול.</p>`,
-                        question: 'מהו שם הכלי מבית גוגל, המבוסס על Gemini, שהופך למומחה פרטי למסמכים שהעליתם ומייצר גם פודקאסט קולי?', correctValue: 'notebooklm', correctLabel: 'NotebookLM', wrongLabel: 'Google Docs'
-                    },
-                    7: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: DeepSeek ומודלי חשיבה</h3>
-                                <h4>💡 דיבאגינג קוד שבור בעזרת Reasoning:</h4>
-                                <p>כאשר מודל רגיל "מנחש" תיקון שגוי לבאג, מודל Reasoning עובר על כל שורת קוד בתהליך המחשבה הגלוי שלו לפני שהוא מציע פתרון - וכך מפחית משמעותית טעויות.</p>
-                                <h4>📋 תבנית פרומפט לדיבאגינג עמוק:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-Here is a function that throws an error: [paste code].
-Think step by step through the execution before answering.
-Identify the exact line causing the failure and explain why, then provide the fixed code.</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: השוואת מודל רגיל מול מודל חשיבה</h3>
-                                <p><b>המשימה:</b> קחו חידת לוגיקה מתמטית לא טריוויאלית, הריצו אותה מול מודל רגיל (Zero-shot) ומול DeepSeek-R1 במצב Reasoning. עקבו אחרי תהליך ה-"Thought" של R1 ובדקו האם השיטתיות שלו הובילה לתשובה מדויקת יותר.</p>`,
-                        question: 'איך נקראים מודלי החשיבה של DeepSeek (כגון R1) המריצים תהליך "Thought" פנימי וארוך לפני מתן התשובה הסופית?', correctValue: 'reasoning', correctLabel: 'Reasoning Models (מודלי חשיבה)', wrongLabel: 'Chat Models רגילים'
-                    },
-                    8: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: בחירת המודל הנכון למשימה</h3>
-                                <h4>💡 תרחיש: פרויקט מעורב הדורש כמה סוגי עבודה</h4>
-                                <p>צוות מוצר צריך לנתח קובץ Excel של נתוני משתמשים, לכתוב קוד לדשבורד, ולסכם ספר מדיניות שלם. כל שלב מנותב למודל המתאים לו ביותר, במקום להשתמש במודל אחד לכל המשימות.</p>
-                                <h4>📋 תבנית לניתוב משימות בין מודלים:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-Step 1 (ChatGPT): Analyze users.csv and extract 3 key trends.
-Step 2 (Claude): Build the dashboard UI code based on Step 1's findings.
-Step 3 (Gemini): Summarize the 200-page policy document via Drive.</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: מיפוי משימה למודל אופטימלי</h3>
-                                <p><b>המשימה:</b> קחו פרויקט אמיתי מהעבודה שלכם ופרקו אותו לשלבים. עבור כל שלב, קבעו איזה מודל (Claude / ChatGPT / Gemini / DeepSeek) הכי מתאים לפי חוזקות הליבה שנלמדו, ונמקו את הבחירה.</p>`,
-                        question: 'לפי מטריצת ההשוואה, איזה מודל מומלץ בעיקר לבניית אפליקציות וכתיבת קוד מאפס?', correctValue: 'claude', correctLabel: 'Claude (Anthropic)', wrongLabel: 'DeepSeek-R1'
-                    },
-                    9: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: AI בסביבת עבודה אמיתית</h3>
-                                <h4>💡 בניית לוח תוכן חודשי לרשתות חברתיות:</h4>
-                                <p>מנהלת שיווק מזינה פרסונת קהל יעד ומגבלות מותג קשוחות, והמודל מפיק טבלה מלאה של רעיונות, כותרות וטקסטים מוכנים לפרסום עבור כל שבועות החודש.</p>
-                                <h4>📋 תבנית פרומפט לתוכנית תוכן:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-[Role]: Social media strategist for a [industry] brand.
-[Context]: Target audience is [persona]. Brand tone is [tone].
-[Objective]: Build a 4-week content calendar (Instagram + LinkedIn).
-[Output Format]: Table with columns: Week, Platform, Headline, Post Copy.</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: אוטומציה של משימה חוזרת</h3>
-                                <p><b>המשימה:</b> זהו משימה חוזרת ומייגעת מהעבודה או הלימודים שלכם (למשל: מענה למיילים דומים, סיווג פניות, כתיבת סיכומי ישיבות). בנו פרומפט מהונדס שיהפוך את המשימה הזו לתהליך של דקה אחת במקום עשרים.</p>`,
-                        question: 'מהי אחת התועלות המרכזיות של הטמעת AI ביישומים עסקיים בעולם האמיתי?', correctValue: 'efficiency', correctLabel: 'שיפור יעילות וחיסכון בזמן עבודה יקר.', wrongLabel: 'האטת קצב העבודה של הצוות.'
-                    },
-                    10: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: מערכות Multi-Agent</h3>
-                                <h4>💡 צוות AI לפיתוח פיצ'ר מקצה לקצה:</h4>
-                                <p>במקום פרומפט בודד, שלושה סוכנים עובדים ברצף: סוכן אחד כותב קוד, סוכן שני בודק אבטחה ולוגיקה, וסוכן שלישי מוודא התאמה לדרישות המוצר - ומחזיר משוב לתיקון אם צריך.</p>
-                                <h4>📋 תבנית להגדרת תפקידי סוכנים:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-Agent 1 (Developer): Write the code for [feature].
-Agent 2 (QA): Review Agent 1's code for bugs and security issues. List them.
-Agent 3 (Product Manager): Check if the fixed code meets the original requirements.
-If not, send it back to Agent 1 with specific feedback.</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: תכנון זרימת סוכנים</h3>
-                                <p><b>המשימה:</b> תכננו זרימת עבודה של 3 סוכני AI למשימה מהעבודה שלכם. הגדירו לכל סוכן: תפקיד, קלט שהוא מקבל, ופלט שהוא מעביר הלאה. הריצו את הזרימה ידנית מול מודל אחד (פותחים שיחה חדשה לכל "סוכן") ובדקו אם התוצאה הסופית טובה יותר משאלה בודדת.</p>`,
-                        question: 'מהו המונח לתיאור מערכת שבה מספר מודלי AI פועלים יחד בלולאה אוטונומית כדי להשיג מטרה מורכבת?', correctValue: 'agents', correctLabel: 'Multi-Agent Systems (סוכנים)', wrongLabel: 'Single Prompting חד-פעמי'
-                    },
-                    11: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: API ואינטגרציה</h3>
-                                <h4>💡 חיבור אפליקציה פנימית ל-API של מודל שפה:</h4>
-                                <p>חברה רוצה שכל בקשת תמיכה שנכנסת למערכת ה-CRM תסווג אוטומטית על ידי מודל שפה, בלי מגע יד אדם - זה נעשה על ידי קריאת API אוטומטית מהשרת של החברה לספק המודל.</p>
-                                <h4>📋 תבנית לבקשת API סטנדרטית:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-POST /v1/messages
-Headers: { "x-api-key": "[SECRET_KEY]", "content-type": "application/json" }
-Body: { "model": "[model-name]", "max_tokens": 200,
-        "messages": [{"role": "user", "content": "[הטקסט שלכם]"}] }</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: קריאה ל-API בפועל</h3>
-                                <p><b>המשימה:</b> פתחו את תיעוד ה-API (Documentation) של אחד ממודלי ה-AI שלמדתם עליהם, ונסו לזהות: מהי כתובת ה-Endpoint, אילו כותרות (Headers) חובה לשלוח, ואיך בדיוק המפתח הסודי (API Key) מועבר בבקשה.</p>`,
-                        question: 'מהו API?', correctValue: 'api', correctLabel: 'ממשק מוסכם וקבוע שמאפשר לשתי תוכנות שונות לתקשר ביניהן בצורה מובנית.', wrongLabel: 'שם נוסף לממשק המשתמש הגרפי (הצ\'אט) שרואים על המסך.'
-                    },
-                    12: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: MCP</h3>
-                                <h4>💡 סוכן AI שקורא בעצמו מגיליון נתונים חי:</h4>
-                                <p>במקום להעתיק ולהדביק נתונים ידנית, מחברים את המודל לשרת MCP שחושף לו גישה ל-Google Sheets - והוא יכול לקרוא ולעדכן את הגיליון ישירות, בעצמו, לפי הצורך.</p>
-                                <h4>📋 תבנית להגדרת הרשאות סוכן מול שרת MCP:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-Available MCP tools: [Google Sheets: read-only, Gmail: read-only].
-Task: Summarize this week's sales numbers from the sheet and draft (do not send) a summary email.
-Never use a tool that is not explicitly listed above.</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: מיפוי כלים לחיבור MCP</h3>
-                                <p><b>המשימה:</b> רשמו 3 כלים או מערכות מהעבודה היומיומית שלכם (יומן, מייל, CRM וכו') שהייתם רוצים שסוכן AI יוכל לגשת אליהם ישירות דרך MCP, ותארו איזו משימה קונקרטית זה היה חוסך לכם.</p>`,
-                        question: 'מה המונח לתיאור השרתים הקטנים שכל אחד מהם חושף למודל AI גישה ליכולת מסוימת (למשל: קריאה מ-GitHub)?', correctValue: 'mcp', correctLabel: 'שרתי MCP (MCP Servers)', wrongLabel: 'מודלי שפה משניים (Sub-models)'
-                    },
-                    13: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: Skills</h3>
-                                <h4>💡 בניית Skill קבועה לבדיקת חוזים:</h4>
-                                <p>במקום להסביר בכל שיחה מחדש אילו סעיפים אסורים בחוזה, בונים Skill קבועה בשם <code>contract-check</code> שכבר "יודעת" את כל הכללים - וקוראים לה בשם בכל פעם שצריך.</p>
-                                <h4>📋 תבנית להגדרת Skill חדשה:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-Skill name: contract-check
-Trigger: when the user uploads a contract or asks to review one.
-Instructions: check against this list of forbidden clauses: [list].
-Output: quote the risky clause and explain it in plain language.</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: תכנון Skill אישית</h3>
-                                <p><b>המשימה:</b> חשבו על משימה חוזרת מהעבודה או הלימודים שלכם, ותארו איך הייתם בונים ממנה Skill: מה יהיה שם ה-Skill, מתי היא תופעל, ואילו הוראות מדויקות היא תכיל.</p>`,
-                        question: 'במה Skill שונה מפרומפט חד-פעמי רגיל?', correctValue: 'skills', correctLabel: 'היא חבילת הוראות שמורה וניתנת לשימוש חוזר, שנטענת לפי שם או הקשר.', wrongLabel: 'אין הבדל אמיתי, זה רק שם שיווקי אחר לאותו הדבר.'
-                    },
-                    14: {
-                        cases: `<h3>🔥 מקרי בוחן ותבניות שימוש: פלאגינים והרחבות</h3>
-                                <h4>💡 הרחבת יכולות בלי לבנות הכל מאפס:</h4>
-                                <p>במקום לפתח בעצמכם יכולת חיפוש מלונות, מתקינים פלאגין קיים בכלי ה-AI שמספק את זה מוכן - בדיוק כמו שמתקינים תוסף לדפדפן.</p>
-                                <h4>📋 תבנית להשוואת פתרון: פלאגין קיים מול MCP עצמאי:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono direction-ltr text-left overflow-x-auto">
-Need: connect our internal CRM to the chat assistant.
-Option A (Plugin): use the vendor's existing marketplace plugin - fast, but locked to that vendor.
-Option B (MCP server): build a small MCP server for our CRM - more work, but works with any MCP client.</pre>`,
-                        practice: `<h3>🏋️ תרגיל שטח מעשי: סקירת פלאגין קיים</h3>
-                                <p><b>המשימה:</b> גשו לחנות הפלאגינים/הרחבות של כלי ה-AI שאתם משתמשים בו, מצאו פלאגין אחד רלוונטי לעבודה שלכם, ותארו איזו בעיה קונקרטית הוא פותר.</p>`,
-                        question: 'מה ההבדל המרכזי בין Plugin ל-MCP?', correctValue: 'plugins', correctLabel: 'Plugin הוא לרוב מנגנון קנייני של ספק ספציפי, בעוד MCP הוא פרוטוקול פתוח ולא תלוי ספק.', wrongLabel: 'אין ביניהם שום הבדל, שני המונחים מתארים בדיוק את אותו הדבר.'
-                    }
-                };
-
-                const m = moduleContent[num];
-                if (m) {
-                    casesContainer.innerHTML = m.cases;
-                    practiceContainer.innerHTML = m.practice;
-                    // ערך ה-radio התקין תואם בדיוק ל-MODULE_ANSWERS בשרת
-                    quizHtml = `
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <p class="font-semibold text-slate-800 mb-2">1. ${m.question}</p>
-                            <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="${m.correctValue}" required class="ml-2 accent-blue-600"> א) ${m.correctLabel}</label>
-                            <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="q1" value="wrong" class="ml-2 accent-blue-600"> ב) ${m.wrongLabel}</label>
-                        </div>`;
-                }
+            // במובייל הסילבוס נמצא מעל התוכן - גוללים אל השיעור שנבחר
+            if (window.innerWidth < 1024) {
+                document.getElementById("content-area").scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-
-            qContainer.innerHTML = quizHtml;
         }
 
-        // תרגילי כתיבת פרומפט אישי - זמין החל ממודול 3, שלושה תרחישים לבחירה לכל מודול
-        const promptScenarios = {
-            3: [
-                'בקשו ממודל לסווג פניות שירות לקוחות לקטגוריות קבועות מראש (שירות/מכירות/תלונה) באמצעות Few-shot Prompting.',
-                'בקשו ממודל לפתור בעיה חשבונאית מורכבת (מע"מ, הנחה מצטברת ומס חברות) באמצעות Chain of Thought.',
-                'בקשו ממודל לשכתב פסקה שיווקית משפה יבשה לשפה משכנעת, בשני שלבים נפרדים (Chain Prompting).'
-            ],
-            4: [
-                'בקשו מ-ChatGPT לנתח קובץ Excel של נתוני מכירות ולהפיק תובנות מרכזיות וגרף.',
-                'בנו הנחיית מערכת (System Instructions) ל-Custom GPT שבודק חוזים מול רשימת סעיפים אסורים.',
-                'בקשו מ-ChatGPT ליצור תמונה שיווקית למוצר חדש לפי בריף מדויק.'
-            ],
-            5: [
-                'בקשו מ-Claude לבנות אפליקציית מחשבון תקציב חודשי אינטראקטיבית ב-HTML ו-Tailwind.',
-                'תארו מסמך משפטי ארוך ובקשו מ-Claude לאתר סתירות פנימיות בין סעיפים.',
-                'בקשו מ-Claude לנתח קוד קיים ולאתר בו פרצת אבטחה אפשרית.'
-            ],
-            6: [
-                'בקשו מ-Gemini לסכם שרשור מיילים ארוך מ-Gmail לשלוש נקודות פעולה.',
-                'תארו מאמר שהעליתם ל-NotebookLM ובקשו מדריך לימוד הכולל שאלות ותשובות.',
-                'בקשו מ-Gemini לנתח קובץ Google Sheets ולהפיק ממנו תובנות עסקיות.'
-            ],
-            7: [
-                'בקשו מ-DeepSeek-R1 לפתור חידת לוגיקה מורכבת במצב Reasoning.',
-                'בקשו דיבאגינג עמוק לקוד שבור, עם הסבר שורה-שורה לפני מתן הפתרון.',
-                'בנו פרומפט שמשווה בין תשובת מודל רגיל לתשובת מודל Reasoning על אותה בעיה מתמטית.'
-            ],
-            8: [
-                'כתבו פרומפט המנתב משימה מורכבת (ניתוח נתונים, כתיבת קוד וסיכום מסמך) בין כמה מודלים שונים.',
-                'בחרו את המודל הנכון למשימת כתיבת קוד מאפס ונמקו את הבחירה בפרומפט עצמו.',
-                'בחרו את המודל הנכון למשימת סיכום ספר מדיניות ענק ונמקו את הבחירה בפרומפט עצמו.'
-            ],
-            9: [
-                'בנו לוח תוכן חודשי לרשתות חברתיות, עם פרסונת קהל יעד ומגבלות מותג קשוחות.',
-                'בנו פרומפט לאוטומציה של מענה למיילים חוזרים בשירות לקוחות.',
-                'בנו פרומפט לניתוח נתוני מכירות רבעוניים והפקת דוח מנהלים מובנה.'
-            ],
-            10: [
-                'תכננו זרימת עבודה של 3 סוכנים (מתכנת, QA ומנהל מוצר) לפיתוח פיצ\'ר חדש.',
-                'תכננו זרימת סוכנים לתהליך גיוס עובדים אוטומטי מקצה לקצה.',
-                'תכננו זרימת סוכנים ליצירת קמפיין שיווקי מקצה לקצה.'
-            ],
-            11: [
-                'כתבו פרומפט שמנחה סוכן AI לקרוא ל-API חיצוני של מזג אוויר ולסכם את התחזית להיום.',
-                'כתבו פרומפט שמסביר מה זה API Key ומתי אסור לחשוף אותו, כאילו אתם מסבירים למתכנת מתחיל.',
-                'כתבו פרומפט שמבקש ממודל לבנות תיעוד (Documentation) קצר לנקודת קצה (Endpoint) של API קיים.'
-            ],
-            12: [
-                'כתבו פרומפט שמגדיר לסוכן AI אילו שרתי MCP (כלים) מותר לו להשתמש בהם למשימה נתונה, ואילו אסור.',
-                'כתבו פרומפט שמבקש מהמודל להסביר להנהלה, בשפה עסקית ולא טכנית, למה כדאי לחבר את הצ\'אטבוט הארגוני ל-MCP.',
-                'כתבו פרומפט לתכנון שרת MCP חדש שיחשוף למודל גישה למערכת CRM פנימית.'
-            ],
-            13: [
-                'כתבו פרומפט שמגדיר Skill חדשה: שם, מתי היא מופעלת, ואילו הוראות היא כוללת, עבור משימה חוזרת מהעבודה שלכם.',
-                'כתבו פרומפט שמשווה בין שימוש בפרומפט חד פעמי לבין בניית Skill קבועה לאותה משימה, ומסביר מתי כל אחד מתאים יותר.',
-                'כתבו פרומפט שמבקש מהמודל לבדוק Skill קיימת ולהציע לה שיפור.'
-            ],
-            14: [
-                'כתבו פרומפט שבודק אילו פלאגינים/הרחבות קיימים לכלי AI מסוים ומסכם את שלושת השימושיים ביותר לצרכים שלכם.',
-                'כתבו פרומפט שמסביר את ההבדל בין Plugin קנייני (Proprietary) לבין כלי מבוסס MCP פתוח.',
-                'כתבו פרומפט שמתכנן פלאגין חדש (רעיון בלבד) שהיה פותר לכם בעיה יומיומית בעבודה.'
-            ]
-        };
+        async function loadQuiz(num) {
+            const qContainer = document.getElementById("dynamic-questions");
+            const submitBtn = document.getElementById("quiz-submit");
+            currentQuiz = null;
+            submitBtn.disabled = true;
+            qContainer.innerHTML = `<p class="text-sm text-slate-500">טוען את שאלות המבחן...</p>`;
+            try {
+                const response = await apiFetch(`/api/modules/${num}/quiz`);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const quiz = await response.json();
+                // אם המשתמש עבר למודול אחר בזמן הטעינה - לא לדרוס
+                if (String(num) !== document.getElementById("current-module-id").value) return;
+                currentQuiz = quiz;
+                const letters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
+                qContainer.innerHTML = `<p class="text-xs text-slate-500">${quiz.questions.length} שאלות · ציון מעבר: ${quiz.passingScore}</p>` +
+                    quiz.questions.map((q, i) => `
+                    <fieldset class="bg-slate-50 p-4 rounded-xl border border-slate-200" id="qbox-${q.id}">
+                        <legend class="sr-only">שאלה ${i + 1}</legend>
+                        <p class="font-semibold text-slate-800 mb-2">${i + 1}. ${escapeHtml(q.question)}</p>
+                        ${shuffle(q.options).map((o, j) => `
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="${q.id}" value="${escapeHtml(o.id)}" required class="ml-2 accent-blue-600"> ${letters[j]}) ${escapeHtml(o.text)}</label>`).join('')}
+                        <div class="q-feedback hidden mt-3 text-sm rounded-lg p-2"></div>
+                    </fieldset>`).join('');
+                submitBtn.disabled = false;
+            } catch (e) {
+                console.error(e);
+                qContainer.innerHTML = `<p class="text-sm text-red-700">לא הצלחנו לטעון את המבחן. נסו לבחור את המודול שוב.</p>`;
+            }
+        }
 
-        function renderPromptPractice(num) {
+        function showLockedModule(mod) {
+            window.lockedModuleNumber = mod.moduleNumber;
+            document.getElementById("content-area").classList.add("hidden");
+            document.getElementById("locked-area").classList.remove("hidden");
+            document.getElementById("locked-title").innerText = `יחידה ${mod.moduleNumber}: ${mod.title}`;
+            document.getElementById("locked-text").innerText =
+                `${siteConfig.freeModules} המודולים הראשונים פתוחים לכולם. המודול הזה ושאר מודולי ההמשך זמינים לרוכשי הקורס המלא` +
+                (siteConfig.price ? `, בתשלום חד-פעמי של ${siteConfig.price}.` : '.');
+            const signedIn = Boolean(currentUser.email);
+            document.getElementById("locked-signin").classList.toggle("hidden", signedIn);
+            const who = document.getElementById("locked-signed-in-as");
+            who.classList.toggle("hidden", !signedIn);
+            who.innerHTML = signedIn ? `מחוברים כ-<bdi dir="ltr">${escapeHtml(currentUser.email)}</bdi>. הרכישה תיפתח לחשבון הזה.` : '';
+            document.getElementById("access-form").classList.toggle("hidden", !signedIn);
+            const link = document.getElementById("checkout-link");
+            if (siteConfig.checkoutUrl && signedIn) {
+                link.href = siteConfig.checkoutUrl;
+                link.innerText = siteConfig.price ? `לרכישת הקורס המלא (${siteConfig.price})` : 'לרכישת הקורס המלא';
+                link.classList.remove("hidden");
+            } else {
+                link.classList.add("hidden");
+            }
+            document.getElementById("access-message").classList.add("hidden");
+            renderGoogleButtons();
+            if (window.innerWidth < 1024) {
+                document.getElementById("locked-area").scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        document.getElementById("access-form").addEventListener("submit", async e => {
+            e.preventDefault();
+            const input = document.getElementById("access-code-input");
+            const msg = document.getElementById("access-message");
+            const btn = document.getElementById("access-submit");
+            const code = input.value.trim();
+            if (!code) return;
+            btn.disabled = true;
+            msg.classList.remove("hidden");
+            msg.className = "text-sm mt-2 text-slate-600";
+            msg.innerText = "בודק...";
+            try {
+                const response = await apiFetch("/api/access/redeem", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code })
+                });
+                const res = await response.json();
+                if (!response.ok) {
+                    msg.className = "text-sm mt-2 text-red-700";
+                    msg.innerText = res.error || "אירעה שגיאה. נסו שוב.";
+                    return;
+                }
+                input.value = "";
+                msg.className = "text-sm mt-2 text-green-700";
+                msg.innerText = "✅ הקוד אושר ונשמר בחשבון שלכם! כל המודולים פתוחים.";
+                const reopen = window.lockedModuleNumber;
+                await loadModules();
+                if (reopen) selectModule(reopen);
+            } catch (err) {
+                msg.className = "text-sm mt-2 text-red-700";
+                msg.innerText = "שגיאה בתקשורת מול השרת. נסו שוב.";
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        function renderPromptPractice(scenarios) {
             const area = document.getElementById("prompt-practice-area");
-            const scenarios = promptScenarios[num];
 
             document.getElementById("student-prompt-input").value = "";
             document.getElementById("prompt-check-result").classList.add("hidden");
 
-            if (!scenarios) {
+            if (!scenarios || scenarios.length === 0) {
                 area.classList.add("hidden");
                 return;
             }
@@ -510,7 +528,7 @@ Option B (MCP server): build a small MCP server for our CRM - more work, but wor
 
             document.getElementById("prompt-scenarios").innerHTML = scenarios.map((s, i) => `
                 <label class="block p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm cursor-pointer hover:border-blue-400 transition-all">
-                    <input type="radio" name="prompt-scenario" value="${i}" class="ml-2 accent-blue-600"> ${s}
+                    <input type="radio" name="prompt-scenario" value="${i}" class="ml-2 accent-blue-600"> ${escapeHtml(s)}
                 </label>`).join('');
         }
 
@@ -567,39 +585,69 @@ Option B (MCP server): build a small MCP server for our CRM - more work, but wor
 
         document.getElementById("quiz-form").addEventListener("submit", async e => {
             e.preventDefault();
+            if (!currentQuiz) return;
             const resBox = document.getElementById("result-box");
-            const studentName = document.getElementById("student-name").value;
-            const moduleNumber = document.getElementById("current-module-id").value;
-            
-            let answers = {};
-            const q1Checked = document.querySelector('input[name="q1"]:checked');
-            const q2Checked = document.querySelector('input[name="q2"]:checked');
-            
-            if (q1Checked) answers.q1 = q1Checked.value;
-            if (q2Checked) answers.q2 = q2Checked.value;
+            const submitBtn = document.getElementById("quiz-submit");
+            const studentName = document.getElementById("student-name").value.trim();
+            const moduleNumber = Number(document.getElementById("current-module-id").value);
+            try { localStorage.setItem(NAME_KEY, studentName); } catch (err) { }
 
+            const answers = {};
+            currentQuiz.questions.forEach(q => {
+                const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+                if (checked) answers[q.id] = checked.value;
+            });
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "בודק...";
             try {
-                const response = await fetch("/api/submissions", {
+                const response = await apiFetch("/api/submissions", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ studentName, moduleNumber, answers })
                 });
-                
                 const res = await response.json();
                 resBox.classList.remove("hidden");
-                
-                if(res.score >= 70) {
-                    resBox.className = "mt-4 p-4 rounded-xl border bg-green-50 text-green-800 border-green-200";
-                } else {
-                    resBox.className = "mt-4 p-4 rounded-xl border bg-amber-50 text-amber-800 border-amber-200";
+
+                if (!response.ok) {
+                    resBox.className = "mt-4 p-4 rounded-xl border bg-red-50 text-red-800 border-red-200";
+                    resBox.innerText = res.error || "אירעה שגיאה בבדיקת המבחן.";
+                    return;
                 }
-                
+
+                recordResult(moduleNumber, res.score, res.passed);
+                renderProgress();
+
+                // משוב לכל שאלה, ליד השאלה עצמה
+                res.results.forEach(r => {
+                    const box = document.querySelector(`#qbox-${r.id} .q-feedback`);
+                    if (!box) return;
+                    box.classList.remove("hidden");
+                    box.className = r.isCorrect
+                        ? "q-feedback mt-3 text-sm rounded-lg p-2 bg-green-50 text-green-800"
+                        : "q-feedback mt-3 text-sm rounded-lg p-2 bg-red-50 text-red-800";
+                    box.innerHTML = r.isCorrect
+                        ? `✅ נכון. ${escapeHtml(r.explanation)}`
+                        : `❌ התשובה הנכונה: <b>${escapeHtml(r.correctAnswer)}</b><br>${escapeHtml(r.explanation)}`;
+                });
+
+                resBox.className = res.passed
+                    ? "mt-4 p-4 rounded-xl border bg-green-50 text-green-800 border-green-200"
+                    : "mt-4 p-4 rounded-xl border bg-amber-50 text-amber-800 border-amber-200";
                 resBox.innerHTML = `
                     <h3 class="font-bold text-lg border-b border-current pb-1 mb-2">📊 תוצאות המבדק: ${res.score}/100</h3>
-                    <p class="text-sm whitespace-pre-line">${res.feedback}</p>
-                    <p class="text-[11px] text-gray-500 mt-3 font-normal">הציון והפידבק הועברו אוטומטית ונשמרו בגיליון Google Sheets של הקורס.</p>
+                    <p class="text-sm">${res.correctCount} מתוך ${res.total} תשובות נכונות. ${res.passed ? '🎉 עברתם את המודול!' : `ציון המעבר הוא ${res.passingScore} - עברו על ההסברים ליד כל שאלה ונסו שוב.`}</p>
+                    <p class="text-[11px] text-gray-500 mt-3 font-normal">${res.recorded ? 'הציון נרשם בגיליון הקורס.' : 'הציון נשמר בדפדפן שלכם.'}</p>
                 `;
-            } catch (err) { alert("שגיאה בתקשורת מול השרת."); }
+                resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } catch (err) {
+                resBox.classList.remove("hidden");
+                resBox.className = "mt-4 p-4 rounded-xl border bg-red-50 text-red-800 border-red-200";
+                resBox.innerText = "שגיאה בתקשורת מול השרת. בדקו את החיבור ונסו שוב.";
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "הגשת המבחן לבדיקה";
+            }
         });
 
         loadModules();

@@ -6,11 +6,17 @@
   "author": "Tomer Meshulam",
   "scripts": {
     "start": "node server.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "test": "node --test",
+    "codes": "node scripts/generate-access-codes.js"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "google-auth-library": "^11.1.0",
     "mongoose": "^8.24.1"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
