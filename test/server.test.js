@@ -19,11 +19,13 @@ const env = {
 // "אסימון" מדומה: good:<email> נחשב אסימון Google תקין
 const fakeVerify = async token => token.startsWith('good:') ? token.slice(5) : null;
 const store = createMemoryPurchaseStore([{ email: 'paid@example.com' }]);
+// שעון קבוע אחרי תאריכי הפרסום של כל המודולים - בדיקות התזמון עצמן נמצאות בסוף הקובץ
+const afterAllReleases = () => new Date('2030-01-01T12:00:00Z');
 
 let server;
 let base;
 test.before(async () => {
-    const app = createApp({ env, verifyGoogleToken: fakeVerify, purchaseStore: store });
+    const app = createApp({ env, verifyGoogleToken: fakeVerify, purchaseStore: store, now: afterAllReleases });
     await new Promise(resolve => { server = app.listen(0, resolve); });
     base = `http://127.0.0.1:${server.address().port}`;
 });
@@ -55,7 +57,7 @@ test('config exposes paywall settings and the Google client id', async () => {
 
 test('anonymous visitors get modules 4+ locked and without content', async () => {
     const modules = await getModules();
-    assert.strictEqual(modules.length, 14);
+    assert.strictEqual(modules.length, 15);
     for (const m of modules) {
         if (m.moduleNumber <= 3) {
             assert.strictEqual(m.locked, false);
@@ -126,7 +128,7 @@ test('the page itself does not contain paid content', async () => {
 });
 
 test('with the paywall off, everything is open and login is unavailable', async () => {
-    const open = createApp({ env: {}, verifyGoogleToken: fakeVerify, purchaseStore: store });
+    const open = createApp({ env: {}, verifyGoogleToken: fakeVerify, purchaseStore: store, now: afterAllReleases });
     const srv = await new Promise(resolve => { const s = open.listen(0, () => resolve(s)); });
     try {
         const url = `http://127.0.0.1:${srv.address().port}`;
@@ -138,5 +140,56 @@ test('with the paywall off, everything is open and login is unavailable', async 
         assert.strictEqual(res.status, 404);
     } finally {
         srv.close();
+    }
+});
+
+test('an unreleased module is "coming soon" for everyone except the owner', async () => {
+    // 17.10.2026 בשעה 23:30 בישראל = לפני הפרסום; חצי שעה אחר כך (18.10 בישראל) = אחרי
+    let clock = new Date('2026-10-17T20:30:00Z');
+    const app = createApp({ env, verifyGoogleToken: fakeVerify, purchaseStore: store, now: () => clock });
+    const srv = await new Promise(resolve => { const s = app.listen(0, () => resolve(s)); });
+    const url = `http://127.0.0.1:${srv.address().port}`;
+    const get = (path, cookie) => fetch(`${url}${path}`, { headers: cookie ? { Cookie: cookie } : {} });
+    const loginHere = async email => (await fetch(`${url}/api/auth/google`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ credential: `good:${email}` })
+    })).headers.get('set-cookie').split(';')[0];
+    try {
+        const buyer = await loginHere('paid@example.com');
+        const m15 = (await (await get('/api/modules', buyer)).json()).find(m => m.moduleNumber === 15);
+        assert.strictEqual(m15.comingSoon, true);
+        assert.strictEqual(m15.availableFrom, '2026-10-18');
+        assert.strictEqual(m15.locked, true);
+        assert.strictEqual(m15.content, undefined);
+        assert.strictEqual((await get('/api/modules/15/quiz', buyer)).status, 403);
+        const submit = await fetch(`${url}/api/submissions`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', Cookie: buyer },
+            body: JSON.stringify({ studentName: 'בדיקה', moduleNumber: 15, answers: {} })
+        });
+        assert.strictEqual(submit.status, 403);
+
+        const owner = await loginHere('owner@example.com');
+        const preview = (await (await get('/api/modules', owner)).json()).find(m => m.moduleNumber === 15);
+        assert.strictEqual(preview.preview, true);
+        assert.strictEqual(preview.locked, false);
+        assert.ok(preview.content);
+        assert.strictEqual((await get('/api/modules/15/quiz', owner)).status, 200);
+
+        clock = new Date('2026-10-17T21:30:00Z');
+        const released = (await (await get('/api/modules', buyer)).json()).find(m => m.moduleNumber === 15);
+        assert.strictEqual(released.comingSoon, undefined);
+        assert.strictEqual(released.locked, false);
+        assert.strictEqual((await get('/api/modules/15/quiz', buyer)).status, 200);
+    } finally {
+        srv.close();
+    }
+});
+
+test('every module in the syllabus has lesson, cases, practice and a quiz', async () => {
+    const buyer = await login('paid@example.com');
+    const modules = await getModules(buyer);
+    for (const m of modules) {
+        assert.ok(m.content && m.cases && m.practice, `module ${m.moduleNumber} content`);
+        const quiz = await fetch(`${base}/api/modules/${m.moduleNumber}/quiz`, { headers: { Cookie: buyer } });
+        assert.strictEqual(quiz.status, 200, `module ${m.moduleNumber} quiz`);
     }
 });

@@ -149,6 +149,14 @@
                 </form>
             </div>
         </section>
+        <section id="coming-soon-area" class="lg:col-span-2 self-start bg-white border border-slate-200 rounded-xl p-8 md:p-12 text-center shadow-sm hidden">
+            <div class="max-w-md mx-auto">
+                <div class="text-4xl mb-3">🗓️</div>
+                <h2 class="text-xl font-bold text-slate-900" id="coming-soon-title"></h2>
+                <p class="text-sm text-slate-600 mt-2" id="coming-soon-description"></p>
+                <p class="text-sm font-semibold text-violet-800 bg-violet-50 border border-violet-200 rounded-lg p-3 mt-5" id="coming-soon-date"></p>
+            </div>
+        </section>
     </main>
 
     <footer class="mt-16 text-center text-xs text-slate-400 border-t pt-4 max-w-6xl mx-auto">
@@ -276,8 +284,9 @@
 
         function renderProgress() {
             const progress = loadProgress();
-            const done = allModules.filter(m => progress[m.moduleNumber] && progress[m.moduleNumber].passed).length;
-            const total = allModules.length;
+            const released = allModules.filter(m => !m.comingSoon);
+            const done = released.filter(m => progress[m.moduleNumber] && progress[m.moduleNumber].passed).length;
+            const total = released.length;
             const pct = total ? Math.round((done / total) * 100) : 0;
             document.getElementById("progress-label").innerText = `${done}/${total} מודולים הושלמו`;
             document.getElementById("progress-bar").style.width = pct + '%';
@@ -313,7 +322,9 @@
                         <button onclick="selectModule(${m.moduleNumber})" id="mod-btn-${m.moduleNumber}" class="w-full text-right bg-white p-3.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all block group">
                             <span class="flex items-center justify-between gap-2">
                                 <span class="text-[11px] font-bold text-blue-600 block uppercase tracking-wider">יחידה ${m.moduleNumber}</span>
-                                ${m.locked
+                                ${m.comingSoon
+                                    ? `<span class="text-[11px] font-bold text-violet-700 bg-violet-50 border border-violet-200 rounded-full px-2">${m.preview ? 'תצוגה מקדימה' : 'בקרוב'} · ${formatDate(m.availableFrom)}</span>`
+                                    : m.locked
                                     ? `<span class="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2">🔒 בתשלום</span>`
                                     : (siteConfig.paywallEnabled && m.free ? `<span class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2">חינם</span>` : '')}
                                 <span id="mod-status-${m.moduleNumber}" class="hidden"></span>
@@ -326,6 +337,25 @@
             } catch (e) {
                 console.error(e);
                 container.innerHTML = `<p class="text-sm text-red-700">לא הצלחנו לטעון את תוכנית הלימודים. רעננו את הדף בעוד רגע (השרת החינמי עשוי להתעורר משינה).</p>`;
+            }
+        }
+
+        // "2026-10-18" -> "18.10.2026"
+        function formatDate(isoDate) {
+            const [y, mo, d] = String(isoDate || '').split('-');
+            return d && mo && y ? `${d}.${mo}.${y}` : '';
+        }
+
+        function showComingSoon(mod) {
+            window.lockedModuleNumber = null;
+            document.getElementById("content-area").classList.add("hidden");
+            document.getElementById("locked-area").classList.add("hidden");
+            document.getElementById("coming-soon-area").classList.remove("hidden");
+            document.getElementById("coming-soon-title").innerText = `יחידה ${mod.moduleNumber}: ${mod.title}`;
+            document.getElementById("coming-soon-description").innerText = mod.description;
+            document.getElementById("coming-soon-date").innerText = `המודול ייפתח ב-${formatDate(mod.availableFrom)}`;
+            if (window.innerWidth < 1024) {
+                document.getElementById("coming-soon-area").scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
@@ -348,7 +378,12 @@
             const mod = allModules.find(m => m.moduleNumber === num);
 
             document.getElementById("placeholder-area").classList.add("hidden");
+            document.getElementById("coming-soon-area").classList.add("hidden");
 
+            if (mod.comingSoon && !mod.preview) {
+                showComingSoon(mod);
+                return;
+            }
             if (mod.locked) {
                 showLockedModule(mod);
                 return;

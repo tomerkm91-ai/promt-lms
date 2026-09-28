@@ -91,7 +91,7 @@ test('generated codes have the expected shape and are unique', () => {
 });
 
 test('every module has cases and practice content', () => {
-    for (let n = 1; n <= 14; n++) {
+    for (const n of Object.keys(MODULE_EXTRAS)) {
         assert.ok(MODULE_EXTRAS[n].cases.length > 0, `module ${n} cases`);
         assert.ok(MODULE_EXTRAS[n].practice.length > 0, `module ${n} practice`);
     }

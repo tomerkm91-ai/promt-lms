@@ -2,8 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert');
 const { QUIZZES, PASSING_SCORE, publicQuiz, gradeQuiz } = require('../quiz');
 
-test('every module 1-14 has a well-formed quiz', () => {
-    for (let n = 1; n <= 14; n++) {
+test('every module has a well-formed quiz', () => {
+    for (const n of Object.keys(QUIZZES)) {
         const questions = QUIZZES[n];
         assert.ok(Array.isArray(questions) && questions.length >= 3, `module ${n} needs at least 3 questions`);
         const ids = new Set();
