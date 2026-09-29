@@ -193,3 +193,21 @@ test('every module in the syllabus has lesson, cases, practice and a quiz', asyn
         assert.strictEqual(quiz.status, 200, `module ${m.moduleNumber} quiz`);
     }
 });
+
+test('privacy page is served, with the contact email only when it is valid', async () => {
+    const html = await (await fetch(`${base}/privacy`)).text();
+    assert.match(html, /מדיניות פרטיות/);
+    assert.ok(!html.includes('{{CONTACT}}'));
+    const withMail = createApp({ env: { CONTACT_EMAIL: 'owner@example.com' }, now: afterAllReleases });
+    const bad = createApp({ env: { CONTACT_EMAIL: '<script>x</script>@a.b' }, now: afterAllReleases });
+    for (const [app, expectMail] of [[withMail, true], [bad, false]]) {
+        const srv = await new Promise(resolve => { const s = app.listen(0, () => resolve(s)); });
+        try {
+            const page = await (await fetch(`http://127.0.0.1:${srv.address().port}/privacy`)).text();
+            assert.strictEqual(page.includes('mailto:owner@example.com'), expectMail);
+            assert.ok(!page.includes('<script>x'));
+        } finally {
+            srv.close();
+        }
+    }
+});

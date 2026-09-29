@@ -1,4 +1,5 @@
 require('dotenv').config();
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const { publicQuiz, gradeQuiz, PASSING_SCORE } = require('./quiz');
@@ -508,6 +509,15 @@ function createApp(options = {}) {
 
     app.get('/', (req, res) => {
         res.sendFile(path.join(__dirname, 'index.html'));
+    });
+
+    // מדיניות פרטיות - נדרשת במסך ההסכמה של Google ובכל מקרה כשאוספים אימיילים
+    const CONTACT_EMAIL = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(env.CONTACT_EMAIL || '') ? env.CONTACT_EMAIL : null;
+    const privacyPage = fs.readFileSync(path.join(__dirname, 'privacy.html'), 'utf8').replace('{{CONTACT}}', CONTACT_EMAIL
+        ? `לכל שאלה או בקשה בנושא פרטיות: <a href="mailto:${CONTACT_EMAIL}" dir="ltr">${CONTACT_EMAIL}</a>`
+        : 'לכל שאלה או בקשה בנושא פרטיות אפשר לפנות לבעל האתר דרך כתובת התמיכה שמופיעה במסך ההתחברות עם Google.');
+    app.get('/privacy', (req, res) => {
+        res.type('html').send(privacyPage);
     });
 
     app.get('/api/config', (req, res) => {
