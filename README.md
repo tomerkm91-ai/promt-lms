@@ -103,6 +103,8 @@
 | `ACCESS_CODES` | לא | קודי גישה חד-פעמיים, מופרדים בפסיקים. |
 | `OWNER_EMAILS` | לא | אימיילים עם גישה מלאה תמיד (למשל של בעל הקורס). |
 | `CONTACT_EMAIL` | לא | אימייל ליצירת קשר שמוצג בדף מדיניות הפרטיות (`/privacy`). |
+| `GROW_WEBHOOK_SECRET` | לא | סוד (16+ תווים) בכתובת שאליה Grow שולחת הודעות תשלום. בלעדיו הכתובת כבויה. |
+| `GROW_WEBHOOK_KEY` | לא | ה-`webhookKey` של Grow. אם מוגדר, הודעה בלי המפתח הזה נדחית. |
 
 ---
 
@@ -119,3 +121,14 @@
 1. ב-[Google Cloud Console](https://console.cloud.google.com/apis/credentials) יוצרים **OAuth client ID** מסוג **Web application**.
 2. ב-**Authorized JavaScript origins** מוסיפים את כתובת האתר (למשל `https://prompt-academy-lms.onrender.com`) ולפיתוח מקומי גם `http://localhost:5000` ו-`http://localhost`.
 3. מעתיקים את ה-Client ID למשתנה `GOOGLE_CLIENT_ID` ב-Render.
+
+## 💳 פתיחה אוטומטית אחרי תשלום (Grow)
+
+1. הקונה מתחבר עם Google, לוחץ "לרכישה" (`CHECKOUT_URL`) ומשלם בדף של Grow. במסך מוצג לו באיזה אימייל להשתמש.
+2. Grow שולחת הודעה (Webhook) לכתובת `https://<האתר>/api/webhooks/grow/<GROW_WEBHOOK_SECRET>`.
+3. השרת בודק שהתשלום אושר ושהסכום לא נמוך מ-`COURSE_PRICE`, ומוסיף את האימייל ללשונית `buyers` (בעמודה `code` נרשם `GROW-<מספר עסקה>`). הודעה כפולה לא יוצרת שורה נוספת.
+4. הקונה לוחץ "כבר שילמתי" והקורס נפתח.
+
+* את ה-Webhook מפעילים דרך התמיכה של Grow (לפי התיעוד שלהם), ונותנים להם את הכתובת מסעיף 2.
+* אם בדף התשלום יש שדה מותאם עם אימייל (למשל "אימייל של חשבון Google"), גם הוא מקבל גישה.
+* קודי הגישה (`ACCESS_CODES`) ממשיכים לעבוד כגיבוי למכירה ידנית.

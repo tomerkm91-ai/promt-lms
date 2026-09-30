@@ -139,6 +139,11 @@
                 </div>
                 <p id="locked-signed-in-as" class="hidden mt-6 text-sm text-slate-700"></p>
                 <a id="checkout-link" href="#" target="_blank" rel="noopener" class="hidden mt-4 inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-all">לרכישת הקורס המלא</a>
+                <div id="checkout-after" class="hidden mt-3 text-sm text-slate-700 bg-amber-50 border border-amber-200 rounded-lg p-3 text-right">
+                    <p id="checkout-email-note"></p>
+                    <button type="button" id="paid-check-btn" class="mt-2 w-full bg-white border border-slate-300 hover:bg-slate-50 font-semibold py-2 rounded-lg">כבר שילמתי - לבדוק אם הקורס נפתח</button>
+                    <p id="paid-check-msg" class="hidden mt-2 text-xs" role="status"></p>
+                </div>
                 <form id="access-form" class="hidden mt-6 text-right">
                     <label for="access-code-input" class="block text-sm font-semibold text-slate-800 mb-1">קיבלתם קוד גישה אחרי הרכישה? הזינו אותו כאן (פעם אחת בלבד):</label>
                     <div class="flex gap-2">
@@ -468,8 +473,13 @@
                 link.href = siteConfig.checkoutUrl;
                 link.innerText = siteConfig.price ? `לרכישת הקורס המלא (${siteConfig.price})` : 'לרכישת הקורס המלא';
                 link.classList.remove("hidden");
+                document.getElementById("checkout-email-note").innerHTML =
+                    `בדף התשלום השתמשו באותו אימייל: <bdi dir="ltr" class="font-semibold">${escapeHtml(currentUser.email)}</bdi>. כך הקורס ייפתח אוטומטית אחרי התשלום.`;
+                document.getElementById("checkout-after").classList.remove("hidden");
+                document.getElementById("paid-check-msg").classList.add("hidden");
             } else {
                 link.classList.add("hidden");
+                document.getElementById("checkout-after").classList.add("hidden");
             }
             document.getElementById("access-message").classList.add("hidden");
             renderGoogleButtons();
@@ -477,6 +487,26 @@
                 document.getElementById("locked-area").scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
+
+        // אחרי תשלום: השרת מקבל הודעה מחברת הסליקה, ולכן בודקים שוב את הגישה
+        document.getElementById("paid-check-btn").addEventListener("click", async () => {
+            const btn = document.getElementById("paid-check-btn");
+            const msg = document.getElementById("paid-check-msg");
+            const reopen = window.lockedModuleNumber;
+            btn.disabled = true;
+            try {
+                await loadModules();
+                const mod = allModules.find(m => m.moduleNumber === reopen);
+                if (mod && !mod.locked) {
+                    selectModule(reopen);
+                } else {
+                    msg.className = "mt-2 text-xs text-slate-700";
+                    msg.innerText = "התשלום עוד לא התקבל אצלנו. לפעמים זה לוקח דקה-שתיים - נסו שוב בעוד רגע. אם שילמתם עם אימייל אחר, פנו אלינו ונסדר את זה.";
+                }
+            } finally {
+                btn.disabled = false;
+            }
+        });
 
         document.getElementById("access-form").addEventListener("submit", async e => {
             e.preventDefault();
