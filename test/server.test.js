@@ -2,7 +2,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const createApp = require('../server');
-const { createMemoryPurchaseStore } = require('../purchases');
+const { createMemoryPurchaseStore, createMemoryWaitlistStore } = require('../purchases');
 
 const CODE = 'AI-TEST-TEST-TEST';
 const env = {
@@ -25,7 +25,7 @@ const afterAllReleases = () => new Date('2030-01-01T12:00:00Z');
 let server;
 let base;
 test.before(async () => {
-    const app = createApp({ env, verifyGoogleToken: fakeVerify, purchaseStore: store, now: afterAllReleases });
+    const app = createApp({ env, verifyGoogleToken: fakeVerify, purchaseStore: store, waitlistStore: createMemoryWaitlistStore(), now: afterAllReleases });
     await new Promise(resolve => { server = app.listen(0, resolve); });
     base = `http://127.0.0.1:${server.address().port}`;
 });
@@ -51,7 +51,7 @@ test('config exposes paywall settings and the Google client id', async () => {
     const res = await (await fetch(`${base}/api/config`)).json();
     assert.deepStrictEqual(res, {
         paywallEnabled: true, freeModules: 3, checkoutUrl: 'https://example.com/buy',
-        price: '35 ₪', googleClientId: 'client-id.apps.googleusercontent.com'
+        price: '35 ₪', googleClientId: 'client-id.apps.googleusercontent.com', promoUntil: null
     });
 });
 
@@ -86,7 +86,7 @@ test('signed-in non-buyer stays locked; buyer and owner are unlocked', async () 
     const stranger = await login('stranger@example.com');
     assert.ok((await getModules(stranger)).find(m => m.moduleNumber === 5).locked);
     const me = await (await fetch(`${base}/api/me`, { headers: { Cookie: stranger } })).json();
-    assert.deepStrictEqual(me, { email: 'stranger@example.com', hasFullAccess: false });
+    assert.deepStrictEqual(me, { email: 'stranger@example.com', hasFullAccess: false, onWaitlist: false });
 
     const buyer = await login('paid@example.com');
     assert.ok((await getModules(buyer)).every(m => !m.locked && m.content));
@@ -262,6 +262,71 @@ test('Grow webhook is disabled without a long enough secret', async () => {
     try {
         const res = await fetch(`http://127.0.0.1:${srv.address().port}/api/webhooks/grow/short`, { method: 'POST' });
         assert.strictEqual(res.status, 404);
+    } finally {
+        srv.close();
+    }
+});
+
+test('launch promo: 10 free modules until the end date, then back to 3 automatically', async () => {
+    let clock = new Date('2026-10-14T20:30:00Z'); // 14.10 23:30 בישראל - היום האחרון של המבצע
+    const app = createApp({
+        env: { ...env, PROMO_FREE_MODULES: '10', PROMO_UNTIL: '2026-10-14' },
+        verifyGoogleToken: fakeVerify, purchaseStore: store, waitlistStore: createMemoryWaitlistStore(), now: () => clock
+    });
+    const srv = await new Promise(resolve => { const s = app.listen(0, () => resolve(s)); });
+    const url = `http://127.0.0.1:${srv.address().port}`;
+    try {
+        let config = await (await fetch(`${url}/api/config`)).json();
+        assert.strictEqual(config.freeModules, 10);
+        assert.strictEqual(config.promoUntil, '2026-10-14');
+        let modules = await (await fetch(`${url}/api/modules`)).json();
+        assert.deepStrictEqual(modules.filter(m => !m.locked).map(m => m.moduleNumber), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        assert.strictEqual((await fetch(`${url}/api/modules/10/quiz`)).status, 200);
+        assert.strictEqual((await fetch(`${url}/api/modules/11/quiz`)).status, 403);
+
+        clock = new Date('2026-10-14T21:30:00Z'); // 15.10 00:30 בישראל - המבצע נגמר
+        config = await (await fetch(`${url}/api/config`)).json();
+        assert.strictEqual(config.freeModules, 3);
+        assert.strictEqual(config.promoUntil, null);
+        modules = await (await fetch(`${url}/api/modules`)).json();
+        assert.deepStrictEqual(modules.filter(m => !m.locked).map(m => m.moduleNumber), [1, 2, 3]);
+        assert.strictEqual((await fetch(`${url}/api/modules/10/quiz`)).status, 403);
+    } finally {
+        srv.close();
+    }
+});
+
+test('waitlist: requires sign-in, records phase and progress once per email', async () => {
+    let clock = new Date('2026-10-10T12:00:00Z');
+    const list = createMemoryWaitlistStore();
+    const app = createApp({
+        env: { ...env, PROMO_FREE_MODULES: '10', PROMO_UNTIL: '2026-10-14' },
+        verifyGoogleToken: fakeVerify, purchaseStore: store, waitlistStore: list, now: () => clock
+    });
+    const srv = await new Promise(resolve => { const s = app.listen(0, () => resolve(s)); });
+    const url = `http://127.0.0.1:${srv.address().port}`;
+    const join = (body, cookie) => fetch(`${url}/api/waitlist`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', ...(cookie ? { Cookie: cookie } : {}) }, body: JSON.stringify(body)
+    });
+    const loginHere = async email => (await fetch(`${url}/api/auth/google`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ credential: `good:${email}` })
+    })).headers.get('set-cookie').split(';')[0];
+    try {
+        assert.strictEqual((await join({ passed: 3 })).status, 401);
+        const early = await loginHere('Early@Example.com');
+        assert.deepStrictEqual(await (await join({ passed: 10 }, early)).json(), { ok: true });
+        assert.deepStrictEqual(await (await join({ passed: 10 }, early)).json(), { ok: true, already: true });
+        const me = await (await fetch(`${url}/api/me`, { headers: { Cookie: early } })).json();
+        assert.strictEqual(me.onWaitlist, true);
+
+        clock = new Date('2026-10-20T12:00:00Z');
+        const late = await loginHere('late@example.com');
+        assert.deepStrictEqual(await (await join({ passed: 'hack' }, late)).json(), { ok: true });
+
+        assert.deepStrictEqual(list.rows, [
+            { email: 'early@example.com', passed: 10, phase: 'במבצע' },
+            { email: 'late@example.com', passed: 0, phase: 'אחרי המבצע' }
+        ]);
     } finally {
         srv.close();
     }

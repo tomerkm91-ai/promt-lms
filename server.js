@@ -9,7 +9,7 @@ const {
     SESSION_COOKIE, SESSION_DAYS, createGoogleVerifier,
     createSessionToken, readSessionToken, parseCookies, sessionCookie
 } = require('./auth');
-const { createSheetPurchaseStore, normalizeEmail } = require('./purchases');
+const { createSheetPurchaseStore, createSheetWaitlistStore, normalizeEmail } = require('./purchases');
 const { parseGrowPayment, toNumber } = require('./grow');
 const crypto = require('crypto');
 
@@ -422,6 +422,8 @@ function createApp(options = {}) {
         || (env.GOOGLE_CLIENT_ID ? createGoogleVerifier(env.GOOGLE_CLIENT_ID) : null);
     const purchases = options.purchaseStore
         || (SHEETDB_URL ? createSheetPurchaseStore({ url: SHEETDB_URL }) : null);
+    const waitlist = options.waitlistStore
+        || (SHEETDB_URL ? createSheetWaitlistStore({ url: SHEETDB_URL }) : null);
     const SESSION_SECRET = env.SESSION_SECRET;
     // לבדיקות: אפשר "להזיז את השעון" כדי לבדוק תזמון פרסום
     const now = options.now || (() => new Date());
@@ -462,7 +464,7 @@ function createApp(options = {}) {
 
     // נעול = בתשלום, והמשתמש לא מחובר או לא ברשימת הרוכשים
     async function isLocked(moduleNumber, req) {
-        if (access.isFree(moduleNumber)) return false;
+        if (access.isFree(moduleNumber, israelDate(now()))) return false;
         return !(await hasFullAccess(currentUser(req)));
     }
 
@@ -472,7 +474,7 @@ function createApp(options = {}) {
             moduleNumber: mod.moduleNumber,
             title: mod.title,
             description: mod.description,
-            free: access.isFree(mod.moduleNumber)
+            free: access.isFree(mod.moduleNumber, israelDate(now()))
         };
         if (!isReleased(mod)) {
             base.comingSoon = true;
@@ -525,9 +527,11 @@ function createApp(options = {}) {
     });
 
     app.get('/api/config', (req, res) => {
+        const today = israelDate(now());
         res.json({
             paywallEnabled: access.enabled,
-            freeModules: access.freeModules,
+            freeModules: access.freeModulesOn(today),
+            promoUntil: access.promoActiveOn(today) ? access.promoUntil : null,
             checkoutUrl: access.checkoutUrl,
             price: access.price,
             googleClientId: access.enabled ? env.GOOGLE_CLIENT_ID : null
@@ -536,7 +540,33 @@ function createApp(options = {}) {
 
     app.get('/api/me', async (req, res) => {
         const email = currentUser(req);
-        res.json({ email, hasFullAccess: await hasFullAccess(email) });
+        let onWaitlist = false;
+        if (email && waitlist) {
+            try { onWaitlist = await waitlist.has(email); } catch (e) { /* הרשימה לא זמינה - לא קריטי */ }
+        }
+        res.json({ email, hasFullAccess: await hasFullAccess(email), onWaitlist });
+    });
+
+    // 📝 הצטרפות לרשימת ההמתנה לקורס המלא (מבחן ביקוש לפני פתיחת מכירות)
+    const isWaitlistRateLimited = createRateLimiter(10);
+    app.post('/api/waitlist', async (req, res) => {
+        if (!access.enabled || !waitlist) return res.status(404).json({ error: 'לא זמין כרגע' });
+        if (isWaitlistRateLimited(req.ip)) {
+            return res.status(429).json({ error: 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.' });
+        }
+        const email = currentUser(req);
+        if (!email) return res.status(401).json({ error: 'צריך להתחבר עם Google כדי להצטרף לרשימה.' });
+        const passedRaw = Number(req.body && req.body.passed);
+        const passed = Number.isInteger(passedRaw) && passedRaw >= 0 && passedRaw <= modulesDatabase.length ? passedRaw : 0;
+        try {
+            if (await waitlist.has(email)) return res.json({ ok: true, already: true });
+            const phase = access.promoActiveOn(israelDate(now())) ? 'במבצע' : 'אחרי המבצע';
+            await waitlist.add({ email, passed, phase });
+            res.json({ ok: true });
+        } catch (e) {
+            console.error('שגיאה בהרשמה לרשימת ההמתנה:', e.message);
+            res.status(503).json({ error: 'לא הצלחנו לשמור את ההרשמה כרגע. נסו שוב בעוד רגע.' });
+        }
     });
 
     app.get('/api/modules', async (req, res) => {
