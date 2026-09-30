@@ -10,6 +10,8 @@ const {
     createSessionToken, readSessionToken, parseCookies, sessionCookie
 } = require('./auth');
 const { createSheetPurchaseStore, normalizeEmail } = require('./purchases');
+const { parseGrowPayment, toNumber } = require('./grow');
+const crypto = require('crypto');
 
 // 14 מודולים מלאים - תוכן לימודי מורחב, תרגילי התנסות ומבחנים
 const modulesDatabase = [
@@ -377,7 +379,9 @@ function createApp(options = {}) {
     // Render (וכל שירות אירוח מאחורי פרוקסי) - כדי ש-req.ip יחזיר את כתובת הגולש האמיתית
     app.set('trust proxy', 1);
     app.disable('x-powered-by');
-    app.use(express.json({ limit: '10kb' }));
+    // הודעות תשלום מחברת הסליקה עשויות להיות גדולות יותר (פירוט מוצרים) ולהגיע גם כטופס
+    const smallJson = express.json({ limit: '10kb' });
+    app.use((req, res, next) => req.path.startsWith('/api/webhooks/') ? next() : smallJson(req, res, next));
 
     // כותרות אבטחה בסיסיות
     app.use((req, res, next) => {
@@ -568,6 +572,50 @@ function createApp(options = {}) {
     });
 
     // מימוש קוד גישה: הקוד נקשר לחשבון Google הראשון שמשתמש בו, ולא יעבוד לאף חשבון אחר
+    // 💳 הודעת תשלום מ-Grow: הקונה נוסף אוטומטית לרשימת הרוכשים.
+    // הכתובת כוללת סוד (GROW_WEBHOOK_SECRET) שרק Grow מקבלת, כדי שאף אחד לא יוכל לזייף "שולם".
+    const GROW_SECRET = env.GROW_WEBHOOK_SECRET && env.GROW_WEBHOOK_SECRET.length >= 16 ? env.GROW_WEBHOOK_SECRET : null;
+    const GROW_KEY = env.GROW_WEBHOOK_KEY || null;
+    const MIN_SUM = toNumber(env.COURSE_PRICE);
+    const sameSecret = (a, b) => {
+        const x = Buffer.from(String(a)), y = Buffer.from(String(b));
+        return x.length === y.length && crypto.timingSafeEqual(x, y);
+    };
+    app.post('/api/webhooks/grow/:secret',
+        express.json({ limit: '200kb' }),
+        express.urlencoded({ extended: true, limit: '200kb' }),
+        async (req, res) => {
+            if (!GROW_SECRET || !sameSecret(req.params.secret, GROW_SECRET)) return res.sendStatus(404);
+            if (!purchases) return res.status(503).json({ error: 'buyers store not configured' });
+            const payment = parseGrowPayment(req.body);
+            if (GROW_KEY && !(payment.webhookKey && sameSecret(payment.webhookKey, GROW_KEY))) {
+                console.warn('⚠️ הודעת Grow עם webhookKey לא תואם - נדחתה');
+                return res.sendStatus(403);
+            }
+            if (!payment.paid || payment.emails.length === 0) {
+                console.warn('ℹ️ הודעת Grow בלי תשלום מאושר או בלי אימייל - לא נוספה גישה');
+                return res.json({ ok: true, granted: false });
+            }
+            if (MIN_SUM !== null && payment.sum !== null && payment.sum < MIN_SUM) {
+                console.warn(`⚠️ הודעת Grow עם סכום ${payment.sum} נמוך ממחיר הקורס - לא נוספה גישה`);
+                return res.json({ ok: true, granted: false });
+            }
+            const code = payment.transactionId ? `GROW-${payment.transactionId}` : 'GROW';
+            try {
+                // אותה הודעה יכולה להגיע יותר מפעם אחת - לא מוסיפים כפילויות
+                if (payment.transactionId && await purchases.findByCode(code)) {
+                    return res.json({ ok: true, granted: true, duplicate: true });
+                }
+                for (const email of payment.emails.slice(0, 2)) {
+                    if (!(await purchases.hasAccess(email))) await purchases.add({ email, code });
+                }
+                res.json({ ok: true, granted: true });
+            } catch (e) {
+                console.error('שגיאה בשמירת רוכש מ-Grow:', e.message);
+                res.status(500).json({ error: 'store failed' });
+            }
+        });
+
     app.post('/api/access/redeem', async (req, res) => {
         if (!access.enabled) return res.status(404).json({ error: 'לא זמין כרגע' });
         if (isRedeemRateLimited(req.ip)) {

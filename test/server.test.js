@@ -211,3 +211,58 @@ test('privacy page is served, with the contact email only when it is valid', asy
         }
     }
 });
+
+test('Grow webhook: secret URL, grants access once, rejects low sums and bad keys', async () => {
+    const SECRET = 'grow-secret-1234567890';
+    const buyers = createMemoryPurchaseStore([]);
+    const app = createApp({
+        env: { ...env, GROW_WEBHOOK_SECRET: SECRET, GROW_WEBHOOK_KEY: 'KEY1' },
+        verifyGoogleToken: fakeVerify, purchaseStore: buyers, now: afterAllReleases
+    });
+    const srv = await new Promise(resolve => { const s = app.listen(0, () => resolve(s)); });
+    const url = `http://127.0.0.1:${srv.address().port}`;
+    const hook = (secret, body, type = 'application/json') => fetch(`${url}/api/webhooks/grow/${secret}`, {
+        method: 'POST', headers: { 'Content-Type': type },
+        body: type === 'application/json' ? JSON.stringify(body) : new URLSearchParams(body).toString()
+    });
+    const paid = { webhookKey: 'KEY1', data: { statusCode: '2', sum: '35', payerEmail: 'new.buyer@example.com', transactionId: 'T1' } };
+    try {
+        assert.strictEqual((await hook('wrong-secret-0000000000', paid)).status, 404);
+        assert.strictEqual((await hook(SECRET, { ...paid, webhookKey: 'nope' })).status, 403);
+
+        const low = await (await hook(SECRET, { ...paid, data: { ...paid.data, sum: '1', transactionId: 'T0' } })).json();
+        assert.strictEqual(low.granted, false);
+
+        const ok = await (await hook(SECRET, paid)).json();
+        assert.deepStrictEqual(ok, { ok: true, granted: true });
+        const again = await (await hook(SECRET, paid)).json();
+        assert.strictEqual(again.duplicate, true);
+        assert.strictEqual(buyers.rows.length, 1);
+        assert.deepStrictEqual(buyers.rows[0], { email: 'new.buyer@example.com', code: 'GROW-T1' });
+
+        // טופס (form-encoded) בפורמט הישן
+        const form = await (await hook(SECRET, { webhookKey: 'KEY1', transactionCode: 'L2', paymentSum: '35', payerEmail: 'form@example.com' }, 'application/x-www-form-urlencoded')).json();
+        assert.strictEqual(form.granted, true);
+
+        // הקונה מתחבר ורואה את הקורס פתוח
+        const login = await fetch(`${url}/api/auth/google`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ credential: 'good:new.buyer@example.com' })
+        });
+        const cookie = login.headers.get('set-cookie').split(';')[0];
+        const modules = await (await fetch(`${url}/api/modules`, { headers: { Cookie: cookie } })).json();
+        assert.ok(modules.every(m => !m.locked));
+    } finally {
+        srv.close();
+    }
+});
+
+test('Grow webhook is disabled without a long enough secret', async () => {
+    const app = createApp({ env: { ...env, GROW_WEBHOOK_SECRET: 'short' }, verifyGoogleToken: fakeVerify, purchaseStore: store, now: afterAllReleases });
+    const srv = await new Promise(resolve => { const s = app.listen(0, () => resolve(s)); });
+    try {
+        const res = await fetch(`http://127.0.0.1:${srv.address().port}/api/webhooks/grow/short`, { method: 'POST' });
+        assert.strictEqual(res.status, 404);
+    } finally {
+        srv.close();
+    }
+});
