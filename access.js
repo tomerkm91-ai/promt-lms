@@ -18,6 +18,12 @@ const parseEmails = raw => parseList(raw, s => s.toLowerCase());
 function createAccessPolicy(env = {}) {
     const parsedFree = Number.parseInt(env.FREE_MODULES, 10);
     const freeModules = Number.isFinite(parsedFree) && parsedFree >= 0 ? parsedFree : 3;
+    // מבצע השקה: עד PROMO_UNTIL (כולל, שעון ישראל) פתוחים PROMO_FREE_MODULES מודולים בחינם
+    const parsedPromo = Number.parseInt(env.PROMO_FREE_MODULES, 10);
+    const promoUntil = /^\d{4}-\d{2}-\d{2}$/.test(env.PROMO_UNTIL || '') ? env.PROMO_UNTIL : null;
+    const promoModules = promoUntil && Number.isFinite(parsedPromo) && parsedPromo > freeModules ? parsedPromo : null;
+    const promoActiveOn = date => Boolean(promoModules) && typeof date === 'string' && date <= promoUntil;
+    const freeModulesOn = date => promoActiveOn(date) ? promoModules : freeModules;
     const codes = parseCodes(env.ACCESS_CODES);
     const owners = parseEmails(env.OWNER_EMAILS);
 
@@ -33,9 +39,13 @@ function createAccessPolicy(env = {}) {
         requested,
         missing,
         freeModules,
+        promoUntil: promoModules ? promoUntil : null,
+        promoActiveOn,
+        freeModulesOn,
         checkoutUrl: env.CHECKOUT_URL || null,
         price: env.COURSE_PRICE || null,
-        isFree: moduleNumber => !enabled || moduleNumber <= freeModules,
+        // date (YYYY-MM-DD) - כדי שמבצע ההשקה יסתיים אוטומטית; בלי תאריך נבדק רק המצב הרגיל
+        isFree: (moduleNumber, date) => !enabled || moduleNumber <= freeModulesOn(date),
         isOwner: email => Boolean(email) && owners.has(String(email).toLowerCase()),
         isValidCode: code => typeof code === 'string' && codes.has(code.trim().toUpperCase())
     };

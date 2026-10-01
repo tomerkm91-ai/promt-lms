@@ -67,6 +67,50 @@ function createSheetPurchaseStore({ url, sheet = 'buyers', fetchImpl = fetch }) 
     };
 }
 
+// 📝 רשימת המתנה: לשונית "waitlist" בגיליון (עמודות email | date | passed | phase)
+function createSheetWaitlistStore({ url, sheet = 'waitlist', fetchImpl = fetch }) {
+    const base = url.replace(/\/+$/, '');
+    let emails = null;
+    let loadedAt = 0;
+    async function load() {
+        if (emails && Date.now() - loadedAt < CACHE_TTL_MS) return emails;
+        const response = await fetchImpl(`${base}?sheet=${encodeURIComponent(sheet)}`);
+        if (!response.ok) throw new Error(`SheetDB read failed: ${response.status}`);
+        const data = await response.json();
+        emails = new Set((Array.isArray(data) ? data : []).map(r => normalizeEmail(r.email)).filter(Boolean));
+        loadedAt = Date.now();
+        return emails;
+    }
+    return {
+        async has(email) { return (await load()).has(normalizeEmail(email)); },
+        async add({ email, passed, phase }) {
+            const response = await fetchImpl(`${base}?sheet=${encodeURIComponent(sheet)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    data: [{
+                        email: normalizeEmail(email),
+                        date: new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' }),
+                        passed,
+                        phase
+                    }]
+                })
+            });
+            if (!response.ok) throw new Error(`SheetDB write failed: ${response.status}`);
+            if (emails) emails.add(normalizeEmail(email));
+        }
+    };
+}
+
+function createMemoryWaitlistStore() {
+    const rows = [];
+    return {
+        async has(email) { return rows.some(r => r.email === normalizeEmail(email)); },
+        async add(row) { rows.push({ ...row, email: normalizeEmail(row.email) }); },
+        rows
+    };
+}
+
 // מאגר בזיכרון - לבדיקות אוטומטיות בלבד (לא שורד הפעלה מחדש של השרת)
 function createMemoryPurchaseStore(initial = []) {
     const rows = initial.map(r => ({ email: normalizeEmail(r.email), code: normalizeCode(r.code) }));
@@ -78,4 +122,8 @@ function createMemoryPurchaseStore(initial = []) {
     };
 }
 
-module.exports = { createSheetPurchaseStore, createMemoryPurchaseStore, normalizeEmail, normalizeCode };
+module.exports = {
+    createSheetPurchaseStore, createMemoryPurchaseStore,
+    createSheetWaitlistStore, createMemoryWaitlistStore,
+    normalizeEmail, normalizeCode
+};
