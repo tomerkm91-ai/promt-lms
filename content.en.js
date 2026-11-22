@@ -109,4 +109,15 @@ const quizzes = {
     ]
 };
 
+// Modules 2-15 live in i18n/en/, one file per group of modules, merged here
+for (const part of [
+    require('./i18n/en/modules-02-06'),
+    require('./i18n/en/modules-07-11'),
+    require('./i18n/en/modules-12-15')
+]) {
+    Object.assign(modules, part.modules);
+    Object.assign(extras, part.extras);
+    Object.assign(quizzes, part.quizzes);
+}
+
 module.exports = { modules, extras, quizzes };
