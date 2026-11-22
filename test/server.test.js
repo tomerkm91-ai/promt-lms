@@ -51,7 +51,7 @@ test('config exposes paywall settings and the Google client id', async () => {
     const res = await (await fetch(`${base}/api/config`)).json();
     assert.deepStrictEqual(res, {
         paywallEnabled: true, freeModules: 3, checkoutUrl: 'https://example.com/buy',
-        price: '35 ₪', googleClientId: 'client-id.apps.googleusercontent.com', promoUntil: null, tipUrl: null
+        price: '35 ₪', googleClientId: 'client-id.apps.googleusercontent.com', promoUntil: null, tipPhone: null
     });
 });
 
@@ -332,18 +332,19 @@ test('waitlist: requires sign-in, records phase and progress once per email', as
     }
 });
 
-test('TIP_URL: אתר פתוח מחזיר קישור https לפרגון, וקישור לא בטוח מתעלמים ממנו', async () => {
-    async function configWith(tipUrl) {
-        const app = createApp({ env: { TIP_URL: tipUrl }, now: afterAllReleases });
+test('TIP_PHONE: אתר פתוח מחזיר את מספר הטלפון לטיפ, וערך לא תקין מתעלמים ממנו', async () => {
+    async function configWith(tipPhone) {
+        const app = createApp({ env: { TIP_PHONE: tipPhone }, now: afterAllReleases });
         const srv = await new Promise(resolve => { const s = app.listen(0, () => resolve(s)); });
         try {
             return await (await fetch(`http://127.0.0.1:${srv.address().port}/api/config`)).json();
         } finally { srv.close(); }
     }
-    const ok = await configWith('https://payboxapp.example/pay/abc');
+    const ok = await configWith(' 050-1234567 ');
     assert.strictEqual(ok.paywallEnabled, false);
-    assert.strictEqual(ok.tipUrl, 'https://payboxapp.example/pay/abc');
-    assert.strictEqual((await configWith('javascript:alert(1)')).tipUrl, null);
-    assert.strictEqual((await configWith('http://insecure.example/pay')).tipUrl, null);
-    assert.strictEqual((await configWith(undefined)).tipUrl, null);
+    assert.strictEqual(ok.tipPhone, '050-1234567');
+    assert.strictEqual((await configWith('+972 50 123 4567')).tipPhone, '+972 50 123 4567');
+    assert.strictEqual((await configWith('<script>alert(1)</script>')).tipPhone, null);
+    assert.strictEqual((await configWith('12345')).tipPhone, null);
+    assert.strictEqual((await configWith(undefined)).tipPhone, null);
 });

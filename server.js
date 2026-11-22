@@ -526,12 +526,12 @@ function createApp(options = {}) {
         res.type('html').send(privacyPage);
     });
 
-    // ☕ קישור "לפרגן ליוצר" (למשל קישור תשלום של PayBox/Bit). רק https - כל ערך אחר מתעלמים ממנו.
-    const TIP_URL = (() => {
-        try {
-            const u = new URL(String(env.TIP_URL || '').trim());
-            return u.protocol === 'https:' ? u.href : null;
-        } catch (e) { return null; }
+    // ☕ מספר טלפון לטיפ ליוצר: מוצג בהודעת התודה ללומדים חדשים. נקרא רק ממשתני הסביבה (לא נשמר בקוד ב-GitHub).
+    // מקבלים רק ספרות, רווחים, מקפים ו-+ בהתחלה (9-15 ספרות) - כל ערך אחר מתעלמים ממנו.
+    const TIP_PHONE = (() => {
+        const phone = String(env.TIP_PHONE || '').trim();
+        const digits = phone.replace(/\D/g, '').length;
+        return /^\+?[\d\s-]+$/.test(phone) && digits >= 9 && digits <= 15 ? phone : null;
     })();
 
     app.get('/api/config', (req, res) => {
@@ -543,7 +543,7 @@ function createApp(options = {}) {
             checkoutUrl: access.checkoutUrl,
             price: access.price,
             googleClientId: access.enabled ? env.GOOGLE_CLIENT_ID : null,
-            tipUrl: TIP_URL
+            tipPhone: TIP_PHONE
         });
     });
 
