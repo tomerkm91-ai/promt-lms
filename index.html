@@ -174,7 +174,20 @@
     <footer class="mt-16 text-center text-xs text-slate-400 border-t pt-4 max-w-6xl mx-auto">
         © 2026 תומר משולם (Tomer Meshulam) - כל הזכויות שמורות | קורס הבנת כלי ה-AI | מערכת LMS מוסמכת רמת Master
         <div class="mt-2"><a href="/privacy" class="underline hover:text-slate-600">מדיניות פרטיות</a></div>
+        <div id="tip-footer" class="hidden mt-2"><a id="tip-footer-link" href="#" target="_blank" rel="noopener noreferrer" class="underline text-amber-700 hover:text-amber-800">☕ נהניתם מהקורס? אפשר לפרגן ליוצר</a></div>
     </footer>
+
+    <!-- ☕ הודעת תודה חד-פעמית ללומד חדש (מוצגת רק כש-TIP_URL מוגדר) -->
+    <div id="tip-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="tip-title">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center">
+            <div class="text-4xl mb-2">🙏</div>
+            <h2 id="tip-title" class="text-lg font-bold text-slate-900">כיף שהצטרפתם לקורס!</h2>
+            <p class="text-sm text-slate-700 mt-3 leading-relaxed">הקורס חינמי לגמרי ופתוח לכולם, וככה הוא יישאר.</p>
+            <p class="text-sm text-slate-700 mt-2 leading-relaxed">אם הוא עוזר לכם ובא לכם לפרגן, אפשר לשלוח ליוצר תשורה קטנה כתודה. בלי שום חובה 💛</p>
+            <a id="tip-modal-link" href="#" target="_blank" rel="noopener noreferrer" class="mt-5 block w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-lg">☕ לשלוח תודה ליוצר</a>
+            <button type="button" id="tip-modal-close" class="mt-2 w-full text-sm text-slate-500 hover:text-slate-700 py-2">אולי בפעם אחרת, ממשיכים ללמוד</button>
+        </div>
+    </div>
 
     <script>
         let allModules = [];
@@ -184,7 +197,38 @@
         // --- התקדמות אישית: נשמרת ב-localStorage של הדפדפן (עלול להיות חסום במצב גלישה פרטית) ---
         const PROGRESS_KEY = 'lms-progress-v1';
         const NAME_KEY = 'lms-student-name';
-        let siteConfig = { paywallEnabled: false, freeModules: 0, checkoutUrl: null, price: null, googleClientId: null };
+        const TIP_SEEN_KEY = 'lms-tip-seen-v1';
+        let siteConfig = { paywallEnabled: false, freeModules: 0, checkoutUrl: null, price: null, googleClientId: null, tipUrl: null };
+
+        // --- ☕ פרגון ליוצר: קישור קבוע בתחתית + הודעה חד-פעמית ללומד חדש ---
+        function tipEnabled() {
+            return Boolean(siteConfig.tipUrl) && !siteConfig.paywallEnabled;
+        }
+        function renderTip() {
+            const on = tipEnabled();
+            document.getElementById('tip-footer').classList.toggle('hidden', !on);
+            if (on) {
+                document.getElementById('tip-footer-link').href = siteConfig.tipUrl;
+                document.getElementById('tip-modal-link').href = siteConfig.tipUrl;
+            }
+        }
+        function closeTipModal() {
+            document.getElementById('tip-modal').classList.add('hidden');
+        }
+        // מוצג פעם אחת בלבד לכל דפדפן, אחרי המבחן הראשון שהוגש בהצלחה (אז הלומד כבר נרשם וטעם מהקורס)
+        function maybeShowTipModal() {
+            if (!tipEnabled()) return;
+            try {
+                if (localStorage.getItem(TIP_SEEN_KEY)) return;
+                localStorage.setItem(TIP_SEEN_KEY, new Date().toISOString());
+            } catch (e) { return; } // בלי אחסון אי אפשר לזכור שכבר הוצג - עדיף לא להציק בכל מבחן
+            document.getElementById('tip-modal').classList.remove('hidden');
+            document.getElementById('tip-modal-link').focus();
+        }
+        document.getElementById('tip-modal-close').addEventListener('click', closeTipModal);
+        document.getElementById('tip-modal-link').addEventListener('click', () => setTimeout(closeTipModal, 0));
+        document.getElementById('tip-modal').addEventListener('click', e => { if (e.target.id === 'tip-modal') closeTipModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTipModal(); });
         let currentUser = { email: null, hasFullAccess: true };
 
         // הזיהוי מול השרת נעשה בעוגיית סשן מאובטחת (HttpOnly) שנשלחת אוטומטית
@@ -343,6 +387,7 @@
                 if (configRes.ok) siteConfig = await configRes.json();
                 if (meRes.ok) currentUser = await meRes.json();
                 renderAccount();
+                renderTip();
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 allModules = await response.json();
                 container.innerHTML = allModules.map(m => `
@@ -736,6 +781,7 @@
                     <p class="text-[11px] text-gray-500 mt-3 font-normal">${res.recorded ? 'הציון נרשם בגיליון הקורס.' : 'הציון נשמר בדפדפן שלכם.'}</p>
                 `;
                 resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                setTimeout(maybeShowTipModal, 1500);
             } catch (err) {
                 resBox.classList.remove("hidden");
                 resBox.className = "mt-4 p-4 rounded-xl border bg-red-50 text-red-800 border-red-200";

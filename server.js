@@ -526,6 +526,14 @@ function createApp(options = {}) {
         res.type('html').send(privacyPage);
     });
 
+    // ☕ קישור "לפרגן ליוצר" (למשל קישור תשלום של PayBox/Bit). רק https - כל ערך אחר מתעלמים ממנו.
+    const TIP_URL = (() => {
+        try {
+            const u = new URL(String(env.TIP_URL || '').trim());
+            return u.protocol === 'https:' ? u.href : null;
+        } catch (e) { return null; }
+    })();
+
     app.get('/api/config', (req, res) => {
         const today = israelDate(now());
         res.json({
@@ -534,7 +542,8 @@ function createApp(options = {}) {
             promoUntil: access.promoActiveOn(today) ? access.promoUntil : null,
             checkoutUrl: access.checkoutUrl,
             price: access.price,
-            googleClientId: access.enabled ? env.GOOGLE_CLIENT_ID : null
+            googleClientId: access.enabled ? env.GOOGLE_CLIENT_ID : null,
+            tipUrl: TIP_URL
         });
     });
 

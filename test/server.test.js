@@ -51,7 +51,7 @@ test('config exposes paywall settings and the Google client id', async () => {
     const res = await (await fetch(`${base}/api/config`)).json();
     assert.deepStrictEqual(res, {
         paywallEnabled: true, freeModules: 3, checkoutUrl: 'https://example.com/buy',
-        price: '35 ₪', googleClientId: 'client-id.apps.googleusercontent.com', promoUntil: null
+        price: '35 ₪', googleClientId: 'client-id.apps.googleusercontent.com', promoUntil: null, tipUrl: null
     });
 });
 
@@ -330,4 +330,20 @@ test('waitlist: requires sign-in, records phase and progress once per email', as
     } finally {
         srv.close();
     }
+});
+
+test('TIP_URL: אתר פתוח מחזיר קישור https לפרגון, וקישור לא בטוח מתעלמים ממנו', async () => {
+    async function configWith(tipUrl) {
+        const app = createApp({ env: { TIP_URL: tipUrl }, now: afterAllReleases });
+        const srv = await new Promise(resolve => { const s = app.listen(0, () => resolve(s)); });
+        try {
+            return await (await fetch(`http://127.0.0.1:${srv.address().port}/api/config`)).json();
+        } finally { srv.close(); }
+    }
+    const ok = await configWith('https://payboxapp.example/pay/abc');
+    assert.strictEqual(ok.paywallEnabled, false);
+    assert.strictEqual(ok.tipUrl, 'https://payboxapp.example/pay/abc');
+    assert.strictEqual((await configWith('javascript:alert(1)')).tipUrl, null);
+    assert.strictEqual((await configWith('http://insecure.example/pay')).tipUrl, null);
+    assert.strictEqual((await configWith(undefined)).tipUrl, null);
 });
