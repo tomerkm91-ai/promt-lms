@@ -757,9 +757,36 @@ const QUIZZES = {
     ]
 };
 
-// גרסה בטוחה לשליחה לדפדפן: ללא תשובה נכונה וללא הסבר
-function publicQuiz(moduleNumber) {
+// 🌍 תרגום לאנגלית (content.en.js): מחליף רק טקסטים. המזהים והתשובה הנכונה תמיד מגיעים מהמבחן בעברית,
+// כך שטעות בתרגום לא יכולה לשנות איזו תשובה נבדקת כנכונה.
+const EN = require('./content.en');
+
+function hasEnglishQuiz(moduleNumber) {
+    return Array.isArray(EN.quizzes[moduleNumber]);
+}
+
+function localizedQuestions(moduleNumber, lang) {
     const questions = QUIZZES[moduleNumber];
+    if (!questions) return null;
+    const translated = lang === 'en' && hasEnglishQuiz(moduleNumber) ? EN.quizzes[moduleNumber] : null;
+    if (!translated) return questions;
+    return questions.map(q => {
+        const t = translated.find(x => x.id === q.id) || {};
+        return {
+            ...q,
+            question: t.question || q.question,
+            explanation: t.explanation || q.explanation,
+            options: q.options.map(o => {
+                const to = (t.options || []).find(x => x.id === o.id);
+                return { id: o.id, text: (to && to.text) || o.text };
+            })
+        };
+    });
+}
+
+// גרסה בטוחה לשליחה לדפדפן: ללא תשובה נכונה וללא הסבר
+function publicQuiz(moduleNumber, lang = 'he') {
+    const questions = localizedQuestions(moduleNumber, lang);
     if (!questions) return null;
     return questions.map(q => ({
         id: q.id,
@@ -769,8 +796,8 @@ function publicQuiz(moduleNumber) {
 }
 
 // בדיקת מבחן: מחזירה ציון 0-100, האם עבר, ופירוט לכל שאלה
-function gradeQuiz(moduleNumber, answers) {
-    const questions = QUIZZES[moduleNumber];
+function gradeQuiz(moduleNumber, answers, lang = 'he') {
+    const questions = localizedQuestions(moduleNumber, lang);
     if (!questions) return null;
     const safeAnswers = answers && typeof answers === 'object' ? answers : {};
 
@@ -792,4 +819,4 @@ function gradeQuiz(moduleNumber, answers) {
     return { score, passed: score >= PASSING_SCORE, correctCount, total: questions.length, results };
 }
 
-module.exports = { QUIZZES, PASSING_SCORE, publicQuiz, gradeQuiz };
+module.exports = { QUIZZES, PASSING_SCORE, publicQuiz, gradeQuiz, hasEnglishQuiz };

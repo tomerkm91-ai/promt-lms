@@ -2,7 +2,8 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const { publicQuiz, gradeQuiz, PASSING_SCORE } = require('./quiz');
+const { publicQuiz, gradeQuiz, PASSING_SCORE, hasEnglishQuiz } = require('./quiz');
+const EN = require('./content.en');
 const { MODULE_EXTRAS } = require('./moduleExtras');
 const { createAccessPolicy } = require('./access');
 const {
@@ -368,9 +369,43 @@ function israelDate(date) {
     }).format(date);
 }
 
-const COMING_SOON_ERROR = { error: 'המודול הזה עוד לא פורסם. הוא ייפתח בקרוב.', comingSoon: true };
+// 🌍 שפת הממשק: הדפדפן שולח lang=en בכל בקשה כשנבחרה אנגלית. כל ערך אחר = עברית.
+function reqLang(req) {
+    const raw = (req.query && req.query.lang) || (req.body && req.body.lang);
+    return raw === 'en' ? 'en' : 'he';
+}
 
-const LOCKED_ERROR = { error: 'המודול הזה זמין לרוכשי הקורס המלא. התחברו עם Google ורכשו גישה כדי לפתוח אותו.', locked: true };
+// הודעות שגיאה שמוצגות למשתמש, בשתי השפות
+const MESSAGES = {
+    comingSoon: { he: 'המודול הזה עוד לא פורסם. הוא ייפתח בקרוב.', en: 'This module has not been published yet. It will open soon.' },
+    locked: { he: 'המודול הזה זמין לרוכשי הקורס המלא. התחברו עם Google ורכשו גישה כדי לפתוח אותו.', en: 'This module is part of the full course. Sign in with Google and get access to open it.' },
+    unavailable: { he: 'לא זמין כרגע', en: 'Not available right now' },
+    tooManyAttempts: { he: 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.', en: 'Too many attempts. Please try again in a few minutes.' },
+    tooManySubmissions: { he: 'יותר מדי הגשות בזמן קצר. נסו שוב בעוד כמה דקות.', en: 'Too many submissions in a short time. Please try again in a few minutes.' },
+    waitlistSignIn: { he: 'צריך להתחבר עם Google כדי להצטרף לרשימה.', en: 'Please sign in with Google to join the list.' },
+    waitlistFailed: { he: 'לא הצלחנו לשמור את ההרשמה כרגע. נסו שוב בעוד רגע.', en: "We couldn't save your sign-up right now. Please try again in a moment." },
+    loginUnavailable: { he: 'התחברות לא זמינה כרגע', en: 'Sign-in is not available right now' },
+    loginFailed: { he: 'ההתחברות עם Google נכשלה. נסו שוב.', en: 'Signing in with Google failed. Please try again.' },
+    redeemSignIn: { he: 'צריך להתחבר עם Google לפני הזנת הקוד.', en: 'Please sign in with Google before entering the code.' },
+    badCode: { he: 'הקוד לא תקין. בדקו שהעתקתם אותו במלואו.', en: 'This code is not valid. Check that you copied all of it.' },
+    codeUsed: { he: 'הקוד הזה כבר מומש בחשבון אחר.', en: 'This code has already been used on another account.' },
+    codeSaveFailed: { he: 'לא הצלחנו לשמור את הקוד כרגע. נסו שוב בעוד רגע.', en: "We couldn't save the code right now. Please try again in a moment." },
+    moduleNotFound: { he: 'מודול לא נמצא', en: 'Module not found' },
+    nameRequired: { he: 'נא להזין שם מלא (עד 80 תווים)', en: 'Please enter your full name (up to 80 characters)' },
+    unknownModule: { he: 'מודול לא מזוהה במערכת', en: 'Unknown module' },
+    graded: { he: 'המבחן נבדק!', en: 'Your quiz has been graded!' },
+    serverError: { he: 'שגיאה בשרת', en: 'Server error' }
+};
+function msg(req, key) {
+    return MESSAGES[key][reqLang(req)];
+}
+const comingSoonError = req => ({ error: msg(req, 'comingSoon'), comingSoon: true });
+const lockedError = req => ({ error: msg(req, 'locked'), locked: true });
+
+// מודול נחשב מתורגם רק כשיש לו באנגלית את כל החלקים: שיעור, לשוניות נוספות ומבחן
+function isTranslated(moduleNumber) {
+    return Boolean(EN.modules[moduleNumber] && EN.extras[moduleNumber] && hasEnglishQuiz(moduleNumber));
+}
 
 // בונה את השרת. options מאפשר לבדיקות להחליף את אימות Google ואת רשימת הרוכשים.
 function createApp(options = {}) {
@@ -469,11 +504,15 @@ function createApp(options = {}) {
     }
 
     // מה שהדפדפן מקבל על מודול: מודול נעול נשלח בלי התוכן עצמו
-    function publicModule(mod, unlocked, visible) {
+    function publicModule(mod, unlocked, visible, lang = 'he') {
+        // באנגלית: מודול מתורגם מוצג באנגלית; מודול שעוד לא תורגם מוצג במקור העברי (contentLang: 'he')
+        const english = lang === 'en' && isTranslated(mod.moduleNumber);
+        const en = english ? EN.modules[mod.moduleNumber] : null;
         const base = {
             moduleNumber: mod.moduleNumber,
-            title: mod.title,
-            description: mod.description,
+            title: en ? en.title : mod.title,
+            description: en ? en.description : mod.description,
+            contentLang: english ? 'en' : 'he',
             free: access.isFree(mod.moduleNumber, israelDate(now()))
         };
         if (!isReleased(mod)) {
@@ -483,11 +522,11 @@ function createApp(options = {}) {
             base.preview = true; // בעל הקורס רואה את המודול לפני הפרסום
         }
         if (!base.free && !unlocked) return { ...base, locked: true };
-        const extras = MODULE_EXTRAS[mod.moduleNumber] || {};
+        const extras = (english ? EN.extras[mod.moduleNumber] : MODULE_EXTRAS[mod.moduleNumber]) || {};
         return {
             ...base,
             locked: false,
-            content: mod.content,
+            content: en ? en.content : mod.content,
             cases: extras.cases || '',
             practice: extras.practice || '',
             promptScenarios: extras.promptScenarios || []
@@ -543,7 +582,9 @@ function createApp(options = {}) {
             checkoutUrl: access.checkoutUrl,
             price: access.price,
             googleClientId: access.enabled ? env.GOOGLE_CLIENT_ID : null,
-            tipPhone: TIP_PHONE
+            tipPhone: TIP_PHONE,
+            // האנגלית מוצעת לכולם (מתג שפה) רק כשכל המודולים תורגמו. עד אז אפשר לצפות בה דרך /?lang=en
+            languages: modulesDatabase.every(m => isTranslated(m.moduleNumber)) ? ['he', 'en'] : ['he']
         });
     });
 
@@ -559,12 +600,12 @@ function createApp(options = {}) {
     // 📝 הצטרפות לרשימת ההמתנה לקורס המלא (מבחן ביקוש לפני פתיחת מכירות)
     const isWaitlistRateLimited = createRateLimiter(10);
     app.post('/api/waitlist', async (req, res) => {
-        if (!access.enabled || !waitlist) return res.status(404).json({ error: 'לא זמין כרגע' });
+        if (!access.enabled || !waitlist) return res.status(404).json({ error: msg(req, 'unavailable') });
         if (isWaitlistRateLimited(req.ip)) {
-            return res.status(429).json({ error: 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.' });
+            return res.status(429).json({ error: msg(req, 'tooManyAttempts') });
         }
         const email = currentUser(req);
-        if (!email) return res.status(401).json({ error: 'צריך להתחבר עם Google כדי להצטרף לרשימה.' });
+        if (!email) return res.status(401).json({ error: msg(req, 'waitlistSignIn') });
         const passedRaw = Number(req.body && req.body.passed);
         const passed = Number.isInteger(passedRaw) && passedRaw >= 0 && passedRaw <= modulesDatabase.length ? passedRaw : 0;
         try {
@@ -574,7 +615,7 @@ function createApp(options = {}) {
             res.json({ ok: true });
         } catch (e) {
             console.error('שגיאה בהרשמה לרשימת ההמתנה:', e.message);
-            res.status(503).json({ error: 'לא הצלחנו לשמור את ההרשמה כרגע. נסו שוב בעוד רגע.' });
+            res.status(503).json({ error: msg(req, 'waitlistFailed') });
         }
     });
 
@@ -582,21 +623,21 @@ function createApp(options = {}) {
         const email = currentUser(req);
         const unlocked = await hasFullAccess(email);
         const owner = access.isOwner(email);
-        res.json(modulesDatabase.map(mod => publicModule(mod, unlocked, owner)));
+        res.json(modulesDatabase.map(mod => publicModule(mod, unlocked, owner, reqLang(req))));
     });
 
     // התחברות: הדפדפן שולח את האסימון שקיבל מ-Google, והשרת מאמת אותו בעצמו
     app.post('/api/auth/google', async (req, res) => {
         if (!access.enabled || !verifyGoogleToken) {
-            return res.status(404).json({ error: 'התחברות לא זמינה כרגע' });
+            return res.status(404).json({ error: msg(req, 'loginUnavailable') });
         }
         if (isAuthRateLimited(req.ip)) {
-            return res.status(429).json({ error: 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.' });
+            return res.status(429).json({ error: msg(req, 'tooManyAttempts') });
         }
         const credential = req.body && typeof req.body.credential === 'string' ? req.body.credential : '';
         const email = credential ? await verifyGoogleToken(credential) : null;
         if (!email) {
-            return res.status(401).json({ error: 'ההתחברות עם Google נכשלה. נסו שוב.' });
+            return res.status(401).json({ error: msg(req, 'loginFailed') });
         }
         res.setHeader('Set-Cookie', sessionCookie(createSessionToken(email, SESSION_SECRET), {
             secure: req.secure,
@@ -656,39 +697,40 @@ function createApp(options = {}) {
         });
 
     app.post('/api/access/redeem', async (req, res) => {
-        if (!access.enabled) return res.status(404).json({ error: 'לא זמין כרגע' });
+        if (!access.enabled) return res.status(404).json({ error: msg(req, 'unavailable') });
         if (isRedeemRateLimited(req.ip)) {
-            return res.status(429).json({ error: 'יותר מדי ניסיונות. נסו שוב בעוד כמה דקות.' });
+            return res.status(429).json({ error: msg(req, 'tooManyAttempts') });
         }
         const email = currentUser(req);
-        if (!email) return res.status(401).json({ error: 'צריך להתחבר עם Google לפני הזנת הקוד.' });
+        if (!email) return res.status(401).json({ error: msg(req, 'redeemSignIn') });
 
         const code = req.body && typeof req.body.code === 'string' ? req.body.code.trim().toUpperCase() : '';
         if (!access.isValidCode(code)) {
-            return res.status(400).json({ error: 'הקוד לא תקין. בדקו שהעתקתם אותו במלואו.' });
+            return res.status(400).json({ error: msg(req, 'badCode') });
         }
         try {
             const existing = await purchases.findByCode(code);
             if (existing && normalizeEmail(existing.email) !== email) {
-                return res.status(409).json({ error: 'הקוד הזה כבר מומש בחשבון אחר.' });
+                return res.status(409).json({ error: msg(req, 'codeUsed') });
             }
             if (!existing) await purchases.add({ email, code });
             res.json({ ok: true, email });
         } catch (e) {
             console.error('שגיאה במימוש קוד:', e.message);
-            res.status(503).json({ error: 'לא הצלחנו לשמור את הקוד כרגע. נסו שוב בעוד רגע.' });
+            res.status(503).json({ error: msg(req, 'codeSaveFailed') });
         }
     });
 
     // שאלות המבחן של מודול - ללא התשובות הנכונות
     app.get('/api/modules/:num/quiz', async (req, res) => {
         const num = Number(req.params.num);
-        const questions = publicQuiz(num);
+        const lang = reqLang(req) === 'en' && isTranslated(num) ? 'en' : 'he';
+        const questions = publicQuiz(num, lang);
         const mod = modulesDatabase.find(m => m.moduleNumber === num);
-        if (!questions || !mod) return res.status(404).json({ error: 'מודול לא נמצא' });
-        if (!canSee(mod, req)) return res.status(403).json(COMING_SOON_ERROR);
-        if (await isLocked(num, req)) return res.status(403).json(LOCKED_ERROR);
-        res.json({ passingScore: PASSING_SCORE, questions });
+        if (!questions || !mod) return res.status(404).json({ error: msg(req, 'moduleNotFound') });
+        if (!canSee(mod, req)) return res.status(403).json(comingSoonError(req));
+        if (await isLocked(num, req)) return res.status(403).json(lockedError(req));
+        res.json({ passingScore: PASSING_SCORE, questions, lang });
     });
 
     app.post('/api/submissions', async (req, res) => {
@@ -698,27 +740,30 @@ function createApp(options = {}) {
             const num = Number(moduleNumber);
 
             if (!name || name.length > 80) {
-                return res.status(400).json({ error: 'נא להזין שם מלא (עד 80 תווים)' });
+                return res.status(400).json({ error: msg(req, 'nameRequired') });
             }
             const mod = modulesDatabase.find(m => m.moduleNumber === num);
             if (mod && !canSee(mod, req)) {
-                return res.status(403).json(COMING_SOON_ERROR);
+                return res.status(403).json(comingSoonError(req));
             }
             if (await isLocked(num, req)) {
-                return res.status(403).json(LOCKED_ERROR);
+                return res.status(403).json(lockedError(req));
             }
             if (isSubmissionRateLimited(req.ip)) {
-                return res.status(429).json({ error: 'יותר מדי הגשות בזמן קצר. נסו שוב בעוד כמה דקות.' });
+                return res.status(429).json({ error: msg(req, 'tooManySubmissions') });
             }
 
-            const graded = gradeQuiz(num, answers);
+            const lang = reqLang(req) === 'en' && isTranslated(num) ? 'en' : 'he';
+            const graded = gradeQuiz(num, answers, lang);
             if (!graded) {
-                return res.status(400).json({ error: 'מודול לא מזוהה במערכת' });
+                return res.status(400).json({ error: msg(req, 'unknownModule') });
             }
 
             const feedbackString = graded.results
                 .map((r, i) => `${r.isCorrect ? '✅' : '❌'} שאלה ${i + 1}`)
                 .join(' | ');
+            // בגיליון: הגשות בממשק האנגלי מסומנות ב-[EN] בתחילת עמודת המשוב (בלי להוסיף עמודה חדשה)
+            const sheetFeedback = (reqLang(req) === 'en' ? '[EN] ' : '') + feedbackString;
 
             // אותם שמות עמודות כמו קודם, כדי לא לשבור את הגיליון הקיים
             const recorded = await saveToSheet({
@@ -727,12 +772,12 @@ function createApp(options = {}) {
                 "מספר מודל": num,
                 "שאלה": `${graded.correctCount}/${graded.total} נכונות`,
                 "תשובה": JSON.stringify(answers).slice(0, 500),
-                "feedback": feedbackString,
+                "feedback": sheetFeedback,
                 "ציון": graded.score,
             });
 
             res.status(201).json({
-                message: 'המבחן נבדק!',
+                message: msg(req, 'graded'),
                 score: graded.score,
                 passed: graded.passed,
                 passingScore: PASSING_SCORE,
@@ -743,7 +788,7 @@ function createApp(options = {}) {
             });
         } catch (error) {
             console.error("שגיאה כללית בשרת:", error);
-            res.status(500).json({ error: 'שגיאה בשרת' });
+            res.status(500).json({ error: msg(req, 'serverError') });
         }
     });
 
