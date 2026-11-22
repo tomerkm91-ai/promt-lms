@@ -212,6 +212,14 @@
             try { return localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'he'; } catch (e) { return 'he'; }
         })();
         const IS_EN = LANG === 'en';
+        // מי שצפה פעם באנגלית ממשיך לראות את מתג השפה גם אחרי שחזר לעברית, כדי שיוכל לחזור לאנגלית
+        const LANG_SEEN_KEY = 'lms-lang-en-seen';
+        const SEEN_ENGLISH = (() => {
+            try {
+                if (IS_EN) localStorage.setItem(LANG_SEEN_KEY, '1');
+                return localStorage.getItem(LANG_SEEN_KEY) === '1';
+            } catch (e) { return false; }
+        })();
 
         // טקסטים קבועים בדף: העברית כתובה ב-HTML עצמו, כאן רק האנגלית
         const STATIC_EN = {
@@ -371,10 +379,12 @@
         }
         applyLanguage();
 
-        // מתג השפה מוצג כשהאנגלית זמינה לכולם (כל המודולים תורגמו), או למי שכבר צופה באנגלית
+        // מתג השפה מוצג כשהאנגלית זמינה לכולם (כל המודולים תורגמו), או למי שכבר צפה באנגלית
+        // (או הגיע עם ?lang= בכתובת - למשל אחרי לחיצה על המתג, גם כשהדפדפן לא שומר נתונים)
         function renderLangSwitch() {
             const box = document.getElementById('lang-switch');
-            const offered = (siteConfig.languages || []).includes('en') || IS_EN;
+            const offered = (siteConfig.languages || []).includes('en') || IS_EN || SEEN_ENGLISH
+                || new URLSearchParams(location.search).has('lang');
             box.classList.toggle('hidden', !offered);
             box.querySelectorAll('.lang-btn').forEach(btn => {
                 const active = btn.dataset.lang === LANG;
