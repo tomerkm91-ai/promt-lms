@@ -15,7 +15,7 @@
         .lesson-content h3 { font-size: 1.5rem; font-weight: bold; color: #1e40af; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-top: 1.5rem; }
         .lesson-content h4 { font-size: 1.2rem; font-weight: bold; margin-top: 1.25rem; color: #1f2937; margin-bottom: 0.5rem; }
         .lesson-content p { color: #4b5563; margin-bottom: 1rem; line-height: 1.75; }
-        .lesson-content ul, .lesson-content ol { list-style-position: inside; margin-bottom: 1.25rem; color: #4b5563; padding-right: 0.5rem; }
+        .lesson-content ul, .lesson-content ol { list-style-position: inside; margin-bottom: 1.25rem; color: #4b5563; padding-inline-start: 0.5rem; }
         .lesson-content ul { list-style-type: disc; }
         .lesson-content ol { list-style-type: decimal; }
         .lesson-content li { margin-top: 0.5rem; line-height: 1.7; }
@@ -26,9 +26,13 @@
 <body class="bg-slate-50 p-4 md:p-8 font-sans text-gray-800">
 
     <header class="mb-8 text-center bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200 max-w-6xl mx-auto">
+        <div id="lang-switch" class="hidden flex justify-end gap-1 text-xs mb-2" role="group" aria-label="Language / שפה">
+            <button type="button" data-lang="he" lang="he" class="lang-btn px-2.5 py-1 rounded-full border border-slate-200">עברית</button>
+            <button type="button" data-lang="en" lang="en" class="lang-btn px-2.5 py-1 rounded-full border border-slate-200">English</button>
+        </div>
         <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">LMS Professional Edition</span>
-        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3">🎓 קורס הבנת כלי ה-AI</h1>
-        <p class="text-slate-600 mt-2 text-sm md:text-base max-w-2xl mx-auto">מערכת מתקדמת להסמכת מומחי בינה מלאכותית. לחצו על מודול כדי לפתוח את חוברת הלימוד, מקרי הבוחן, התרגול המעשי והמבחן האוטומטי.</p>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-3" data-i18n="hdrTitle">🎓 קורס הבנת כלי ה-AI</h1>
+        <p class="text-slate-600 mt-2 text-sm md:text-base max-w-2xl mx-auto" data-i18n="hdrSub">מערכת מתקדמת להסמכת מומחי בינה מלאכותית. לחצו על מודול כדי לפתוח את חוברת הלימוד, מקרי הבוחן, התרגול המעשי והמבחן האוטומטי.</p>
     </header>
 
     <main class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -38,29 +42,29 @@
                 <div id="promo-banner" class="hidden mb-3 text-sm font-semibold text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-lg p-3" role="status"></div>
                 <div id="account-box" class="hidden mb-3 pb-3 border-b">
                     <div id="account-signed-out">
-                        <p class="text-xs text-slate-600 mb-2">התחברו כדי לפתוח את הקורס המלא בכל מכשיר:</p>
+                        <p class="text-xs text-slate-600 mb-2" data-i18n="acctSignin">התחברו כדי לפתוח את הקורס המלא בכל מכשיר:</p>
                         <div id="google-btn-sidebar"></div>
                     </div>
                     <div id="account-signed-in" class="hidden flex items-center justify-between gap-2 text-xs">
                         <span class="text-slate-700 truncate" dir="ltr" id="account-email"></span>
-                        <button type="button" id="logout-btn" class="text-blue-700 hover:underline shrink-0">יציאה</button>
+                        <button type="button" id="logout-btn" class="text-blue-700 hover:underline shrink-0" data-i18n="acctLogout">יציאה</button>
                     </div>
                 </div>
-                <h2 class="text-base font-bold text-slate-700 border-b pb-2 mb-3 flex items-center gap-2">
+                <h2 class="text-base font-bold text-slate-700 border-b pb-2 mb-3 flex items-center gap-2" data-i18n="sylTitle">
                     📊 סילבוס הקורס ומפת למידה
                 </h2>
                 <div class="mb-3">
                     <div class="flex justify-between text-xs text-slate-600 mb-1">
-                        <span>ההתקדמות שלכם</span>
+                        <span data-i18n="progYours">ההתקדמות שלכם</span>
                         <span id="progress-label">0/0 מודולים הושלמו</span>
                     </div>
-                    <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden" role="progressbar" aria-label="התקדמות בקורס" id="progress-track">
+                    <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden" role="progressbar" aria-label="התקדמות בקורס" data-i18n-aria="progAria" id="progress-track">
                         <div id="progress-bar" class="h-full bg-emerald-500 transition-all" style="width:0%"></div>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1">ההתקדמות נשמרת בדפדפן הזה בלבד.</p>
+                    <p class="text-[11px] text-slate-400 mt-1" data-i18n="progLocal">ההתקדמות נשמרת בדפדפן הזה בלבד.</p>
                 </div>
                 <div id="modules-list" class="space-y-2.5">
-                    <p class="text-gray-500 text-sm">טוען את תוכנית הלימודים מהשרת...</p>
+                    <p class="text-gray-500 text-sm" data-i18n="modsLoading">טוען את תוכנית הלימודים מהשרת...</p>
                 </div>
             </div>
         </section>
@@ -68,12 +72,13 @@
         <section id="content-area" class="lg:col-span-2 bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hidden">
             
             <div class="bg-slate-100 border-b border-slate-200 flex text-sm overflow-x-auto whitespace-nowrap">
-                <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn active px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium">📖 חומר לימוד עיוני</button>
-                <button onclick="switchTab('cases')" id="tab-cases" class="tab-btn px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium">🔥 תבניות ומקרי בוחן</button>
-                <button onclick="switchTab('practice')" id="tab-practice" class="tab-btn px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium">🏋️ תרגול שטח מעשי</button>
+                <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn active px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium" data-i18n="tabTheory">📖 חומר לימוד עיוני</button>
+                <button onclick="switchTab('cases')" id="tab-cases" class="tab-btn px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium" data-i18n="tabCases">🔥 תבניות ומקרי בוחן</button>
+                <button onclick="switchTab('practice')" id="tab-practice" class="tab-btn px-5 py-3.5 border-b-2 border-transparent hover:text-blue-600 transition-all font-medium" data-i18n="tabPractice">🏋️ תרגול שטח מעשי</button>
             </div>
 
             <div class="p-6 md:p-8">
+                <div id="untranslated-note" class="hidden mb-5 text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3" role="note" lang="en" dir="ltr">🌍 This module hasn't been translated into English yet, so it's shown in the original Hebrew.</div>
                 <div id="tab-content-theory" class="tab-panel lesson-content">
                     <div id="lesson-view"></div>
                 </div>
@@ -94,13 +99,13 @@
                         <input type="hidden" id="current-module-id">
                         
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
-                            <label class="block font-semibold mb-1 text-slate-800 text-sm">שם הסטודנט להנפקת הציון:</label>
-                            <input type="text" id="student-name" required maxlength="80" autocomplete="name" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm" placeholder="הקלידו שם מלא">
+                            <label class="block font-semibold mb-1 text-slate-800 text-sm" data-i18n="quizName">שם הסטודנט להנפקת הציון:</label>
+                            <input type="text" id="student-name" required maxlength="80" autocomplete="name" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition text-sm" placeholder="הקלידו שם מלא" data-i18n-placeholder="quizNamePh">
                         </div>
 
                         <div id="dynamic-questions" class="space-y-4"></div>
 
-                        <button type="submit" id="quiz-submit" class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-lg mt-6 shadow-md transition-all">
+                        <button type="submit" id="quiz-submit" class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-lg mt-6 shadow-md transition-all" data-i18n="quizSubmit">
                             הגשת המבחן לבדיקה
                         </button>
                     </form>
@@ -108,11 +113,11 @@
                 </div>
 
                 <div id="prompt-practice-area" class="border-t border-slate-200 mt-12 pt-8 hidden">
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">✍️ תרגול כתיבת פרומפט אישי</h3>
-                    <p class="text-sm text-slate-600 mb-4">בחרו אחד משלושת התרחישים, כתבו פרומפט מהונדס משלכם על בסיסו, ולחצו על "בדיקת הפרומפט" לקבלת משוב אוטומטי מיידי.</p>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2" data-i18n="ppTitle">✍️ תרגול כתיבת פרומפט אישי</h3>
+                    <p class="text-sm text-slate-600 mb-4" data-i18n="ppText">בחרו אחד משלושת התרחישים, כתבו פרומפט מהונדס משלכם על בסיסו, ולחצו על "בדיקת הפרומפט" לקבלת משוב אוטומטי מיידי.</p>
                     <div id="prompt-scenarios" class="grid sm:grid-cols-3 gap-3 mb-4"></div>
-                    <textarea id="student-prompt-input" rows="6" class="w-full p-3 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="כתבו כאן את הפרומפט המהונדס שלכם..."></textarea>
-                    <button type="button" id="check-prompt-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg mt-4 shadow-md transition-all">
+                    <textarea id="student-prompt-input" rows="6" class="w-full p-3 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="כתבו כאן את הפרומפט המהונדס שלכם..." data-i18n-placeholder="ppPh"></textarea>
+                    <button type="button" id="check-prompt-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg mt-4 shadow-md transition-all" data-i18n="ppBtn">
                         בדיקת הפרומפט
                     </button>
                     <div id="prompt-check-result" class="hidden mt-4 p-4 rounded-lg border text-sm"></div>
@@ -123,39 +128,39 @@
         <section id="placeholder-area" class="lg:col-span-2 flex items-center justify-center bg-white border border-slate-200 rounded-xl p-12 text-center shadow-sm">
             <div>
                 <div class="text-4xl mb-3">🎓</div>
-                <p class="text-xl font-bold text-slate-800">בחרו יחידת לימוד מתוך הסילבוס</p>
-                <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">כל מודול כולל עשרות עמודי תוכן, תבניות שימוש מוכנות, תרגילי שטח ומבחן חובה.</p>
+                <p class="text-xl font-bold text-slate-800" data-i18n="phTitle">בחרו יחידת לימוד מתוך הסילבוס</p>
+                <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto" data-i18n="phText">כל מודול כולל עשרות עמודי תוכן, תבניות שימוש מוכנות, תרגילי שטח ומבחן חובה.</p>
             </div>
         </section>
 
         <section id="locked-area" class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-8 md:p-12 text-center shadow-sm hidden">
             <div class="max-w-md mx-auto">
                 <div class="text-4xl mb-3">🔒</div>
-                <h2 class="text-xl font-bold text-slate-900" id="locked-title">המודול הזה זמין בקורס המלא</h2>
+                <h2 class="text-xl font-bold text-slate-900" id="locked-title" data-i18n="lockedTitle">המודול הזה זמין בקורס המלא</h2>
                 <p class="text-sm text-slate-600 mt-2" id="locked-text"></p>
                 <div id="locked-signin" class="mt-6">
-                    <p class="text-sm font-semibold text-slate-800 mb-2">שלב 1: התחברו עם חשבון Google</p>
+                    <p class="text-sm font-semibold text-slate-800 mb-2" data-i18n="lockedStep1">שלב 1: התחברו עם חשבון Google</p>
                     <div id="google-btn-locked" class="flex justify-center"></div>
-                    <p class="text-[11px] text-slate-500 mt-2">הגישה שתרכשו תישמר בחשבון הזה ותעבוד בכל מכשיר.</p>
+                    <p class="text-[11px] text-slate-500 mt-2" data-i18n="lockedSaved">הגישה שתרכשו תישמר בחשבון הזה ותעבוד בכל מכשיר.</p>
                 </div>
                 <p id="locked-signed-in-as" class="hidden mt-6 text-sm text-slate-700"></p>
                 <a id="checkout-link" href="#" target="_blank" rel="noopener" class="hidden mt-4 inline-block w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-all">לרכישת הקורס המלא</a>
-                <div id="checkout-after" class="hidden mt-3 text-sm text-slate-700 bg-amber-50 border border-amber-200 rounded-lg p-3 text-right">
+                <div id="checkout-after" class="hidden mt-3 text-sm text-slate-700 bg-amber-50 border border-amber-200 rounded-lg p-3 text-start">
                     <p id="checkout-email-note"></p>
-                    <button type="button" id="paid-check-btn" class="mt-2 w-full bg-white border border-slate-300 hover:bg-slate-50 font-semibold py-2 rounded-lg">כבר שילמתי - לבדוק אם הקורס נפתח</button>
+                    <button type="button" id="paid-check-btn" class="mt-2 w-full bg-white border border-slate-300 hover:bg-slate-50 font-semibold py-2 rounded-lg" data-i18n="lockedPaid">כבר שילמתי - לבדוק אם הקורס נפתח</button>
                     <p id="paid-check-msg" class="hidden mt-2 text-xs" role="status"></p>
                 </div>
-                <div id="waitlist-box" class="hidden mt-5 text-right bg-violet-50 border border-violet-200 rounded-lg p-4">
-                    <p class="text-sm font-bold text-violet-900">📝 רשימת ההמתנה לקורס המלא</p>
+                <div id="waitlist-box" class="hidden mt-5 text-start bg-violet-50 border border-violet-200 rounded-lg p-4">
+                    <p class="text-sm font-bold text-violet-900" data-i18n="wlTitle">📝 רשימת ההמתנה לקורס המלא</p>
                     <p class="text-sm text-slate-700 mt-1" id="waitlist-text"></p>
-                    <button type="button" id="waitlist-btn" class="mt-3 w-full bg-violet-700 hover:bg-violet-800 disabled:opacity-50 text-white font-bold py-2.5 rounded-lg">אני רוצה את הקורס המלא - הוסיפו אותי לרשימה</button>
+                    <button type="button" id="waitlist-btn" class="mt-3 w-full bg-violet-700 hover:bg-violet-800 disabled:opacity-50 text-white font-bold py-2.5 rounded-lg" data-i18n="wlBtn">אני רוצה את הקורס המלא - הוסיפו אותי לרשימה</button>
                     <p id="waitlist-msg" class="hidden mt-2 text-sm" role="status"></p>
                 </div>
-                <form id="access-form" class="hidden mt-6 text-right">
-                    <label for="access-code-input" class="block text-sm font-semibold text-slate-800 mb-1">קיבלתם קוד גישה אחרי הרכישה? הזינו אותו כאן (פעם אחת בלבד):</label>
+                <form id="access-form" class="hidden mt-6 text-start">
+                    <label for="access-code-input" class="block text-sm font-semibold text-slate-800 mb-1" data-i18n="codeLabel">קיבלתם קוד גישה אחרי הרכישה? הזינו אותו כאן (פעם אחת בלבד):</label>
                     <div class="flex gap-2">
                         <input id="access-code-input" type="text" maxlength="64" autocomplete="off" spellcheck="false" dir="ltr" class="flex-1 min-w-0 p-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none" placeholder="AI-XXXX-XXXX-XXXX">
-                        <button type="submit" id="access-submit" class="bg-slate-900 hover:bg-slate-700 disabled:opacity-50 text-white font-bold px-4 rounded-lg text-sm">פתיחה</button>
+                        <button type="submit" id="access-submit" class="bg-slate-900 hover:bg-slate-700 disabled:opacity-50 text-white font-bold px-4 rounded-lg text-sm" data-i18n="codeBtn">פתיחה</button>
                     </div>
                     <p id="access-message" class="text-sm mt-2 hidden" role="status"></p>
                 </form>
@@ -172,8 +177,8 @@
     </main>
 
     <footer class="mt-16 text-center text-xs text-slate-400 border-t pt-4 max-w-6xl mx-auto">
-        © 2026 תומר משולם (Tomer Meshulam) - כל הזכויות שמורות | קורס הבנת כלי ה-AI | מערכת LMS מוסמכת רמת Master
-        <div class="mt-2"><a href="/privacy" class="underline hover:text-slate-600">מדיניות פרטיות</a></div>
+        <span data-i18n="footerCopy">© 2026 תומר משולם (Tomer Meshulam) - כל הזכויות שמורות | קורס הבנת כלי ה-AI | מערכת LMS מוסמכת רמת Master</span>
+        <div class="mt-2"><a href="/privacy" class="underline hover:text-slate-600" data-i18n="footerPrivacy">מדיניות פרטיות</a></div>
     </footer>
 
     <!-- ☕ הודעת תודה חד-פעמית ללומד חדש (מוצגת רק כש-TIP_PHONE מוגדר) -->
@@ -195,15 +200,208 @@
         let currentActiveTab = 'theory';
         let currentQuiz = null;
 
+        // --- 🌍 שפה: עברית (ברירת מחדל) או אנגלית ---
+        // הבחירה: ?lang= בכתובת, אחרת מה שנשמר בדפדפן. החלפת שפה טוענת את הדף מחדש, כדי שהכול יתעדכן יחד.
+        const LANG_KEY = 'lms-lang';
+        const LANG = (() => {
+            const fromUrl = new URLSearchParams(location.search).get('lang');
+            if (fromUrl === 'en' || fromUrl === 'he') {
+                try { localStorage.setItem(LANG_KEY, fromUrl); } catch (e) { }
+                return fromUrl;
+            }
+            try { return localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'he'; } catch (e) { return 'he'; }
+        })();
+        const IS_EN = LANG === 'en';
+
+        // טקסטים קבועים בדף: העברית כתובה ב-HTML עצמו, כאן רק האנגלית
+        const STATIC_EN = {
+            hdrTitle: '🎓 Understanding AI Tools',
+            hdrSub: 'A hands-on course for working confidently with AI tools. Pick a module to open its lesson, case studies, practice exercises and automatic quiz.',
+            acctSignin: 'Sign in to unlock the full course on any device:',
+            acctLogout: 'Sign out',
+            sylTitle: '📊 Course syllabus and learning map',
+            progYours: 'Your progress',
+            progAria: 'Course progress',
+            progLocal: 'Your progress is saved in this browser only.',
+            modsLoading: 'Loading the syllabus...',
+            tabTheory: '📖 Lesson',
+            tabCases: '🔥 Templates & case studies',
+            tabPractice: '🏋️ Hands-on practice',
+            quizName: 'Your name (for your grade):',
+            quizNamePh: 'Type your full name',
+            quizSubmit: 'Submit the quiz',
+            ppTitle: '✍️ Write your own prompt',
+            ppText: 'Pick one of the three scenarios, write your own engineered prompt for it, and click "Check my prompt" for instant automatic feedback.',
+            ppPh: 'Write your engineered prompt here...',
+            ppBtn: 'Check my prompt',
+            phTitle: 'Pick a module from the syllabus',
+            phText: 'Each module includes a lesson, ready-to-use templates, hands-on exercises and a quiz.',
+            lockedTitle: 'This module is part of the full course',
+            lockedStep1: 'Step 1: Sign in with your Google account',
+            lockedSaved: 'Your access will be saved to this account and will work on every device.',
+            lockedPaid: "I've already paid - check if the course is unlocked",
+            wlTitle: '📝 Waitlist for the full course',
+            wlBtn: 'I want the full course - add me to the list',
+            codeLabel: 'Got an access code after purchase? Enter it here (one time only):',
+            codeBtn: 'Unlock',
+            footerCopy: '© 2026 Tomer Meshulam - All rights reserved | Understanding AI Tools course',
+            footerPrivacy: 'Privacy policy (in Hebrew)'
+        };
+
+        // טקסטים שנבנים בקוד, בשתי השפות
+        const TEXT = {
+            he: {
+                pageTitle: 'קורס הבנת כלי ה-AI | ChatGPT, Claude, Gemini, MCP ופרומפטינג',
+                googleLoadFail: 'לא הצלחנו לטעון את כפתור ההתחברות של Google. רעננו את הדף.',
+                loginFailed: 'ההתחברות נכשלה.',
+                networkError: 'שגיאה בתקשורת מול השרת. נסו שוב.',
+                promo: (n, date) => `🎁 מבצע השקה: ${n} השיעורים הראשונים פתוחים בחינם עד ${date}!`,
+                progress: (done, total) => `${done}/${total} מודולים הושלמו`,
+                passedBadge: best => `✓ עבר (${best})`,
+                triedBadge: best => `נוסה (${best})`,
+                unit: n => `יחידה ${n}`,
+                preview: 'תצוגה מקדימה',
+                soon: 'בקרוב',
+                paidBadge: '🔒 בתשלום',
+                freeBadge: 'חינם',
+                modulesLoadFail: 'לא הצלחנו לטעון את תוכנית הלימודים. רעננו את הדף בעוד רגע (השרת החינמי עשוי להתעורר משינה).',
+                unitTitle: (n, title) => `יחידה ${n}: ${title}`,
+                opensOn: date => `המודול ייפתח ב-${date}`,
+                quizTitle: n => `📝 מבדק הסמכה: יחידה ${n}`,
+                quizLoading: 'טוען את שאלות המבחן...',
+                quizMeta: (count, passing) => `${count} שאלות · ציון מעבר: ${passing}`,
+                questionN: i => `שאלה ${i}`,
+                quizLoadFail: 'לא הצלחנו לטעון את המבחן. נסו לבחור את המודול שוב.',
+                lockedText: (free, price) => `${free} המודולים הראשונים פתוחים לכולם. המודול הזה ושאר מודולי ההמשך זמינים לרוכשי הקורס המלא` + (price ? `, בתשלום חד-פעמי של ${price}.` : '.'),
+                signedInAs: emailHtml => `מחוברים כ-${emailHtml}. הרכישה תיפתח לחשבון הזה.`,
+                buy: price => price ? `לרכישת הקורס המלא (${price})` : 'לרכישת הקורס המלא',
+                emailNote: emailHtml => `בדף התשלום השתמשו באותו אימייל: ${emailHtml}. כך הקורס ייפתח אוטומטית אחרי התשלום.`,
+                waitlistText: (total, price) => `הקורס המלא (כל ${total} השיעורים${price ? ', ב-' + price : ''}) ייפתח לרכישה בקרוב. הצטרפו לרשימה ונעדכן אתכם ראשונים.`,
+                onWaitlist: '✓ אתם ברשימה. נעדכן אתכם כשהקורס המלא ייפתח.',
+                waitlistFailed: 'ההרשמה נכשלה. נסו שוב.',
+                notPaidYet: 'התשלום עוד לא התקבל אצלנו. לפעמים זה לוקח דקה-שתיים - נסו שוב בעוד רגע. אם שילמתם עם אימייל אחר, פנו אלינו ונסדר את זה.',
+                checking: 'בודק...',
+                genericError: 'אירעה שגיאה. נסו שוב.',
+                codeOk: '✅ הקוד אושר ונשמר בחשבון שלכם! כל המודולים פתוחים.',
+                ppLabels: { role: 'הגדרת תפקיד/פרסונה (Role)', context: 'הקשר ורקע (Context)', objective: 'הגדרת המשימה (Objective)', constraints: 'מגבלות (Constraints)', format: 'פורמט פלט (Output Format)' },
+                ppEmpty: 'לפני הבדיקה, כתבו קודם את הפרומפט שלכם בתיבת הטקסט.',
+                ppGood: (found, total, words) => `<b>✅ פרומפט טוב!</b><p class="mt-1">הפרומפט שלכם כולל ${found} מתוך ${total} מרכיבי ליבה, ובאורך מספק (${words} מילים). עבודה מצוינת!</p>`,
+                ppTooShort: words => `הפרומפט קצר מדי (${words} מילים) - נסו לפרט יותר.`,
+                ppMissing: label => `חסר מרכיב: ${label}`,
+                ppNotYet: (found, total) => `<b>⚠️ עוד לא מושלם</b><p class="mt-1">נמצאו ${found} מתוך ${total} מרכיבי ליבה. הבעיות שנמצאו:</p>`,
+                quizError: 'אירעה שגיאה בבדיקת המבחן.',
+                correct: 'נכון.',
+                correctAnswerIs: 'התשובה הנכונה:',
+                resultsTitle: score => `📊 תוצאות המבדק: ${score}/100`,
+                resultsText: (c, t, passed, passing) => `${c} מתוך ${t} תשובות נכונות. ${passed ? '🎉 עברתם את המודול!' : `ציון המעבר הוא ${passing} - עברו על ההסברים ליד כל שאלה ונסו שוב.`}`,
+                recorded: 'הציון נרשם בגיליון הקורס.',
+                savedLocally: 'הציון נשמר בדפדפן שלכם.',
+                serverError: 'שגיאה בתקשורת מול השרת. בדקו את החיבור ונסו שוב.',
+                submit: 'הגשת המבחן לבדיקה'
+            },
+            en: {
+                pageTitle: 'Understanding AI Tools | ChatGPT, Claude, Gemini, MCP and prompting',
+                googleLoadFail: "We couldn't load the Google sign-in button. Please refresh the page.",
+                loginFailed: 'Sign-in failed.',
+                networkError: 'Could not reach the server. Please try again.',
+                promo: (n, date) => `🎁 Launch offer: the first ${n} lessons are free until ${date}!`,
+                progress: (done, total) => `${done}/${total} modules completed`,
+                passedBadge: best => `✓ Passed (${best})`,
+                triedBadge: best => `Tried (${best})`,
+                unit: n => `Module ${n}`,
+                preview: 'Preview',
+                soon: 'Coming soon',
+                paidBadge: '🔒 Paid',
+                freeBadge: 'Free',
+                modulesLoadFail: "We couldn't load the syllabus. Please refresh in a moment (the free server may be waking up).",
+                unitTitle: (n, title) => `Module ${n}: ${title}`,
+                opensOn: date => `This module opens on ${date}`,
+                quizTitle: n => `📝 Module ${n} quiz`,
+                quizLoading: 'Loading the quiz questions...',
+                quizMeta: (count, passing) => `${count} questions · Passing score: ${passing}`,
+                questionN: i => `Question ${i}`,
+                quizLoadFail: "We couldn't load the quiz. Try selecting the module again.",
+                lockedText: (free, price) => `The first ${free} modules are open to everyone. This module and the rest of the course are available with the full course` + (price ? `, for a one-time payment of ${price}.` : '.'),
+                signedInAs: emailHtml => `Signed in as ${emailHtml}. Your purchase will be unlocked for this account.`,
+                buy: price => price ? `Get the full course (${price})` : 'Get the full course',
+                emailNote: emailHtml => `On the payment page, use the same email: ${emailHtml}. That way the course unlocks automatically after payment.`,
+                waitlistText: (total, price) => `The full course (all ${total} lessons${price ? ', for ' + price : ''}) will be available soon. Join the list and we'll let you know first.`,
+                onWaitlist: "✓ You're on the list. We'll let you know when the full course opens.",
+                waitlistFailed: 'Signing up failed. Please try again.',
+                notPaidYet: "We haven't received the payment yet. It can take a minute or two - please try again shortly. If you paid with a different email, contact us and we'll sort it out.",
+                checking: 'Checking...',
+                genericError: 'Something went wrong. Please try again.',
+                codeOk: '✅ Code accepted and saved to your account! All modules are unlocked.',
+                ppLabels: { role: 'Role / persona', context: 'Context and background', objective: 'Task (Objective)', constraints: 'Constraints', format: 'Output format' },
+                ppEmpty: 'Write your prompt in the text box first, then check it.',
+                ppGood: (found, total, words) => `<b>✅ Good prompt!</b><p class="mt-1">Your prompt includes ${found} of ${total} core components and is long enough (${words} words). Great work!</p>`,
+                ppTooShort: words => `The prompt is too short (${words} words) - try adding more detail.`,
+                ppMissing: label => `Missing component: ${label}`,
+                ppNotYet: (found, total) => `<b>⚠️ Not quite there yet</b><p class="mt-1">Found ${found} of ${total} core components. Issues found:</p>`,
+                quizError: 'Something went wrong while grading the quiz.',
+                correct: 'Correct.',
+                correctAnswerIs: 'The correct answer:',
+                resultsTitle: score => `📊 Your result: ${score}/100`,
+                resultsText: (c, t, passed, passing) => `${c} of ${t} answers correct. ${passed ? '🎉 You passed this module!' : `The passing score is ${passing} - read the explanation next to each question and try again.`}`,
+                recorded: 'Your grade was recorded in the course sheet.',
+                savedLocally: 'Your grade was saved in your browser.',
+                serverError: 'Could not reach the server. Check your connection and try again.',
+                submit: 'Submit the quiz'
+            }
+        };
+        const T = TEXT[LANG];
+
+        function applyLanguage() {
+            document.documentElement.lang = LANG;
+            document.documentElement.dir = IS_EN ? 'ltr' : 'rtl';
+            document.title = T.pageTitle;
+            if (!IS_EN) return;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const v = STATIC_EN[el.dataset.i18n];
+                if (v) el.textContent = v;
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const v = STATIC_EN[el.dataset.i18nPlaceholder];
+                if (v) el.placeholder = v;
+            });
+            document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+                const v = STATIC_EN[el.dataset.i18nAria];
+                if (v) el.setAttribute('aria-label', v);
+            });
+        }
+        applyLanguage();
+
+        // מתג השפה מוצג כשהאנגלית זמינה לכולם (כל המודולים תורגמו), או למי שכבר צופה באנגלית
+        function renderLangSwitch() {
+            const box = document.getElementById('lang-switch');
+            const offered = (siteConfig.languages || []).includes('en') || IS_EN;
+            box.classList.toggle('hidden', !offered);
+            box.querySelectorAll('.lang-btn').forEach(btn => {
+                const active = btn.dataset.lang === LANG;
+                btn.classList.toggle('bg-blue-600', active);
+                btn.classList.toggle('text-white', active);
+                btn.classList.toggle('font-bold', active);
+                btn.setAttribute('aria-pressed', String(active));
+            });
+        }
+        document.querySelectorAll('#lang-switch .lang-btn').forEach(btn => btn.addEventListener('click', () => {
+            if (btn.dataset.lang === LANG) return;
+            try { localStorage.setItem(LANG_KEY, btn.dataset.lang); } catch (e) { }
+            const url = new URL(location.href);
+            url.searchParams.set('lang', btn.dataset.lang);
+            location.href = url.toString();
+        }));
+
         // --- התקדמות אישית: נשמרת ב-localStorage של הדפדפן (עלול להיות חסום במצב גלישה פרטית) ---
         const PROGRESS_KEY = 'lms-progress-v1';
         const NAME_KEY = 'lms-student-name';
         const TIP_SEEN_KEY = 'lms-tip-seen-v1';
-        let siteConfig = { paywallEnabled: false, freeModules: 0, checkoutUrl: null, price: null, googleClientId: null, tipPhone: null };
+        let siteConfig = { paywallEnabled: false, freeModules: 0, checkoutUrl: null, price: null, googleClientId: null, tipPhone: null, languages: ['he'] };
 
         // --- ☕ טיפ ליוצר: הודעה חד-פעמית ללומד חדש עם מספר הטלפון ---
         function tipEnabled() {
-            return Boolean(siteConfig.tipPhone) && !siteConfig.paywallEnabled;
+            // מספר טלפון ישראלי לא רלוונטי לרוב הגולשים מחו"ל - בממשק האנגלי לא מציגים את הודעת הטיפ
+            return Boolean(siteConfig.tipPhone) && !siteConfig.paywallEnabled && !IS_EN;
         }
         function renderTip() {
             if (tipEnabled()) document.getElementById('tip-phone').textContent = siteConfig.tipPhone;
@@ -236,8 +434,10 @@
         let currentUser = { email: null, hasFullAccess: true };
 
         // הזיהוי מול השרת נעשה בעוגיית סשן מאובטחת (HttpOnly) שנשלחת אוטומטית
+        // השפה נשלחת בכל בקשה, כדי שהשרת יחזיר תוכן והודעות בשפה הנכונה
         function apiFetch(url, options = {}) {
-            return fetch(url, { credentials: 'same-origin', ...options });
+            const withLang = IS_EN ? url + (url.includes('?') ? '&' : '?') + 'lang=en' : url;
+            return fetch(withLang, { credentials: 'same-origin', ...options });
         }
 
         // --- התחברות עם Google ---
@@ -267,14 +467,14 @@
                 ['google-btn-sidebar', 'google-btn-locked'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el && !el.hasChildNodes()) {
-                        google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', text: 'signin_with', locale: 'he' });
+                        google.accounts.id.renderButton(el, { theme: 'outline', size: 'large', text: 'signin_with', locale: LANG });
                     }
                 });
             } catch (e) {
                 console.error(e);
                 ['google-btn-sidebar', 'google-btn-locked'].forEach(id => {
                     const el = document.getElementById(id);
-                    if (el) el.innerHTML = '<p class="text-xs text-red-700">לא הצלחנו לטעון את כפתור ההתחברות של Google. רעננו את הדף.</p>';
+                    if (el) el.innerHTML = `<p class="text-xs text-red-700">${T.googleLoadFail}</p>`;
                 });
             }
         }
@@ -287,12 +487,12 @@
                     body: JSON.stringify({ credential: response.credential })
                 });
                 const data = await res.json();
-                if (!res.ok) { alert(data.error || 'ההתחברות נכשלה.'); return; }
+                if (!res.ok) { alert(data.error || T.loginFailed); return; }
                 const reopen = window.lockedModuleNumber;
                 await loadModules();
                 if (reopen) selectModule(reopen);
             } catch (e) {
-                alert('שגיאה בתקשורת מול השרת. נסו שוב.');
+                alert(T.networkError);
             }
         }
 
@@ -305,7 +505,7 @@
         function renderPromo() {
             const banner = document.getElementById('promo-banner');
             if (!siteConfig.paywallEnabled || !siteConfig.promoUntil) { banner.classList.add('hidden'); return; }
-            banner.innerText = `🎁 מבצע השקה: ${siteConfig.freeModules} השיעורים הראשונים פתוחים בחינם עד ${shortDate(siteConfig.promoUntil)}!`;
+            banner.innerText = T.promo(siteConfig.freeModules, shortDate(siteConfig.promoUntil));
             banner.classList.remove('hidden');
         }
 
@@ -363,7 +563,7 @@
             const done = released.filter(m => progress[m.moduleNumber] && progress[m.moduleNumber].passed).length;
             const total = released.length;
             const pct = total ? Math.round((done / total) * 100) : 0;
-            document.getElementById("progress-label").innerText = `${done}/${total} מודולים הושלמו`;
+            document.getElementById("progress-label").innerText = T.progress(done, total);
             document.getElementById("progress-bar").style.width = pct + '%';
             document.getElementById("progress-track").setAttribute('aria-valuenow', pct);
 
@@ -373,10 +573,10 @@
                 const p = progress[m.moduleNumber];
                 if (p && p.passed) {
                     badge.className = "text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2";
-                    badge.innerText = `✓ עבר (${p.best})`;
+                    badge.innerText = T.passedBadge(p.best);
                 } else if (p) {
                     badge.className = "text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2";
-                    badge.innerText = `נוסה (${p.best})`;
+                    badge.innerText = T.triedBadge(p.best);
                 } else {
                     badge.className = "hidden";
                     badge.innerText = "";
@@ -392,27 +592,28 @@
                 if (meRes.ok) currentUser = await meRes.json();
                 renderAccount();
                 renderTip();
+                renderLangSwitch();
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 allModules = await response.json();
                 container.innerHTML = allModules.map(m => `
-                        <button onclick="selectModule(${m.moduleNumber})" id="mod-btn-${m.moduleNumber}" class="w-full text-right bg-white p-3.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all block group">
+                        <button onclick="selectModule(${m.moduleNumber})" id="mod-btn-${m.moduleNumber}" class="w-full text-start bg-white p-3.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all block group">
                             <span class="flex items-center justify-between gap-2">
-                                <span class="text-[11px] font-bold text-blue-600 block uppercase tracking-wider">יחידה ${m.moduleNumber}</span>
+                                <span class="text-[11px] font-bold text-blue-600 block uppercase tracking-wider">${T.unit(m.moduleNumber)}</span>
                                 ${m.comingSoon
-                                    ? `<span class="text-[11px] font-bold text-violet-700 bg-violet-50 border border-violet-200 rounded-full px-2">${m.preview ? 'תצוגה מקדימה' : 'בקרוב'} · ${formatDate(m.availableFrom)}</span>`
+                                    ? `<span class="text-[11px] font-bold text-violet-700 bg-violet-50 border border-violet-200 rounded-full px-2">${m.preview ? T.preview : T.soon} · ${formatDate(m.availableFrom)}</span>`
                                     : m.locked
-                                    ? `<span class="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2">🔒 בתשלום</span>`
-                                    : (siteConfig.paywallEnabled && m.free ? `<span class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2">חינם</span>` : '')}
+                                    ? `<span class="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2">${T.paidBadge}</span>`
+                                    : (siteConfig.paywallEnabled && m.free ? `<span class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2">${T.freeBadge}</span>` : '')}
                                 <span id="mod-status-${m.moduleNumber}" class="hidden"></span>
                             </span>
-                            <h3 class="font-bold text-slate-800 text-sm mt-0.5 group-hover:text-blue-600 transition-colors">${escapeHtml(m.title)}</h3>
-                            <p class="text-slate-500 text-xs mt-1 truncate font-normal">${escapeHtml(m.description)}</p>
+                            <h3 class="font-bold text-slate-800 text-sm mt-0.5 group-hover:text-blue-600 transition-colors" dir="${m.contentLang === 'en' || !IS_EN ? 'auto' : 'rtl'}">${escapeHtml(m.title)}</h3>
+                            <p class="text-slate-500 text-xs mt-1 truncate font-normal" dir="${m.contentLang === 'en' || !IS_EN ? 'auto' : 'rtl'}">${escapeHtml(m.description)}</p>
                         </button>
                     `).join('');
                 renderProgress();
             } catch (e) {
                 console.error(e);
-                container.innerHTML = `<p class="text-sm text-red-700">לא הצלחנו לטעון את תוכנית הלימודים. רעננו את הדף בעוד רגע (השרת החינמי עשוי להתעורר משינה).</p>`;
+                container.innerHTML = `<p class="text-sm text-red-700">${T.modulesLoadFail}</p>`;
             }
         }
 
@@ -427,9 +628,9 @@
             document.getElementById("content-area").classList.add("hidden");
             document.getElementById("locked-area").classList.add("hidden");
             document.getElementById("coming-soon-area").classList.remove("hidden");
-            document.getElementById("coming-soon-title").innerText = `יחידה ${mod.moduleNumber}: ${mod.title}`;
+            document.getElementById("coming-soon-title").innerText = T.unitTitle(mod.moduleNumber, mod.title);
             document.getElementById("coming-soon-description").innerText = mod.description;
-            document.getElementById("coming-soon-date").innerText = `המודול ייפתח ב-${formatDate(mod.availableFrom)}`;
+            document.getElementById("coming-soon-date").innerText = T.opensOn(formatDate(mod.availableFrom));
             if (window.innerWidth < 1024) {
                 document.getElementById("coming-soon-area").scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
@@ -447,9 +648,9 @@
         function selectModule(num) {
             allModules.forEach(m => {
                 const btn = document.getElementById(`mod-btn-${m.moduleNumber}`);
-                if(btn) btn.className = "w-full text-right bg-white p-3.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all block";
+                if(btn) btn.className = "w-full text-start bg-white p-3.5 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/30 transition-all block";
             });
-            document.getElementById(`mod-btn-${num}`).className = "w-full text-right bg-blue-50 p-3.5 rounded-xl border-2 border-blue-600 block shadow-sm font-semibold";
+            document.getElementById(`mod-btn-${num}`).className = "w-full text-start bg-blue-50 p-3.5 rounded-xl border-2 border-blue-600 block shadow-sm font-semibold";
 
             const mod = allModules.find(m => m.moduleNumber === num);
 
@@ -470,10 +671,17 @@
             document.getElementById("quiz-form").reset();
             try { document.getElementById("student-name").value = localStorage.getItem(NAME_KEY) || ""; } catch (e) { }
 
+            // מודול שעוד לא תורגם מוצג בממשק האנגלי במקור העברי - מימין לשמאל, עם הודעה קצרה
+            const contentDir = mod.contentLang === 'en' ? 'ltr' : 'rtl';
+            ['tab-content-theory', 'tab-content-cases', 'tab-content-practice', 'prompt-practice-area'].forEach(id => {
+                document.getElementById(id).setAttribute('dir', contentDir);
+            });
+            document.getElementById("untranslated-note").classList.toggle("hidden", !(IS_EN && mod.contentLang !== 'en'));
+
             // טעינת לשונית א - חומר עיוני מהשרת
             document.getElementById("lesson-view").innerHTML = mod.content;
             document.getElementById("current-module-id").value = num;
-            document.getElementById("quiz-title").innerText = `📝 מבדק הסמכה: יחידה ${num}`;
+            document.getElementById("quiz-title").innerText = T.quizTitle(num);
 
             // לשוניות ב' ו-ג' - מקרי בוחן ותרגול שטח (מגיעים מהשרת)
             document.getElementById("cases-view").innerHTML = mod.cases;
@@ -499,7 +707,7 @@
             const submitBtn = document.getElementById("quiz-submit");
             currentQuiz = null;
             submitBtn.disabled = true;
-            qContainer.innerHTML = `<p class="text-sm text-slate-500">טוען את שאלות המבחן...</p>`;
+            qContainer.innerHTML = `<p class="text-sm text-slate-500">${T.quizLoading}</p>`;
             try {
                 const response = await apiFetch(`/api/modules/${num}/quiz`);
                 if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -507,20 +715,23 @@
                 // אם המשתמש עבר למודול אחר בזמן הטעינה - לא לדרוס
                 if (String(num) !== document.getElementById("current-module-id").value) return;
                 currentQuiz = quiz;
-                const letters = ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
-                qContainer.innerHTML = `<p class="text-xs text-slate-500">${quiz.questions.length} שאלות · ציון מעבר: ${quiz.passingScore}</p>` +
+                // השאלות עצמן בשפה שהשרת החזיר (מבחן שעוד לא תורגם מגיע בעברית)
+                const quizLang = quiz.lang === 'en' ? 'en' : 'he';
+                const letters = quizLang === 'en' ? ['A', 'B', 'C', 'D', 'E', 'F'] : ['א', 'ב', 'ג', 'ד', 'ה', 'ו'];
+                qContainer.setAttribute('dir', quizLang === 'en' ? 'ltr' : 'rtl');
+                qContainer.innerHTML = `<p class="text-xs text-slate-500" dir="${IS_EN ? 'ltr' : 'rtl'}">${T.quizMeta(quiz.questions.length, quiz.passingScore)}</p>` +
                     quiz.questions.map((q, i) => `
                     <fieldset class="bg-slate-50 p-4 rounded-xl border border-slate-200" id="qbox-${q.id}">
-                        <legend class="sr-only">שאלה ${i + 1}</legend>
+                        <legend class="sr-only">${T.questionN(i + 1)}</legend>
                         <p class="font-semibold text-slate-800 mb-2">${i + 1}. ${escapeHtml(q.question)}</p>
                         ${shuffle(q.options).map((o, j) => `
-                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="${q.id}" value="${escapeHtml(o.id)}" required class="ml-2 accent-blue-600"> ${letters[j]}) ${escapeHtml(o.text)}</label>`).join('')}
+                        <label class="block mt-2 text-sm text-slate-700 cursor-pointer"><input type="radio" name="${q.id}" value="${escapeHtml(o.id)}" required class="me-2 accent-blue-600"> ${letters[j]}) ${escapeHtml(o.text)}</label>`).join('')}
                         <div class="q-feedback hidden mt-3 text-sm rounded-lg p-2"></div>
                     </fieldset>`).join('');
                 submitBtn.disabled = false;
             } catch (e) {
                 console.error(e);
-                qContainer.innerHTML = `<p class="text-sm text-red-700">לא הצלחנו לטעון את המבחן. נסו לבחור את המודול שוב.</p>`;
+                qContainer.innerHTML = `<p class="text-sm text-red-700">${T.quizLoadFail}</p>`;
             }
         }
 
@@ -528,24 +739,22 @@
             window.lockedModuleNumber = mod.moduleNumber;
             document.getElementById("content-area").classList.add("hidden");
             document.getElementById("locked-area").classList.remove("hidden");
-            document.getElementById("locked-title").innerText = `יחידה ${mod.moduleNumber}: ${mod.title}`;
-            document.getElementById("locked-text").innerText =
-                `${siteConfig.freeModules} המודולים הראשונים פתוחים לכולם. המודול הזה ושאר מודולי ההמשך זמינים לרוכשי הקורס המלא` +
-                (siteConfig.price ? `, בתשלום חד-פעמי של ${siteConfig.price}.` : '.');
+            document.getElementById("locked-title").innerText = T.unitTitle(mod.moduleNumber, mod.title);
+            document.getElementById("locked-text").innerText = T.lockedText(siteConfig.freeModules, siteConfig.price);
             const signedIn = Boolean(currentUser.email);
             document.getElementById("locked-signin").classList.toggle("hidden", signedIn);
             const who = document.getElementById("locked-signed-in-as");
             who.classList.toggle("hidden", !signedIn);
-            who.innerHTML = signedIn ? `מחוברים כ-<bdi dir="ltr">${escapeHtml(currentUser.email)}</bdi>. הרכישה תיפתח לחשבון הזה.` : '';
+            who.innerHTML = signedIn ? T.signedInAs(`<bdi dir="ltr">${escapeHtml(currentUser.email)}</bdi>`) : '';
             // קוד גישה רלוונטי רק כשיש רכישה; לפני כן מוצגת רשימת ההמתנה
             document.getElementById("access-form").classList.toggle("hidden", !signedIn || !siteConfig.checkoutUrl);
             const link = document.getElementById("checkout-link");
             if (siteConfig.checkoutUrl && signedIn) {
                 link.href = siteConfig.checkoutUrl;
-                link.innerText = siteConfig.price ? `לרכישת הקורס המלא (${siteConfig.price})` : 'לרכישת הקורס המלא';
+                link.innerText = T.buy(siteConfig.price);
                 link.classList.remove("hidden");
                 document.getElementById("checkout-email-note").innerHTML =
-                    `בדף התשלום השתמשו באותו אימייל: <bdi dir="ltr" class="font-semibold">${escapeHtml(currentUser.email)}</bdi>. כך הקורס ייפתח אוטומטית אחרי התשלום.`;
+                    T.emailNote(`<bdi dir="ltr" class="font-semibold">${escapeHtml(currentUser.email)}</bdi>`);
                 document.getElementById("checkout-after").classList.remove("hidden");
                 document.getElementById("paid-check-msg").classList.add("hidden");
             } else {
@@ -555,8 +764,7 @@
             // עוד אין קישור רכישה - במקומו רשימת המתנה (מבחן ביקוש)
             const wl = document.getElementById("waitlist-box");
             wl.classList.toggle("hidden", !signedIn || Boolean(siteConfig.checkoutUrl));
-            document.getElementById("waitlist-text").innerText =
-                `הקורס המלא (כל ${allModules.length} השיעורים${siteConfig.price ? ', ב-' + siteConfig.price : ''}) ייפתח לרכישה בקרוב. הצטרפו לרשימה ונעדכן אתכם ראשונים.`;
+            document.getElementById("waitlist-text").innerText = T.waitlistText(allModules.length, siteConfig.price);
             renderWaitlistState();
             document.getElementById("access-message").classList.add("hidden");
             renderGoogleButtons();
@@ -571,7 +779,7 @@
             if (currentUser.onWaitlist) {
                 btn.classList.add("hidden");
                 msg.className = "mt-2 text-sm font-semibold text-emerald-800";
-                msg.innerText = "✓ אתם ברשימה. נעדכן אתכם כשהקורס המלא ייפתח.";
+                msg.innerText = T.onWaitlist;
             } else {
                 btn.classList.remove("hidden");
                 msg.classList.add("hidden");
@@ -591,7 +799,7 @@
                     body: JSON.stringify({ passed })
                 });
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.error || 'ההרשמה נכשלה. נסו שוב.');
+                if (!res.ok) throw new Error(data.error || T.waitlistFailed);
                 currentUser.onWaitlist = true;
                 renderWaitlistState();
             } catch (e) {
@@ -615,7 +823,7 @@
                     selectModule(reopen);
                 } else {
                     msg.className = "mt-2 text-xs text-slate-700";
-                    msg.innerText = "התשלום עוד לא התקבל אצלנו. לפעמים זה לוקח דקה-שתיים - נסו שוב בעוד רגע. אם שילמתם עם אימייל אחר, פנו אלינו ונסדר את זה.";
+                    msg.innerText = T.notPaidYet;
                 }
             } finally {
                 btn.disabled = false;
@@ -632,7 +840,7 @@
             btn.disabled = true;
             msg.classList.remove("hidden");
             msg.className = "text-sm mt-2 text-slate-600";
-            msg.innerText = "בודק...";
+            msg.innerText = T.checking;
             try {
                 const response = await apiFetch("/api/access/redeem", {
                     method: "POST",
@@ -642,18 +850,18 @@
                 const res = await response.json();
                 if (!response.ok) {
                     msg.className = "text-sm mt-2 text-red-700";
-                    msg.innerText = res.error || "אירעה שגיאה. נסו שוב.";
+                    msg.innerText = res.error || T.genericError;
                     return;
                 }
                 input.value = "";
                 msg.className = "text-sm mt-2 text-green-700";
-                msg.innerText = "✅ הקוד אושר ונשמר בחשבון שלכם! כל המודולים פתוחים.";
+                msg.innerText = T.codeOk;
                 const reopen = window.lockedModuleNumber;
                 await loadModules();
                 if (reopen) selectModule(reopen);
             } catch (err) {
                 msg.className = "text-sm mt-2 text-red-700";
-                msg.innerText = "שגיאה בתקשורת מול השרת. נסו שוב.";
+                msg.innerText = T.networkError;
             } finally {
                 btn.disabled = false;
             }
@@ -673,7 +881,7 @@
 
             document.getElementById("prompt-scenarios").innerHTML = scenarios.map((s, i) => `
                 <label class="block p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm cursor-pointer hover:border-blue-400 transition-all">
-                    <input type="radio" name="prompt-scenario" value="${i}" class="ml-2 accent-blue-600"> ${escapeHtml(s)}
+                    <input type="radio" name="prompt-scenario" value="${i}" class="me-2 accent-blue-600"> ${escapeHtml(s)}
                 </label>`).join('');
         }
 
@@ -685,11 +893,11 @@
             const wordCount = trimmed.split(/\s+/).filter(Boolean).length;
 
             const components = [
-                { label: 'הגדרת תפקיד/פרסונה (Role)', patterns: [/\bact as\b/i, /\byou are\b/i, /role\s*[:\-]/i, /פעל\s*כ/, /תפקידך/, /בתור\s/, /כמומחה/] },
-                { label: 'הקשר ורקע (Context)', patterns: [/\bcontext\b/i, /\bbackground\b/i, /\bbecause\b/i, /context\s*[:\-]/i, /הקשר/, /רקע/, /מכיוון ש/, /לאור\s/] },
-                { label: 'הגדרת המשימה (Objective)', patterns: [/objective\s*[:\-]/i, /task\s*[:\-]/i, /\b(write|analyze|create|generate|summarize|build)\b/i, /המשימה/, /נתח|כתוב|בנה|צור|סכם|הפק/] },
-                { label: 'מגבלות (Constraints)', patterns: [/constraints?\s*[:\-]/i, /\b(do not|don't|must not|no more than|maximum|max)\b/i, /מגבלות|אל תכלול|אל תוסיף|לכל היותר|מקסימום|עד\s*\d/] },
-                { label: 'פורמט פלט (Output Format)', patterns: [/format\s*[:\-]/i, /\b(table|bullet|json|list)\b/i, /פורמט|טבלה|רשימה|נקודות/] }
+                { label: T.ppLabels.role, patterns: [/\bact as\b/i, /\byou are\b/i, /role\s*[:\-]/i, /פעל\s*כ/, /תפקידך/, /בתור\s/, /כמומחה/] },
+                { label: T.ppLabels.context, patterns: [/\bcontext\b/i, /\bbackground\b/i, /\bbecause\b/i, /context\s*[:\-]/i, /הקשר/, /רקע/, /מכיוון ש/, /לאור\s/] },
+                { label: T.ppLabels.objective, patterns: [/objective\s*[:\-]/i, /task\s*[:\-]/i, /\b(write|analyze|create|generate|summarize|build)\b/i, /המשימה/, /נתח|כתוב|בנה|צור|סכם|הפק/] },
+                { label: T.ppLabels.constraints, patterns: [/constraints?\s*[:\-]/i, /\b(do not|don't|must not|no more than|maximum|max)\b/i, /מגבלות|אל תכלול|אל תוסיף|לכל היותר|מקסימום|עד\s*\d/] },
+                { label: T.ppLabels.format, patterns: [/format\s*[:\-]/i, /\b(table|bullet|json|list)\b/i, /פורמט|טבלה|רשימה|נקודות/] }
             ];
 
             const missing = [];
@@ -711,20 +919,20 @@
 
             if (!text.trim()) {
                 resultBox.className = "mt-4 p-4 rounded-lg border text-sm bg-amber-50 text-amber-800 border-amber-200";
-                resultBox.innerHTML = "לפני הבדיקה, כתבו קודם את הפרומפט שלכם בתיבת הטקסט.";
+                resultBox.innerHTML = T.ppEmpty;
                 return;
             }
 
             const result = evaluatePromptQuality(text);
             if (result.isGood) {
                 resultBox.className = "mt-4 p-4 rounded-lg border text-sm bg-green-50 text-green-800 border-green-200";
-                resultBox.innerHTML = `<b>✅ פרומפט טוב!</b><p class="mt-1">הפרומפט שלכם כולל ${result.found} מתוך ${result.total} מרכיבי ליבה, ובאורך מספק (${result.wordCount} מילים). עבודה מצוינת!</p>`;
+                resultBox.innerHTML = T.ppGood(result.found, result.total, result.wordCount);
             } else {
                 resultBox.className = "mt-4 p-4 rounded-lg border text-sm bg-amber-50 text-amber-800 border-amber-200";
                 let issuesHtml = "";
-                if (result.tooShort) issuesHtml += `<li>הפרומפט קצר מדי (${result.wordCount} מילים) - נסו לפרט יותר.</li>`;
-                result.missing.forEach(m => issuesHtml += `<li>חסר מרכיב: ${m}</li>`);
-                resultBox.innerHTML = `<b>⚠️ עוד לא מושלם</b><p class="mt-1">נמצאו ${result.found} מתוך ${result.total} מרכיבי ליבה. הבעיות שנמצאו:</p><ul class="list-disc pr-5 mt-1 space-y-0.5">${issuesHtml}</ul>`;
+                if (result.tooShort) issuesHtml += `<li>${T.ppTooShort(result.wordCount)}</li>`;
+                result.missing.forEach(m => issuesHtml += `<li>${escapeHtml(T.ppMissing(m))}</li>`);
+                resultBox.innerHTML = `${T.ppNotYet(result.found, result.total)}<ul class="list-disc ps-5 mt-1 space-y-0.5">${issuesHtml}</ul>`;
             }
         });
 
@@ -744,19 +952,19 @@
             });
 
             submitBtn.disabled = true;
-            submitBtn.innerText = "בודק...";
+            submitBtn.innerText = T.checking;
             try {
                 const response = await apiFetch("/api/submissions", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ studentName, moduleNumber, answers })
+                    body: JSON.stringify({ studentName, moduleNumber, answers, lang: LANG })
                 });
                 const res = await response.json();
                 resBox.classList.remove("hidden");
 
                 if (!response.ok) {
                     resBox.className = "mt-4 p-4 rounded-xl border bg-red-50 text-red-800 border-red-200";
-                    resBox.innerText = res.error || "אירעה שגיאה בבדיקת המבחן.";
+                    resBox.innerText = res.error || T.quizError;
                     return;
                 }
 
@@ -772,27 +980,27 @@
                         ? "q-feedback mt-3 text-sm rounded-lg p-2 bg-green-50 text-green-800"
                         : "q-feedback mt-3 text-sm rounded-lg p-2 bg-red-50 text-red-800";
                     box.innerHTML = r.isCorrect
-                        ? `✅ נכון. ${escapeHtml(r.explanation)}`
-                        : `❌ התשובה הנכונה: <b>${escapeHtml(r.correctAnswer)}</b><br>${escapeHtml(r.explanation)}`;
+                        ? `✅ ${T.correct} ${escapeHtml(r.explanation)}`
+                        : `❌ ${T.correctAnswerIs} <b>${escapeHtml(r.correctAnswer)}</b><br>${escapeHtml(r.explanation)}`;
                 });
 
                 resBox.className = res.passed
                     ? "mt-4 p-4 rounded-xl border bg-green-50 text-green-800 border-green-200"
                     : "mt-4 p-4 rounded-xl border bg-amber-50 text-amber-800 border-amber-200";
                 resBox.innerHTML = `
-                    <h3 class="font-bold text-lg border-b border-current pb-1 mb-2">📊 תוצאות המבדק: ${res.score}/100</h3>
-                    <p class="text-sm">${res.correctCount} מתוך ${res.total} תשובות נכונות. ${res.passed ? '🎉 עברתם את המודול!' : `ציון המעבר הוא ${res.passingScore} - עברו על ההסברים ליד כל שאלה ונסו שוב.`}</p>
-                    <p class="text-[11px] text-gray-500 mt-3 font-normal">${res.recorded ? 'הציון נרשם בגיליון הקורס.' : 'הציון נשמר בדפדפן שלכם.'}</p>
+                    <h3 class="font-bold text-lg border-b border-current pb-1 mb-2">${T.resultsTitle(res.score)}</h3>
+                    <p class="text-sm">${T.resultsText(res.correctCount, res.total, res.passed, res.passingScore)}</p>
+                    <p class="text-[11px] text-gray-500 mt-3 font-normal">${res.recorded ? T.recorded : T.savedLocally}</p>
                 `;
                 resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 setTimeout(maybeShowTipModal, 1500);
             } catch (err) {
                 resBox.classList.remove("hidden");
                 resBox.className = "mt-4 p-4 rounded-xl border bg-red-50 text-red-800 border-red-200";
-                resBox.innerText = "שגיאה בתקשורת מול השרת. בדקו את החיבור ונסו שוב.";
+                resBox.innerText = T.serverError;
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerText = "הגשת המבחן לבדיקה";
+                submitBtn.innerText = T.submit;
             }
         });
 
