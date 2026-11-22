@@ -51,7 +51,7 @@ test('config exposes paywall settings and the Google client id', async () => {
     const res = await (await fetch(`${base}/api/config`)).json();
     assert.deepStrictEqual(res, {
         paywallEnabled: true, freeModules: 3, checkoutUrl: 'https://example.com/buy',
-        price: '35 ₪', googleClientId: 'client-id.apps.googleusercontent.com', promoUntil: null, tipPhone: null, languages: ['he']
+        price: '35 ₪', googleClientId: 'client-id.apps.googleusercontent.com', promoUntil: null, tipPhone: null, languages: ['he', 'en']
     });
 });
 
