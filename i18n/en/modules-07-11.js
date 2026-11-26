@@ -4,51 +4,21 @@
 const modules = {
     7: {
         title: 'DeepSeek',
-        description: 'Capabilities, limitations, coding, logic and comparison with other models.',
-        content: `<h3>📘 Lesson 7: The Reasoning Model Revolution and DeepSeek</h3>
-                  <p>DeepSeek changed the rules of the game in the AI world by proving that cutting-edge performance can be reached with low development costs, using advanced open-source architectures (MoE - Mixture of Experts).</p>
-
-                  <h4>🧠 Reasoning Models (DeepSeek-R1)</h4>
-                  <p>Regular models try to produce the next word right away. Reasoning models, on the other hand, use a Reinforcement Learning loop and run a long internal thinking process before they give an answer.</p>
-                  <p>In the interface you'll see a dedicated area called "Thought", where the model argues with itself, spots logical errors, checks alternative ways to solve the problem, and only when it is confident does it show the final output. This process gives a big boost to performance in math, hard logic and writing complex code.</p>
-
-                  <div style="background-color:#f0fdf4; border-left:4px solid #16a34a; padding:10px; margin-top:15px; border-radius:4px;">
-                      <b>🏋️ Try it yourself:</b> Go to DeepSeek, turn on "DeepSeek-R1" mode (Reasoning), and give it a complex programming task or a hard logic puzzle. Follow its thinking process (Thought) to see how it breaks problems down.
-                  </div>`
+        description: 'Test DeepSeek thinking mode on a problem with an independent answer key.',
+        content: `<h3>Lesson 7. When is thinking mode worth the wait?</h3>
+                <p>Reasoning models can spend additional computation on a task before returning an answer. DeepSeek offers thinking mode. Multi-step planning, mathematics and debugging are good candidates for a comparison. Record both the accuracy and the time it took.</p>
+                <p>Model architecture and user settings are different concepts. In a mixture-of-experts (MoE) architecture, a router selects a subset of expert networks for each token. Thinking mode changes how the model approaches a request. Neither tells you whether any individual answer is correct.</p>
+                <p>State the constraints explicitly and ask for a result you can test. For a scheduling problem, a proposed timetable lets you check each dependency yourself.</p>
+                <p><a href="https://api-docs.deepseek.com/guides/thinking_mode/">DeepSeek thinking mode</a></p>`
     },
     8: {
         title: 'Comparing Models',
-        description: 'Which model fits which task, and practicing prompts side by side.',
-        content: `<h3>📘 Lesson 8: A Decision Matrix for Matching the Best Model to the Task</h3>
-                  <p>As expert prompt engineers, you must not rely on just one tool. You need to choose the model based on the type of task and the model's strengths:</p>
-
-                  <table border="1" style="width:100%; text-align:left; border-collapse:collapse; margin-top:15px; margin-bottom:15px; font-size:0.95em;">
-                    <tr style="background-color:#1e40af; color:white;">
-                      <th style="padding:10px; border:1px solid #cbd5e1;">Model</th>
-                      <th style="padding:10px; border:1px solid #cbd5e1;">Core strengths</th>
-                      <th style="padding:10px; border:1px solid #cbd5e1;">When should you use it?</th>
-                    </tr>
-                    <tr>
-                      <td style="padding:10px; border:1px solid #cbd5e1;"><b>Claude (Anthropic)</b></td>
-                      <td style="padding:10px; border:1px solid #cbd5e1;">Writing code from scratch, strong logical understanding, very high-quality creative writing.</td>
-                      <td style="padding:10px; border:1px solid #cbd5e1;">Building apps, writing long articles, analyzing complex documents.</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:10px; border:1px solid #cbd5e1;"><b>ChatGPT (OpenAI)</b></td>
-                      <td style="padding:10px; border:1px solid #cbd5e1;">Analyzing data and files (built-in Python), connecting to automations, generating images (DALL-E).</td>
-                      <td style="padding:10px; border:1px solid #cbd5e1;">Analyzing Excel files and reports, varied everyday work, building Custom GPTs.</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:10px; border:1px solid #cbd5e1;"><b>DeepSeek-R1</b></td>
-                      <td style="padding:10px; border:1px solid #cbd5e1;">Deep thinking (Reasoning), solving logic and math problems, especially cost-effective.</td>
-                      <td style="padding:10px; border:1px solid #cbd5e1;">Debugging (fixing broken code), math, cracking code architectures.</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:10px; border:1px solid #cbd5e1;"><b>Gemini (Google)</b></td>
-                      <td style="padding:10px; border:1px solid #cbd5e1;">A huge context window (millions of tokens), seamless sync with Google Workspace.</td>
-                      <td style="padding:10px; border:1px solid #cbd5e1;">Scanning and summarizing entire books of knowledge, working with Google Drive files and emails.</td>
-                    </tr>
-                  </table>`
+        description: 'Run a small, repeatable comparison using a scoring rubric.',
+        content: `<h3>Lesson 8. Choose a model with a small experiment</h3>
+                <p>A team wants to turn meeting notes into action items. The right tool must copy owners and due dates accurately, flag missing details and handle a changed decision. Write down these criteria before reading any outputs.</p>
+                <ol><li>Prepare three notes: an explicit assignment, a missing owner and a revised deadline.</li><li>Give two tools the same notes and instructions in fresh chats. Record the model, date and enabled tools.</li><li>Hide the model names while scoring. Award one point for each correctly extracted field. Record unsupported details separately.</li><li>Repeat the comparison once. Explain your choice using the scores, time and editing effort.</li></ol>
+                <p>Compare like with like. If one tool has access to the original document and the other has only an excerpt, the result measures that difference as well.</p>
+                <p><a href="https://developers.openai.com/api/docs/guides/prompting">Prompt testing and iteration</a></p>`
     },
     9: {
         title: 'AI in the Real World',
@@ -59,8 +29,8 @@ const modules = {
                   <h4>🚀 Examples of real-world applications:</h4>
                   <ul>
                       <li><b>Marketing and content creation:</b> Creating a comprehensive monthly content calendar for social media. By feeding in the customer persona and strict constraints, the model produces a complete table with ideas, headlines and ready-to-publish copy.</li>
-                      <li><b>Faster software development:</b> Using AI-based assistants such as GitHub Copilot or Cursor, which let developers write code with natural-language prompts directly inside their development environment, cutting development time by tens of percent.</li>
-                      <li><b>Automated customer service:</b> Deploying small language models (SLMs) as chatbots on company websites. They draw on the organization's FAQ files and answer customers with human-level accuracy.</li>
+                      <li><b>Faster software development:</b> Using AI-based assistants such as GitHub Copilot or Cursor, which let developers write code with natural-language prompts directly inside their development environment, which can speed up routine edits when suggestions pass review.</li>
+                      <li><b>Automated customer service:</b> Deploying small language models (SLMs) as chatbots on company websites. They draw on the organization's FAQ files and draft replies that can be checked against the current policy and escalated when a question falls outside it.</li>
                   </ul>`
     },
     10: {
@@ -77,7 +47,7 @@ const modules = {
                   <ul>
                       <li><b>Agent 1 (the Developer):</b> Receives the request and writes the raw code.</li>
                       <li><b>Agent 2 (the Software Tester - QA):</b> Receives the code from the developer, runs logic checks and looks for bugs or security holes.</li>
-                      <li><b>Agent 3 (the Architect / Product Manager):</b> Checks whether the code meets all of the user's original requirements. If problems are found, it sends the code back to the developer agent with feedback for fixing. All of this happens completely automatically.</li>
+                      <li><b>Agent 3 (the Architect / Product Manager):</b> Checks whether the code meets all of the user's original requirements. If problems are found, it sends the code back to the developer agent with feedback for fixing. Set a retry limit, log the checks and send unresolved issues to a reviewer.</li>
                   </ul>`
     },
     11: {
@@ -90,10 +60,10 @@ const modules = {
                   <p>Most APIs today (including language model APIs) work on the REST principle: you send an HTTP request to a specific address (an <b>Endpoint</b>), using a specific method (<code>GET</code> to get information, <code>POST</code> to send information), and you get back a response in <b>JSON</b> format. This is exactly how the server of this LMS works: the path <code>/api/modules</code> is a GET Endpoint that returns the list of modules, and the path <code>/api/submissions</code> is a POST Endpoint that receives quiz answers and returns a score.</p>
 
                   <h4>🔑 API Keys and why they are secret</h4>
-                  <p>So that the API provider knows who is calling it (and can bill you or block misuse), every request is sent together with an <b>API key</b> - a secret string that is unique to your account. An API key is just like a password: you must <b>never</b> store it in code that gets pushed to GitHub (just as we saw in this course with the <code>.env</code> file that was accidentally exposed in the repo history) - it should be kept in environment variables only.</p>
+                  <p>So that the API provider knows who is calling it (and can bill you or block misuse), every request is sent together with an <b>API key</b> - a secret string that is unique to your account. An API key is just like a password: you must <b>never</b> store it in code that gets pushed to GitHub (just as we saw in this course with the <code>.env</code> file that was accidentally exposed in the repo history) - store it on the server using a secret manager or securely configured environment variable.</p>
 
                   <h4>🧠 How this works for AI models specifically</h4>
-                  <p>When you call the API of Claude, ChatGPT or Gemini, you send a POST request with the prompt, the name of the model you want, and parameters such as <code>temperature</code> (creativity level) and <code>max_tokens</code> (maximum response length). The response comes back as JSON with the text the model generated.</p>
+                  <p>When you call the API of Claude, ChatGPT or Gemini, you send a POST request with the prompt, the name of the model you want, and parameters such as <code>temperature</code> (creativity level) and <code>max_tokens</code> (maximum response length). Check the provider documentation for the authentication header, supported parameters and response shape. This example illustrates a request and uses a placeholder URL.</p>
                   <pre dir="ltr" style="background-color:#f3f4f6; padding:12px; border-radius:6px; font-family:monospace; direction:ltr; text-align:left; overflow-x:auto;">
 POST https://api.example.com/v1/messages
 Headers: { "x-api-key": "YOUR_SECRET_KEY", "content-type": "application/json" }
@@ -107,41 +77,28 @@ Body: { "model": "claude-x", "max_tokens": 300, "messages": [{"role":"user","con
 
 const extras = {
     7: {
-        cases: `
-                    <h3>🔥 Case Studies and Templates: DeepSeek and Reasoning Models</h3>
-                    <h4>💡 Debugging broken code with Reasoning:</h4>
-                    <p>When a regular model "guesses" a wrong fix for a bug, a Reasoning model goes through every line of code in its visible thinking process before suggesting a solution - which significantly reduces mistakes.</p>
-                    <h4>📋 A prompt template for deep debugging:</h4>
-                    <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono text-left overflow-x-auto" dir="ltr">
-Here is a function that throws an error: [paste code].
-Think step by step through the execution before answering.
-Identify the exact line causing the failure and explain why, then provide the fixed code.</pre>`,
-        practice: `
-                    <h3>🏋️ Hands-on Exercise: A Regular Model vs. a Reasoning Model</h3>
-                    <p><b>Your task:</b> Take a non-trivial math logic puzzle and run it on a regular model (Zero-shot) and on DeepSeek-R1 in Reasoning mode. Follow R1's "Thought" process and check whether its systematic approach led to a more accurate answer.</p>`,
+        cases: `<h3>Case. Can two reviewers finish earlier?</h3>
+                <p>A team must review three files. File A takes 20 minutes and B takes 15. C takes 10 minutes and can start only after A. With two reviewers, ask for start and end times for each file.</p>
+                <p>A and B can start together. C follows A, so the earliest finish is minute 30. A schedule claiming 25 minutes violates the dependency.</p>`,
+        practice: `<h3>Lab. Check a schedule against its constraints</h3>
+                <p>Run the file-review case in two fresh chats with thinking mode on and off where available. Use the same task and time each run. Change the dependency so that C must follow both A and B, then change B to 35 minutes.</p>
+                <p><b>Check:</b> With both dependencies and the longer B, C starts no earlier than minute 35 and ends at minute 45. Score feasibility and finish time separately. Record when the extra computation changed the result.</p>`,
         promptScenarios: [
-            'Ask DeepSeek-R1 to solve a complex logic puzzle in Reasoning mode.',
-            'Ask for deep debugging of broken code, with a line-by-line explanation before the solution is given.',
-            'Build a prompt that compares a regular model\'s answer with a Reasoning model\'s answer to the same math problem.'
+            'Ask DeepSeek for a feasible review schedule and a finish time.',
+            'Ask for a minimal failing input and a test that checks a proposed code fix.',
+            'Compare two answers to a scheduling problem using the same constraints.'
         ]
     },
     8: {
-        cases: `
-                    <h3>🔥 Case Studies and Templates: Choosing the Right Model for the Task</h3>
-                    <h4>💡 Scenario: a mixed project that needs several kinds of work</h4>
-                    <p>A product team needs to analyze an Excel file of user data, write code for a dashboard, and summarize an entire policy book. Each step is routed to the model best suited to it, instead of using one model for every task.</p>
-                    <h4>📋 A template for routing tasks between models:</h4>
-                    <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono text-left overflow-x-auto" dir="ltr">
-Step 1 (ChatGPT): Analyze users.csv and extract 3 key trends.
-Step 2 (Claude): Build the dashboard UI code based on Step 1's findings.
-Step 3 (Gemini): Summarize the 200-page policy document via Drive.</pre>`,
-        practice: `
-                    <h3>🏋️ Hands-on Exercise: Mapping a Task to the Best Model</h3>
-                    <p><b>Your task:</b> Take a real project from your work and break it into steps. For each step, decide which model (Claude / ChatGPT / Gemini / DeepSeek) fits best based on the core strengths you've learned, and explain your choice.</p>`,
+        cases: `<h3>Case. One report, several tool requirements</h3>
+                <p>For a spreadsheet, check whether the tool can calculate and expose its results. For a quiz, check whether learners can interact with it. For a policy summary, check whether you can trace the answer to the current document. Any candidate that meets the requirement can enter your comparison.</p>`,
+        practice: `<h3>Lab. A blind comparison with an answer key</h3>
+                <p>Use three notes: “Maya will send the agenda by Friday.” “Send the slides by Tuesday; owner unassigned.” “Earlier draft: Lee will book the room on Monday. Approved update: Lee will book it on Wednesday.”</p>
+                <p>Run the same extraction prompt in two tools. Score owner and deadline separately for each row, for a total of six points. The expected pairs are Maya/Friday, unassigned/Tuesday and Lee/Wednesday. If both score six, compare editing time and repeat on a new note.</p>`,
         promptScenarios: [
             'Write a prompt that routes a complex task (data analysis, writing code and summarizing a document) between several different models.',
-            'Choose the right model for a task of writing code from scratch, and explain your choice in the prompt itself.',
-            'Choose the right model for a task of summarizing a huge policy book, and explain your choice in the prompt itself.'
+            'Write a prompt and two test cases for comparing code from two models.',
+            'Define three criteria for scoring summaries of the same policy excerpt.'
         ]
     },
     9: {
@@ -155,9 +112,10 @@ Step 3 (Gemini): Summarize the 200-page policy document via Drive.</pre>`,
 [Context]: Target audience is [persona]. Brand tone is [tone].
 [Objective]: Build a 4-week content calendar (Instagram + LinkedIn).
 [Output Format]: Table with columns: Week, Platform, Headline, Post Copy.</pre>`,
-        practice: `
-                    <h3>🏋️ Hands-on Exercise: Automating a Repetitive Task</h3>
-                    <p><b>Your task:</b> Identify a repetitive, tedious task from your work or studies (for example: replying to similar emails, sorting incoming requests, writing meeting summaries). Build an engineered prompt that turns this task into a one-minute process instead of twenty.</p>`,
+        practice: `<h3>Lab. Turn verified data into a decision slide with Canva AI</h3>
+                <p>A training organizer has one minute to brief a director. Use these figures: April had 15 attendees out of 20 registrations. May had 24 out of 40. First draft a headline, one chart and a question for the director. Then use the brief to generate a presentation draft in Canva AI.</p>
+                <p><b>Check the slide:</b> The counts rose by nine and the rate fell by 15 percentage points. Check each chart label, remove any invented cause, and deliver one slide with one decision question. Example: “Should we ask May registrants why they missed the session?”</p>
+                <p><a href="https://www.canva.com/help/using-magic-presentations/">Creating presentations with Canva AI</a></p>`,
         promptScenarios: [
             'Build a monthly social media content calendar, with a target audience persona and strict brand constraints.',
             'Build a prompt that automates replies to recurring customer service emails.',
@@ -175,9 +133,11 @@ Agent 1 (Developer): Write the code for [feature].
 Agent 2 (QA): Review Agent 1's code for bugs and security issues. List them.
 Agent 3 (Product Manager): Check if the fixed code meets the original requirements.
 If not, send it back to Agent 1 with specific feedback.</pre>`,
-        practice: `
-                    <h3>🏋️ Hands-on Exercise: Planning an Agent Workflow</h3>
-                    <p><b>Your task:</b> Plan a workflow of 3 AI agents for a task from your work. For each agent, define: its role, the input it receives, and the output it passes on. Run the workflow manually with a single model (open a new chat for each "agent") and check whether the final result is better than asking a single question.</p>`,
+        practice: `<h3>Lab. Design a draft-only follow-up with Make</h3>
+                <p>A training team keeps feedback in a spreadsheet. Design a Make scenario in which a new row supplies a comment, an AI step drafts a reply, and a reviewer sees the draft. Give the AI only the comment and the published workshop policy. A workflow with fixed steps is enough here. An agent becomes useful if it must choose a tool or a next step.</p>
+                <p>Test with three invented rows: “Where are the slides?” with an available link, an empty comment, and a refund request outside the supplied policy. Expect a draft containing the supplied link, a skipped row, and a review flag respectively. Use test data and a draft action. Count the drafts before and after running the same row again; one response per row is the acceptance criterion.</p>
+                <p>If Make is unavailable, trace the same inputs on paper and record the expected action at each step.</p>
+                <p><a href="https://www.make.com/integrations/google-sheets/google-email">Google Sheets and Gmail in Make</a></p>`,
         promptScenarios: [
             'Plan a 3-agent workflow (developer, QA and product manager) for developing a new feature.',
             'Plan an agent workflow for an automated end-to-end hiring process.',
@@ -210,36 +170,36 @@ const quizzes = {
     7: [
         {
             id: 'q1',
-            question: 'What are models like DeepSeek-R1, which run a long internal thinking process before giving the final answer, called?',
+            question: 'Which term describes models that can spend additional computation on a task before answering?',
             options: [
-                { id: 'a', text: 'Vision Models' },
-                { id: 'b', text: 'Reasoning Models' },
-                { id: 'c', text: 'Translation Models' },
-                { id: 'd', text: 'Small Language Models (SLMs)' }
+                { id: 'a', text: 'Vision models' },
+                { id: 'b', text: 'Reasoning models' },
+                { id: 'c', text: 'Translation models' },
+                { id: 'd', text: 'Speech encoders' }
             ],
-            explanation: 'Reasoning models "think" before they answer: they check for errors and look at alternative ways to solve the problem.'
+            explanation: 'Reasoning models are designed to use extra computation on tasks such as planning or mathematics.'
         },
         {
             id: 'q2',
-            question: 'According to the lesson, which tasks do reasoning models especially excel at?',
+            question: 'Which task in the lesson provides a useful test of thinking mode?',
             options: [
-                { id: 'a', text: 'Math, hard logic and writing complex code.' },
-                { id: 'b', text: 'Generating images.' },
-                { id: 'c', text: 'Extra-fast answers to simple questions.' },
-                { id: 'd', text: 'Video editing.' }
+                { id: 'a', text: 'Schedule dependent jobs and check the earliest feasible finish.' },
+                { id: 'b', text: 'Pick a background color.' },
+                { id: 'c', text: 'Copy a short label.' },
+                { id: 'd', text: 'Play a recorded sound.' }
             ],
-            explanation: 'The long thinking process improves performance on problems that require several steps of reasoning.'
+            explanation: 'The schedule has explicit constraints and an answer that can be checked independently.'
         },
         {
             id: 'q3',
-            question: 'According to the lesson, what did DeepSeek demonstrate to the AI world?',
+            question: 'A takes 20 minutes, B takes 35 and C takes 10. Two reviewers are available. C follows both. What is the earliest finish?',
             options: [
-                { id: 'a', text: 'That very high performance can be reached with relatively low development costs.' },
-                { id: 'b', text: 'That language models no longer need training data.' },
-                { id: 'c', text: 'That only American companies can develop advanced models.' },
-                { id: 'd', text: 'That reasoning models are always faster than regular models.' }
+                { id: 'a', text: '45 minutes.' },
+                { id: 'b', text: '35 minutes.' },
+                { id: 'c', text: '30 minutes.' },
+                { id: 'd', text: '65 minutes.' }
             ],
-            explanation: 'The lesson presented this as a game changer, alongside the use of the MoE architecture.'
+            explanation: 'A and B can run together. C starts at minute 35 and ends at minute 45.'
         },
         {
             id: 'q4',
@@ -256,36 +216,36 @@ const quizzes = {
     8: [
         {
             id: 'q1',
-            question: 'According to the comparison matrix in the lesson, which model is mainly recommended for building apps and writing code from scratch?',
+            question: 'What should you prepare before reading either output?',
             options: [
-                { id: 'a', text: 'Claude' },
-                { id: 'b', text: 'Gemini' },
-                { id: 'c', text: 'DeepSeek-R1' },
-                { id: 'd', text: 'There\'s no difference - all models are the same' }
+                { id: 'a', text: 'Test inputs, expected fields and a scoring rubric.' },
+                { id: 'b', text: 'The name of the winning model.' },
+                { id: 'c', text: 'A longer answer from your favorite tool.' },
+                { id: 'd', text: 'A prettier chart.' }
             ],
-            explanation: 'In the matrix, Claude is marked as strong at writing code from scratch and analyzing complex documents.'
+            explanation: 'A rubric written in advance keeps the selection tied to the task.'
         },
         {
             id: 'q2',
-            question: 'According to the matrix, which model is especially suited to summarizing an entire book of knowledge and working with Google Drive files?',
+            question: 'One tool saw the full minutes and the other only a summary. What should you do to compare the models on extraction?',
             options: [
-                { id: 'a', text: 'DeepSeek-R1' },
-                { id: 'b', text: 'Gemini' },
-                { id: 'c', text: 'Claude' },
-                { id: 'd', text: 'ChatGPT' }
+                { id: 'a', text: 'Ignore the difference.' },
+                { id: 'b', text: 'Repeat with the same source and instructions.' },
+                { id: 'c', text: 'Choose the longer output.' },
+                { id: 'd', text: 'Score only the formatting.' }
             ],
-            explanation: 'Gemini stands out thanks to its large context window and its connection to Google Workspace.'
+            explanation: 'Equal source access removes a confounding difference between the runs.'
         },
         {
             id: 'q3',
-            question: 'According to the matrix, which task is DeepSeek-R1 especially suited to?',
+            question: 'The note says the owner is unassigned. Which output earns the owner point?',
             options: [
-                { id: 'a', text: 'Debugging broken code and math problems.' },
-                { id: 'b', text: 'Working with emails in Gmail.' },
-                { id: 'c', text: 'Building a Custom GPT.' },
-                { id: 'd', text: 'Generating marketing images.' }
+                { id: 'a', text: 'Unassigned.' },
+                { id: 'b', text: 'Maya, because she owns another task.' },
+                { id: 'c', text: 'The meeting organizer.' },
+                { id: 'd', text: 'The person who wrote the note.' }
             ],
-            explanation: 'Deep thinking (Reasoning) makes it a good fit for logic and math problems and for fixing code.'
+            explanation: 'An explicit missing value is the reference answer for this row.'
         },
         {
             id: 'q4',
@@ -388,7 +348,7 @@ const quizzes = {
                 { id: 'c', text: 'It deletes the project.' },
                 { id: 'd', text: 'It approves the code anyway.' }
             ],
-            explanation: 'This feedback loop is what makes the system autonomous and improves the result.'
+            explanation: 'The feedback loop enables another attempt. Set a retry limit and route unresolved issues to a reviewer.'
         }
     ],
     11: [
@@ -412,7 +372,7 @@ const quizzes = {
                 { id: 'c', text: 'In environment variables, outside the code saved in the repo.' },
                 { id: 'd', text: 'In the website\'s header.' }
             ],
-            explanation: 'An API key is like a password - keep it in environment variables only.'
+            explanation: 'An API key is like a password - use server-side secret storage.'
         },
         {
             id: 'q3',

@@ -13,7 +13,7 @@ const modules = {
         title: 'AI Foundations',
         description: 'What a language model is, how AI "thinks", and the golden rules.',
         content: `<h3>📘 Lesson 1: A Deep Introduction to LLMs and Core Principles</h3>
-                  <p>A Large Language Model (LLM) is an artificial neural network trained on enormous amounts of text. The model does not understand meaning the way a human does. Instead, at every moment it calculates which word (or token) is most likely to come next, based on the context you gave it.</p>
+                  <p>A Large Language Model (LLM) is an artificial neural network trained on enormous amounts of text. The model does not understand meaning the way a human does. Instead, at every moment it calculates a distribution of possible next tokens, based on the context you gave it.</p>
 
                   <h4>💡 How it works: tokenization and context</h4>
                   <p>When you type text, the model breaks it into small units called <b>tokens</b> (a word, part of a word or a single character). The model uses a mechanism called Attention to work out which words in the text are most relevant to each other.</p>
@@ -66,12 +66,12 @@ const quizzes = {
             id: 'q1',
             question: 'At the architecture level, what is a Large Language Model (LLM)?',
             options: [
-                { id: 'a', text: 'A statistical system that calculates the most likely next token, based on the context it was given.' },
+                { id: 'a', text: 'A neural network that estimates probabilities for possible next tokens given the context.' },
                 { id: 'b', text: 'Conscious software that understands meaning and emotions like a human.' },
                 { id: 'c', text: 'A database that retrieves ready-made answers by keyword.' },
                 { id: 'd', text: 'A search engine that returns the first result from the internet.' }
             ],
-            explanation: 'An LLM does not "understand" like a person - at each step it calculates the most likely next token given the context.'
+            explanation: 'During generation the model estimates next-token probabilities. The decoding settings affect which token is selected.'
         },
         {
             id: 'q2',

@@ -43,13 +43,13 @@ const modules = {
         title: 'Plugins and Extensions',
         description: 'How plugins extend AI capabilities, how they differ from MCP, and when to use each.',
         content: `<h3>📘 Lesson 14: Plugins and Extensions - Adding Capabilities Without Building Everything from Scratch</h3>
-                  <p>A <b>plugin</b> is an add-on component that extends the capabilities of an existing application without changing its core - just like a browser extension. In the AI world it comes in several forms: ChatGPT plugins (today Actions/Connectors), plugins for Claude Code (which include Skills, slash commands and subagents), and IDE extensions such as Copilot or Cursor.</p>
+                  <p>A <b>plugin</b> is an add-on component that extends the capabilities of an existing application without changing its core - just like a browser extension. In the AI world it comes in several forms: apps in ChatGPT, plugins for Claude Code (which include Skills, slash commands and subagents), and IDE extensions such as Copilot or Cursor.</p>
 
                   <h4>🆚 Plugin vs. MCP - what's the difference?</h4>
                   <p>It's easy to confuse the two because both "add capabilities" to the model, but the difference is fundamental:</p>
                   <ul>
-                      <li><b>MCP:</b> An open, standard protocol that doesn't depend on any vendor - any MCP server can work with any client that supports the protocol.</li>
-                      <li><b>Plugin:</b> Usually a proprietary mechanism of a specific vendor (for example, the ChatGPT plugin store) - it works only inside the system that built it, and sometimes uses MCP "under the hood".</li>
+                      <li><b>MCP:</b> An open, standard protocol that doesn't depend on any vendor - a compatible client can use the server capabilities it supports and is authorized to access.</li>
+                      <li><b>Plugin:</b> Usually a proprietary mechanism of a specific vendor (for example, an app directory inside a chat product) - it works only inside the system that built it, and sometimes uses MCP "under the hood".</li>
                   </ul>
 
                   <h4>🛠️ When to use each</h4>
@@ -81,7 +81,7 @@ const modules = {
                       <li><b>Give the model permission to say "I don't know":</b> Write explicitly: "If you're not sure, say that you don't know - don't guess".</li>
                       <li><b>Give it the material yourself (Grounding):</b> Paste in the document and instruct: "Answer only based on the attached text". This is much more reliable than asking it to answer "from memory".</li>
                       <li><b>Ask for an exact quote:</b> "Quote the exact sentence from the document that the answer is based on" - and then check that the sentence really is there.</li>
-                      <li><b>Verify every source yourself:</b> Open every link, look up every article or court ruling. A source you couldn't find doesn't exist as far as you're concerned.</li>
+                      <li><b>Verify every source yourself:</b> Open every link, look up every article or court ruling. If you cannot locate a source, mark the claim unverified.</li>
                       <li><b>The higher the risk, the stricter the check needs to be:</b> An idea for a post doesn't need verification; legal, medical or financial advice always needs to be checked against a reliable source or a professional.</li>
                   </ol>
 
@@ -166,9 +166,11 @@ Do not guess. Do not use outside knowledge.
 &lt;/doc&gt;
 
 Question: [your question]</pre>`,
-        practice: `<h3>🏋️ Hands-on Exercise: Catching the Model Making Things Up</h3>
-                <p><b>Your task:</b> Pick a topic you know well. Ask the model for "a list of 5 articles or books on the topic, with the author's name and year". Then check each item with a regular search and mark it: exists and accurate / exists but the details are wrong / doesn't exist at all.</p>
-                <p><b>Step 2:</b> Run the same request again, this time with the template from the "Case Studies" tab and with a real document that you pasted in yourself. Compare how many mistakes each version had.</p>`,
+        practice: `<h3>Lab. Audit a cited answer with Perplexity</h3>
+                <p>Ask Perplexity, “What did Google rename NotebookLM, when did Google announce the change, and which features does the announcement describe?” Request the original announcement. Pick three factual claims and open each cited page.</p>
+                <p>Record the claim, publisher, date, a short supporting passage and your verdict: supported, contradicted or insufficient evidence. A page that merely mentions the product is insufficient. An inaccessible source stays unverified. Compare one claim with the answer in a notebook containing only the announcement.</p>
+                <p><b>Submit:</b> Three evidence rows and a revised two-sentence answer. Use the <a href="https://blog.google/innovation-and-ai/products/gemini-notebook/notebooklm-gemini-notebook/">Google announcement</a> as the instructor key. The new name is Gemini Notebook and the announcement date is 16 July 2026.</p>
+                <p><a href="https://www.perplexity.ai/help-center/en/articles/10352903-what-is-pro-search">How Perplexity cites search results</a></p>`,
         promptScenarios: [
             'Write a prompt that asks the model to summarize an attached document, with an explicit constraint to answer only based on the document and to quote the exact sentence for every claim.',
             'Write a prompt for a customer service chatbot that instructs it to say "I don\'t know" and hand over to a human agent when the answer doesn\'t appear in the company\'s policy.',
@@ -199,7 +201,7 @@ const quizzes = {
                 { id: 'c', text: 'An Artifact' },
                 { id: 'd', text: 'A Custom GPT' }
             ],
-            explanation: 'An MCP server exposes a capability; an MCP client (for example, Claude Desktop) is what connects to it.'
+            explanation: 'An MCP server exposes a capability; a client inside the host connects to that server.'
         },
         {
             id: 'q3',
@@ -210,7 +212,7 @@ const quizzes = {
                 { id: 'c', text: 'A public library.' },
                 { id: 'd', text: 'A remote control.' }
             ],
-            explanation: 'Like USB-C: any MCP server can connect to any client that supports the protocol.'
+            explanation: 'The analogy describes a shared interface. Actual access depends on supported capabilities and permissions.'
         },
         {
             id: 'q4',
@@ -221,7 +223,7 @@ const quizzes = {
                 { id: 'c', text: 'Because it replaces the need for prompts.' },
                 { id: 'd', text: 'Because it only works on new computers.' }
             ],
-            explanation: 'Through MCP tools the agent gets real information and performs actions, instead of guessing.'
+            explanation: 'An MCP server can expose read or write tools. The host controls access and the application checks results.'
         }
     ],
     13: [

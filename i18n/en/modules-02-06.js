@@ -5,8 +5,8 @@ const modules = {
     2: {
         title: 'Anatomy of a Prompt',
         description: 'Role, Context, Objective, Constraints and output format.',
-        content: `<h3>📘 Lesson 2: The Structure of the Perfect Prompt (Component-Based Engineering)</h3>
-                  <p>To get accurate, consistent output every time, prompt engineers use a fixed structure made up of 5 core components:</p>
+        content: `<h3>📘 Lesson 2: Five components you can test</h3>
+                  <p>Use these five components as a checklist. Include the parts that help a reader carry out this particular task.</p>
 
                   <ol>
                       <li><b>Role (persona):</b> Tells the model which professional point of view to work from. <i>Example: "Act as a senior Full Stack developer with expertise in information security".</i></li>
@@ -31,72 +31,41 @@ const modules = {
     },
     3: {
         title: 'Professional Techniques',
-        description: 'Zero-shot, Few-shot, Chain Prompting and Meta Prompting.',
-        content: `<h3>📘 Lesson 3: Advanced Techniques - From a Simple Query to System Engineering</h3>
-                  <p>When tasks are complex or require mathematical and logical precision, we use advanced engineering techniques:</p>
-
-                  <h4>1. Zero-shot vs. Few-shot Prompting</h4>
-                  <p><b>Zero-shot:</b> Asking for the task directly (for example: "Translate this sentence into Arabic").<br>
-                  <b>Few-shot:</b> Giving examples inside the prompt to teach the model the pattern you want before it tackles the real task.</p>
-                  <i>When should you use it?</i> When you want the model to write in a specific tone, sort emails into predefined categories, or produce output in a strict structure.
-
-                  <h4>2. Chain of Thought (CoT)</h4>
-                  <p>The most important technique for reducing hallucinations and improving math abilities. By adding the instruction <b>"Let's think step by step"</b>, you force the model to lay out its logic in text before it settles on the final result.</p>
-
-                  <h4>3. Chain Prompting</h4>
-                  <p>Breaking a huge task into several chats or defined steps. For example: Step 1 - ask for an outline of an article. Step 2 (in the same chat) - expand section 1 only. Step 3 - write a summary.</p>
-
-                  <div style="background-color:#f0fdf4; border-left:4px solid #16a34a; padding:10px; margin-top:15px; border-radius:4px;">
-                      <b>🏋️ Try it yourself:</b> Give the model a hard logic puzzle with no instructions (Zero-shot) and check whether it got it right. Then open a new chat and give it the same puzzle, but this time add at the end: "Describe your thought process and solve it step by step". Compare the results.
-                  </div>`
+        description: 'Use examples, compare prompt versions and check a result against a known answer.',
+        content: `<h3>Lesson 3. How would you know if a prompt improved?</h3>
+                <p>A zero-shot prompt gives the task directly. A few-shot prompt adds examples of inputs and acceptable outputs. Examples help when a category boundary is hard to describe. Keep at least one example out of the prompt so you can test that boundary.</p>
+                <h4>Reasoning tasks</h4>
+                <p>Give a reasoning model the goal, relevant facts and success criteria. Ask for evidence you can inspect, such as the formula used or a quote that supports a claim. A fluent explanation can accompany a wrong answer. Check the result independently.</p>
+                <h4>Chain prompting</h4>
+                <p>Break work into stages when you need to review an intermediate result. For a meeting summary, extract decisions and owners first. Check the list against the notes before turning it into a follow-up email.</p>
+                <p><a href="https://developers.openai.com/api/docs/guides/reasoning-best-practices">OpenAI guidance on prompting reasoning models</a></p>`
     },
     4: {
         title: 'ChatGPT',
-        description: 'Working with files, research, images, Projects and GPTs.',
-        content: `<h3>📘 Lesson 4: ChatGPT - Data Analysis, Advanced Tools and Custom Bots</h3>
-                  <p>The ChatGPT Plus / Enterprise interface includes capabilities that let it work as an analyst and an all-round personal assistant:</p>
-
-                  <h4>📊 Advanced Data Analysis</h4>
-                  <p>You can upload Excel, CSV and PDF files or source code. Behind the scenes, ChatGPT writes and runs Python code in an isolated environment, analyzes the file, performs calculations and produces charts you can download. This makes it the ultimate tool for analyzing financial reports or marketing trends.</p>
-
-                  <h4>🤖 Custom GPTs & Projects</h4>
-                  <p><b>Custom GPTs:</b> Let you create a customized version of ChatGPT that is preloaded with fixed system instructions and your organization's knowledge files (for example: a bot that reviews contracts according to your company's rules only).</p>
-
-                  <div style="background-color:#f0fdf4; border-left:4px solid #16a34a; padding:10px; margin-top:15px; border-radius:4px;">
-                      <b>🏋️ Try it yourself:</b> Upload a simple Excel file or a text file with data to ChatGPT, and write: "Act as a data analyst, run a trend analysis of the attached file and show me a visual chart of the results".
-                  </div>`
+        description: 'Use a spreadsheet, check a calculation and turn the result into a chart.',
+        content: `<h3>Lesson 4. Analyze a spreadsheet with ChatGPT</h3>
+                <p>A team says attendance improved. Before choosing a chart, decide what “improved” means. Total attendance measures reach. Attendance divided by registrations measures the share who came. Those two measures can move in opposite directions.</p>
+                <p>With data analysis available, ChatGPT can use Python to inspect a CSV or spreadsheet, calculate results and create charts. Identify the units and denominator in your prompt. Ask to see the figures behind the chart.</p>
+                <h4>Reusing instructions</h4>
+                <p>Projects group related chats and files. A custom GPT can reuse instructions and reference files across tasks. For a recurring report, save a definition of attendance rate and specify what to do with a missing registration count.</p>
+                <p><a href="https://help.openai.com/en/articles/8437071-data-analysis-with-chatgpt">ChatGPT data analysis guide</a></p>`
     },
     5: {
         title: 'Claude',
-        description: 'Projects, Artifacts, large documents, code and MCP.',
-        content: `<h3>📘 Lesson 5: Claude - The Expert in Logic, Code and Long Documents</h3>
-                  <p>Anthropic's Claude model is considered a market leader in writing code, legal wording and complex logic, thanks to its clean architecture and huge Context Window.</p>
-
-                  <h4>🛠️ The Artifacts feature</h4>
-                  <p>When you ask Claude to create code (HTML/JS, CSS, SVG, Python and so on), it doesn't just show you blocks of text. It opens a dedicated interactive panel on the side of the screen that shows you <b>a live app that works in real time</b>, games, or designs you can try out with the click of a button.</p>
-
-                  <h4>📂 Claude Projects</h4>
-                  <p>A workspace for long-term projects. You can upload all of your website files or technical documentation there, set a base instruction for the project, and hold focused conversations that build on all of these materials without uploading them again in every message.</p>
-
-                  <div style="background-color:#f0fdf4; border-left:4px solid #16a34a; padding:10px; margin-top:15px; border-radius:4px;">
-                      <b>🏋️ Try it yourself:</b> Go to Claude and write this prompt: "Build me an interactive calculator for planning a monthly budget using HTML and Tailwind CSS". Watch how the Artifacts panel opens and shows you the calculator working on the side.
-                  </div>`
+        description: 'Build a reusable Claude Artifact and test how it behaves.',
+        content: `<h3>Lesson 5. Build an interactive study tool with Claude</h3>
+                <p>An Artifact is a self-contained piece of work you can revisit and edit. It can be a document, a chart or a small interactive tool. A Project can keep the source material and instructions for a series of related chats.</p>
+                <p>Give Claude a short brief covering the learner, the task and what should happen after a choice. A larger context window can help compare passages that are far apart. Ask for section references and check them against the original.</p>
+                <p><a href="https://support.claude.com/en/articles/17153992-what-are-artifacts-and-how-do-i-use-them">Claude Artifacts guide</a></p>`
     },
     6: {
         title: 'Gemini',
-        description: 'Integration with Google Workspace, Drive, Docs and NotebookLM.',
-        content: `<h3>📘 Lesson 6: Gemini - Google's Ecosystem and the Research Revolution with NotebookLM</h3>
-                  <p>Google's Gemini model stands out for its unprecedented context window (up to 2 million tokens in the advanced models), which lets you feed it entire books, hour-long videos or hundreds of files at once.</p>
-
-                  <h4>🌐 Google Workspace extensions</h4>
-                  <p>By using the <code>@</code> sign (for example <code>@Google Drive</code>), you can ask Gemini to search, summarize and analyze files directly from your cloud account or your email, in real time and securely.</p>
-
-                  <h4>📚 NotebookLM, a phenomenal research tool</h4>
-                  <p>A dedicated research tool from Google, built on Gemini. You upload sources to it (documents, website links, audio files) and the tool becomes a private expert on your materials only. It produces summaries and study guides, and it can create an automatic <b>voice podcast (Audio Overview)</b> in which two AI hosts hold a fascinating conversation analyzing your materials.</p>
-
-                  <div style="background-color:#f0fdf4; border-left:4px solid #16a34a; padding:10px; margin-top:15px; border-radius:4px;">
-                      <b>🏋️ Try it yourself:</b> Go to Google's NotebookLM website, upload a study document or a link to an article, and ask it to create a "Study Guide" for you with questions and answers about the material.
-                  </div>`
+        description: 'Use Gemini with Workspace and use Gemini Notebook to answer from selected sources.',
+        content: `<h3>Lesson 6. Which source answers the question?</h3>
+                <p>Gemini can use a connected Google Workspace account to find material in Drive or summarize a Gmail thread when the account and its permissions allow it. Name the file and ask for the passage that supports the answer.</p>
+                <p>Gemini Notebook (formerly NotebookLM) lets you select sources and ask questions about them. Follow a citation back to its passage. A passage can support the date of a decision while leaving the person responsible unknown. An Audio Overview can help you review the material after checking the facts.</p>
+                <p>A context window limits how much material a model can consider in one request. Limits vary by model and interface. For a long report, check that the answer covers the relevant sections.</p>
+                <p><a href="https://support.google.com/gemini/answer/15229592">Gemini and Workspace</a> · <a href="https://support.google.com/gemininotebook/answer/16179559">Gemini Notebook citations</a></p>`
     }
 };
 
@@ -104,7 +73,7 @@ const extras = {
     2: {
         cases: `
                     <h3>🔥 Case Studies and Templates: Anatomy of a Prompt</h3>
-                    <p>Here you'll see how adding <b>Constraints</b> saves projects from information overload or hallucinations.</p>
+                    <p>A constraint can keep a report focused. Check each finding against the supplied records.</p>
                     <h4>📋 A complete prompt template (tables and analysis):</h4>
                     <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono text-left overflow-x-auto" dir="ltr">
 [Role]: Data Analyst Specialist.
@@ -126,12 +95,12 @@ const extras = {
 Request: "My account is locked and I can't log in" -> Department: Security & Technical Support
 Request: "I wanted to know how much your annual subscription costs" -> Department: Sales & Billing
 Request: "Do you offer a military discount?" -> Department: [the model completes this automatically]</pre>`,
-        practice: `
-                    <h3>🏋️ Hands-on Exercise: Chain of Thought</h3>
-                    <p>Give the model a complex accounting task that involves calculating VAT, stacked discounts and corporate tax. Tell it to solve the task in two ways: once directly, and once explicitly using the Chain of Thought technique. Then compare the financial accuracy.</p>`,
+        practice: `<h3>Lab. Can the model calculate a completion rate?</h3>
+                <p>Six people registered. Four attended. Three of the attendees finished the workshop. In a fresh chat ask, “What was the completion rate?” Save the answer, including any question or assumption. In a second chat ask, “What percentage of attendees finished? Show the numerator, denominator and result.”</p>
+                <p><b>Check:</b> 3 / 4 = 75% of attendees and 3 / 6 = 50% of registrants. The first question leaves room for either denominator. Credit an answer that identifies the ambiguity. The second answer must use four. Try a workshop with zero attendees. An acceptable answer says the rate is undefined.</p>`,
         promptScenarios: [
             'Ask a model to sort customer service requests into predefined categories (service/sales/complaint) using Few-shot Prompting.',
-            'Ask a model to solve a complex accounting problem (VAT, a stacked discount and corporate tax) using Chain of Thought.',
+            'Ask for a workshop completion rate, including the counts and the denominator.',
             'Ask a model to rewrite a marketing paragraph from dry language into persuasive language, in two separate steps (Chain Prompting).'
         ]
     },
@@ -145,8 +114,13 @@ You are a Contract Compliance Assistant for [Company Name].
 Always check uploaded contracts against this list of forbidden clauses: [list].
 If a forbidden clause is found, quote it and explain the risk in plain language.
 Never approve a contract yourself - always end with "Escalate to Legal: Yes/No".</pre>`,
-        practice: `<h3>🏋️ Hands-on Exercise: Automatic Data Analysis</h3>
-                                <p><b>Your task:</b> Upload an Excel or CSV file with sales data (real or made up) to ChatGPT, and ask it to act as a senior data analyst: identify the three main trends, calculate the monthly growth rate, and produce a chart that illustrates the most significant finding.</p>`,
+        practice: `<h3>Lab. Which workshop improved?</h3>
+                <p>Save these three lines as a CSV, or paste them into a chat with data analysis available.</p>
+                <pre>month,registrations,attendees
+April,20,15
+May,40,24</pre>
+                <p>Ask for attendance totals and rates, a chart with labeled units, and a one-sentence summary for the organizer. Check the arithmetic before accepting the chart.</p>
+                <p><b>Answer key:</b> Nine more people attended in May. Attendance rate fell from 75% to 60%, a drop of 15 percentage points. A summary that just says “attendance improved” omits an important part of the story.</p>`,
         promptScenarios: [
             'Ask ChatGPT to analyze an Excel file of sales data and produce key insights and a chart.',
             'Build System Instructions for a Custom GPT that checks contracts against a list of forbidden clauses.',
@@ -154,17 +128,12 @@ Never approve a contract yourself - always end with "Escalate to Legal: Yes/No".
         ]
     },
     5: {
-        cases: `<h3>🔥 Case Studies and Templates: Claude for Writing Code and Analyzing Documents</h3>
-                                <h4>💡 Analyzing a long 80-page contract in one go:</h4>
-                                <p>Thanks to the huge context window, you can paste an entire legal document into Claude and ask it to find internal contradictions between different clauses, instead of splitting it into parts.</p>
-                                <h4>📋 A prompt template for building a live Artifact:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono text-left overflow-x-auto" dir="ltr">
-Act as a senior frontend developer.
-Build a single-file HTML/JS/Tailwind widget that [describe feature].
-Requirements: fully interactive, no external dependencies, mobile responsive.
-Open it as an Artifact so I can test it live.</pre>`,
-        practice: `<h3>🏋️ Hands-on Exercise: Building an Interactive Tool</h3>
-                                <p><b>Your task:</b> Ask Claude to build you an interactive Tip Calculator in HTML and Tailwind CSS. Watch the Artifacts panel that opens, then ask for a design change (for example, a different color) and see how it updates the live code instantly.</p>`,
+        cases: `<h3>Case. Turn a checklist into a reusable tool</h3>
+                <p>A trainer wants a self-check for new hires. Give Claude the checklist, the intended audience and the rule for marking an item complete. Ask for a one-page interactive Artifact and keep a copy of the original checklist for comparison.</p>
+                <pre>Build a checklist with three items: read the brief, complete the practice task, submit feedback. Show a count of completed items. Unchecking an item must decrease the count. Include a reset button.</pre>`,
+        practice: `<h3>Lab. Build a two-question tutor</h3>
+                <p>Ask Claude for an interactive Artifact that shows one question at a time. Use these facts: 3 of 4 attendees finished a workshop (75%); 3 of 6 registrants finished (50%). Ask about each denominator. Offer 50% and 75% as choices, give feedback naming the denominator, and include a restart button.</p>
+                <p><b>Test it:</b> Select the wrong answer on question one. Check the feedback. Finish question two, restart, and confirm the score returns to zero. Submit the prompt, the Artifact and one change you made after testing.</p>`,
         promptScenarios: [
             'Ask Claude to build an interactive monthly budget calculator app in HTML and Tailwind.',
             'Describe a long legal document and ask Claude to find internal contradictions between clauses.',
@@ -172,19 +141,15 @@ Open it as an Artifact so I can test it live.</pre>`,
         ]
     },
     6: {
-        cases: `<h3>🔥 Case Studies and Templates: Gemini and Google Workspace</h3>
-                                <h4>💡 Summarizing a long email thread before a meeting:</h4>
-                                <p>With <code>@Google Drive</code> you can ask Gemini to summarize a long file or thread into three action items, without opening it yourself.</p>
-                                <h4>📋 A prompt template with a Workspace extension:</h4>
-                                <pre class="bg-slate-800 text-slate-100 p-4 rounded-lg text-xs font-mono text-left overflow-x-auto" dir="ltr">
-@Google Drive summarize the file "[file name]".
-List only the 3 open action items and who owns each one.
-Format as a checklist.</pre>`,
-        practice: `<h3>🏋️ Hands-on Exercise: Building a Study Guide in NotebookLM</h3>
-                                <p><b>Your task:</b> Upload an article or a study chapter to NotebookLM, ask it to create a "Study Guide" with questions and answers, and finally turn on the Audio Overview feature to hear how the two AI hosts summarize the material out loud.</p>`,
+        cases: `<h3>Case. An agenda with traceable action items</h3>
+                <p>With Google Workspace connected, ask Gemini to find a named meeting note in Drive. Request an action, an owner and the original sentence for each assignment. If several files have the same name, supply the intended date or select the file. Read the cited sentences before circulating the agenda.</p>`,
+        practice: `<h3>Lab. Reconcile two versions of a decision</h3>
+                <p>Create two text sources. “Draft, 2 May: The workshop is planned for 12 June. Sam will book the room.” “Approved minutes, 9 May: The workshop moves to 19 June. Room booking remains open.”</p>
+                <p>Add both to Gemini Notebook. Ask for the approved date, the confirmed booking owner and a citation for each answer. Open each citation.</p>
+                <p><b>Check:</b> The approved date is 19 June. The minutes confirm no owner. Sam appears in the draft only. Save a two-row evidence table that keeps the draft and approved decisions distinct.</p>`,
         promptScenarios: [
             'Ask Gemini to summarize a long email thread from Gmail into three action items.',
-            'Describe an article you uploaded to NotebookLM and ask for a study guide with questions and answers.',
+            'Ask Gemini Notebook to distinguish a draft decision from the approved minutes and cite each source.',
             'Ask Gemini to analyze a Google Sheets file and draw business insights from it.'
         ]
     }
@@ -251,14 +216,14 @@ const quizzes = {
         },
         {
             id: 'q2',
-            question: 'Which instruction triggers the Chain of Thought technique?',
+            question: 'A model reports a 75% completion rate. Which follow-up best helps you verify it?',
             options: [
-                { id: 'a', text: '"Answer in one word only".' },
-                { id: 'b', text: '"Translate into English".' },
-                { id: 'c', text: '"Let\'s think step by step".' },
-                { id: 'd', text: '"Don\'t explain, just give the answer".' }
+                { id: 'a', text: 'Repeat the percentage in words.' },
+                { id: 'b', text: 'Translate the response.' },
+                { id: 'c', text: 'Show the counts and identify who is in the denominator.' },
+                { id: 'd', text: 'Write a more confident conclusion.' }
             ],
-            explanation: 'This instruction makes the model lay out its logic in text before it settles on the result.'
+            explanation: 'The counts let you check both the arithmetic and the definition of the rate.'
         },
         {
             id: 'q3',
@@ -308,14 +273,14 @@ const quizzes = {
         },
         {
             id: 'q3',
-            question: 'Which task is especially well suited to ChatGPT\'s data analysis capability?',
+            question: 'What happened to workshop attendance in the April and May example?',
             options: [
-                { id: 'a', text: 'Analyzing trends in a sales file and producing a chart.' },
-                { id: 'b', text: 'Sending emails on your behalf without approval.' },
-                { id: 'c', text: 'Directly accessing the company\'s internal database without uploading a file.' },
-                { id: 'd', text: 'Editing a full-length video.' }
+                { id: 'a', text: 'The number increased while the rate fell.' },
+                { id: 'b', text: 'Both the number and the rate increased.' },
+                { id: 'c', text: 'The rate fell by nine percentage points.' },
+                { id: 'd', text: 'Both months had the same attendance rate.' }
             ],
-            explanation: 'You upload a file, and the model analyzes it, runs calculations and produces charts you can download.'
+            explanation: '15/20 is 75% and 24/40 is 60%. May had more attendees and a lower rate.'
         },
         {
             id: 'q4',
@@ -332,14 +297,14 @@ const quizzes = {
     5: [
         {
             id: 'q1',
-            question: 'What is the Claude feature that opens a separate panel with an app or code running in real time called?',
+            question: 'Which Claude feature can produce a self-contained interactive checklist?',
             options: [
-                { id: 'a', text: 'Projects' },
+                { id: 'a', text: 'Project instructions' },
                 { id: 'b', text: 'Artifacts' },
-                { id: 'c', text: 'Plugins' },
-                { id: 'd', text: 'Canvas Mode' }
+                { id: 'c', text: 'A conversation title' },
+                { id: 'd', text: 'File search' }
             ],
-            explanation: 'Artifacts show the generated code as a live app in a side panel.'
+            explanation: 'An Artifact can contain the checklist interface and the logic for counting checked items.'
         },
         {
             id: 'q2',
@@ -378,36 +343,36 @@ const quizzes = {
     6: [
         {
             id: 'q1',
-            question: 'What is the Google tool, built on Gemini, that becomes an expert on the materials you upload and can also create a podcast-style audio summary?',
+            question: 'Which Google tool lets you build a notebook around selected sources?',
             options: [
                 { id: 'a', text: 'Google Docs' },
-                { id: 'b', text: 'NotebookLM' },
+                { id: 'b', text: 'Gemini Notebook (formerly NotebookLM)' },
                 { id: 'c', text: 'Google Translate' },
                 { id: 'd', text: 'Google Sheets' }
             ],
-            explanation: 'NotebookLM works only from the sources you uploaded and produces summaries, study guides and an Audio Overview.'
+            explanation: 'Gemini Notebook supports questions and citations based on the sources in a notebook.'
         },
         {
             id: 'q2',
-            question: 'How do you ask Gemini to work directly with files in Google Drive?',
+            question: 'What is needed for Gemini to find a private file directly in your Google Drive?',
             options: [
-                { id: 'a', text: 'By using the @ sign and referring to the extension, for example @Google Drive.' },
-                { id: 'b', text: 'By downloading the file and pasting it in as an image.' },
-                { id: 'c', text: 'By emailing the file to Google.' },
-                { id: 'd', text: 'It isn\'t possible in Gemini.' }
+                { id: 'a', text: 'A connected Workspace account with permission to read the file.' },
+                { id: 'b', text: 'The name of any Gmail user.' },
+                { id: 'c', text: 'A larger context window.' },
+                { id: 'd', text: 'An audio summary.' }
             ],
-            explanation: 'Workspace extensions are triggered with @ and let you search, summarize and analyze files and emails.'
+            explanation: 'The connection and your access permissions determine which material Gemini can retrieve.'
         },
         {
             id: 'q3',
-            question: 'What characterizes NotebookLM\'s answers?',
+            question: 'The draft names Sam, but the approved minutes leave room booking open. What should the summary say?',
             options: [
-                { id: 'a', text: 'They are based on the entire internet, without distinction.' },
-                { id: 'b', text: 'They are based on the sources you uploaded.' },
-                { id: 'c', text: 'They are always in table format.' },
-                { id: 'd', text: 'They are only available in English.' }
+                { id: 'a', text: 'Sam is the confirmed owner.' },
+                { id: 'b', text: 'The approved minutes leave the owner unconfirmed.' },
+                { id: 'c', text: 'The workshop was cancelled.' },
+                { id: 'd', text: 'The draft overrides the minutes.' }
             ],
-            explanation: 'The tool becomes a private expert on your materials - that is what sets it apart from a general chatbot.'
+            explanation: 'Link each statement to its source. A draft assignment alone does not establish a confirmed owner.'
         },
         {
             id: 'q4',
