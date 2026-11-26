@@ -13,6 +13,7 @@ const {
 const { createSheetPurchaseStore, createSheetWaitlistStore, normalizeEmail } = require('./purchases');
 const { parseGrowPayment, toNumber } = require('./grow');
 const crypto = require('crypto');
+const { createFeedbackHandler } = require('./feedback');
 
 // מודולי הקורס - תוכן לימודי מורחב, תרגילי התנסות ומבחנים
 const modulesDatabase = [
@@ -573,6 +574,12 @@ function createApp(options = {}) {
             return false;
         }
     }
+
+    app.post('/api/feedback', createFeedbackHandler({
+        save: saveToSheet,
+        isLimited: createRateLimiter(6),
+        language: reqLang
+    }));
 
     app.get('/', (req, res) => {
         res.sendFile(path.join(__dirname, 'index.html'));

@@ -21,6 +21,11 @@
         .lesson-content li { margin-top: 0.5rem; line-height: 1.7; }
         .lesson-content code { background-color: #f3f4f6; padding: 0.2rem 0.5rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.95em; color: #b91c1c; }
         .tab-btn.active { border-bottom-color: #2563eb; color: #2563eb; font-weight: bold; }
+        .feedback-stars { display: flex; width: fit-content; gap: .15rem; margin-top: .3rem; }
+        .feedback-star { position: relative; cursor: pointer; display: grid; width: 2.9rem; height: 2.9rem; place-items: center; }
+        .feedback-star input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+        .feedback-star span { font: 2.4rem/1 Arial,sans-serif; color: #92560a; }
+        .feedback-star:focus-within { outline: 2px solid #1d4ed8; outline-offset: 1px; border-radius: .4rem; }
     </style>
 </head>
 <body class="bg-slate-50 p-4 md:p-8 font-sans text-gray-800">
@@ -176,6 +181,38 @@
         </section>
     </main>
 
+    <section class="max-w-2xl mx-auto mt-10 bg-white p-6 rounded-xl border border-slate-200 shadow-sm" aria-labelledby="review-heading">
+        <h2 id="review-heading" class="font-bold text-xl" data-i18n="reviewHeading">איך היה הקורס?</h2>
+        <form id="course-review" class="mt-4 space-y-4">
+            <fieldset>
+                <legend data-i18n="reviewScale">בחרו דירוג מ־1 (לא טוב) עד 5 (מעולה)</legend>
+                <div class="feedback-stars">
+                        <label class="feedback-star">
+                            <input type="radio" name="rating" value="1" required aria-label="1 מתוך 5" data-i18n-aria="reviewStar1"><span aria-hidden="true">☆</span>
+                        </label>
+                        <label class="feedback-star">
+                            <input type="radio" name="rating" value="2" required aria-label="2 מתוך 5" data-i18n-aria="reviewStar2"><span aria-hidden="true">☆</span>
+                        </label>
+                        <label class="feedback-star">
+                            <input type="radio" name="rating" value="3" required aria-label="3 מתוך 5" data-i18n-aria="reviewStar3"><span aria-hidden="true">☆</span>
+                        </label>
+                        <label class="feedback-star">
+                            <input type="radio" name="rating" value="4" required aria-label="4 מתוך 5" data-i18n-aria="reviewStar4"><span aria-hidden="true">☆</span>
+                        </label>
+                        <label class="feedback-star">
+                            <input type="radio" name="rating" value="5" required aria-label="5 מתוך 5" data-i18n-aria="reviewStar5"><span aria-hidden="true">☆</span>
+                        </label>
+                </div>
+            </fieldset>
+            <label class="block" for="review-comment"><span data-i18n="reviewComment">מה עזר לכם או מה כדאי לשפר? (רשות)</span>
+                <textarea id="review-comment" maxlength="1000" rows="3" class="mt-1 block w-full p-3 rounded-lg border border-slate-300"></textarea>
+            </label>
+            <p class="text-sm text-slate-600" data-i18n="reviewPrivate">המשוב מגיע ליוצר הקורס. אין צורך להזין שם.</p>
+            <button type="submit" class="bg-blue-700 text-white rounded-lg px-5 py-2 font-bold disabled:opacity-50" data-i18n="reviewSend">שליחת משוב</button>
+        </form>
+        <p id="review-status" role="status" aria-live="polite" class="mt-3 text-sm font-semibold"></p>
+    </section>
+
     <footer class="mt-16 text-center text-xs text-slate-400 border-t pt-4 max-w-6xl mx-auto">
         <span data-i18n="footerCopy">© 2026 תומר משולם (Tomer Meshulam) - כל הזכויות שמורות | קורס הבנת כלי ה-AI | מערכת LMS מוסמכת רמת Master</span>
         <div class="mt-2"><a href="/privacy" class="underline hover:text-slate-600" data-i18n="footerPrivacy">מדיניות פרטיות</a></div>
@@ -223,6 +260,16 @@
 
         // טקסטים קבועים בדף: העברית כתובה ב-HTML עצמו, כאן רק האנגלית
         const STATIC_EN = {
+            reviewHeading: 'How was the course?',
+            reviewScale: 'Choose a rating from 1 (poor) to 5 (excellent)',
+            reviewComment: 'What helped you, or what could be better? (optional)',
+            reviewPrivate: 'Your feedback goes to the course creator. You can leave out your name.',
+            reviewSend: 'Send feedback',
+            reviewStar1: '1 out of 5',
+            reviewStar2: '2 out of 5',
+            reviewStar3: '3 out of 5',
+            reviewStar4: '4 out of 5',
+            reviewStar5: '5 out of 5',
             hdrTitle: '🎓 Understanding AI Tools',
             hdrSub: 'A hands-on course for working confidently with AI tools. Pick a module to open its lesson, case studies, practice exercises and automatic quiz.',
             acctSignin: 'Sign in to unlock the full course on any device:',
@@ -378,6 +425,50 @@
             });
         }
         applyLanguage();
+
+        const review = document.getElementById('course-review');
+        const reviewStatus = document.getElementById('review-status');
+        const reviewButton = review.querySelector('button');
+        const reviewStars = Array.from(review.querySelectorAll('input[name="rating"]'));
+        const chosenStars = () => Number(reviewStars.find(star => star.checked)?.value || 0);
+        function showStars(count) {
+            reviewStars.forEach(star => {
+                star.nextElementSibling.textContent = Number(star.value) <= count ? '★' : '☆';
+            });
+        }
+        reviewStars.forEach(star => {
+            star.addEventListener('change', () => showStars(chosenStars()));
+            star.addEventListener('pointerenter', () => showStars(Number(star.value)));
+        });
+        review.querySelector('.feedback-stars').addEventListener('pointerleave', () => showStars(chosenStars()));
+        review.addEventListener('submit', async event => {
+            event.preventDefault();
+            if (reviewButton.disabled || !review.reportValidity()) return;
+            reviewButton.disabled = true;
+            reviewStatus.textContent = IS_EN ? 'Sending…' : 'שולח…';
+            const failure = IS_EN ? 'Could not save your feedback. Please try again.' : 'המשוב לא נשמר. אפשר לנסות שוב.';
+            try {
+                const response = await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lang: LANG, rating: chosenStars(), comment: document.getElementById('review-comment').value })
+                });
+                const data = await response.json();
+                if (!response.ok || data.saved !== true) {
+                    reviewStatus.textContent = data.error || failure;
+                    return;
+                }
+                review.hidden = true;
+                reviewStatus.textContent = IS_EN ? 'Thank you! Your feedback has been saved.' : 'תודה! המשוב שלך נשמר.';
+                reviewStatus.tabIndex = -1;
+                reviewStatus.focus();
+            } catch {
+                reviewStatus.textContent = failure;
+            } finally {
+                reviewButton.disabled = false;
+            }
+        });
+
 
         // מתג השפה מוצג כשהאנגלית זמינה לכולם (כל המודולים תורגמו), או למי שכבר צפה באנגלית
         // (או הגיע עם ?lang= בכתובת - למשל אחרי לחיצה על המתג, גם כשהדפדפן לא שומר נתונים)
