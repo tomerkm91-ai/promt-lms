@@ -109,11 +109,12 @@ const quizzes = {
     ]
 };
 
-// Modules 2-15 live in i18n/en/, one file per group of modules, merged here
+// Modules 2-17 live in i18n/en/, one file per group of modules, merged here
 for (const part of [
     require('./i18n/en/modules-02-06'),
     require('./i18n/en/modules-07-11'),
-    require('./i18n/en/modules-12-15')
+    require('./i18n/en/modules-12-15'),
+    require('./i18n/en/modules-16-17')
 ]) {
     Object.assign(modules, part.modules);
     Object.assign(extras, part.extras);

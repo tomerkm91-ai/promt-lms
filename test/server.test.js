@@ -57,7 +57,7 @@ test('config exposes paywall settings and the Google client id', async () => {
 
 test('anonymous visitors get modules 4+ locked and without content', async () => {
     const modules = await getModules();
-    assert.strictEqual(modules.length, 15);
+    assert.strictEqual(modules.length, 17);
     for (const m of modules) {
         if (m.moduleNumber <= 3) {
             assert.strictEqual(m.locked, false);
