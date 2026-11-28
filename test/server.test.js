@@ -96,6 +96,52 @@ test('signed-in non-buyer stays locked; buyer and owner are unlocked', async () 
     assert.ok((await getModules(owner)).every(m => !m.locked));
 });
 
+test('HIDDEN_MODULES hides modules from visitors and buyers, and owners still preview them', async () => {
+    const hidden = [16, 17];
+    const app = createApp({
+        env: { ...env, HIDDEN_MODULES: ' 16, 17 ,x' }, verifyGoogleToken: fakeVerify, purchaseStore: store,
+        waitlistStore: createMemoryWaitlistStore(), now: afterAllReleases
+    });
+    const srv = await new Promise(resolve => { const s = app.listen(0, () => resolve(s)); });
+    const url = `http://127.0.0.1:${srv.address().port}`;
+    const list = cookie => fetch(`${url}/api/modules`, { headers: cookie ? { Cookie: cookie } : {} }).then(r => r.json());
+    const loginHere = async email => (await fetch(`${url}/api/auth/google`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ credential: `good:${email}` })
+    })).headers.get('set-cookie').split(';')[0];
+    try {
+        const buyer = await loginHere('paid@example.com');
+        for (const cookie of [undefined, buyer]) {
+            const mods = await list(cookie);
+            assert.strictEqual(mods.length, 15);
+            assert.ok(hidden.every(n => !mods.some(m => m.moduleNumber === n)));
+            const headers = cookie ? { Cookie: cookie } : {};
+            assert.strictEqual((await fetch(`${url}/api/modules/16/quiz`, { headers })).status, 403);
+            const sub = await fetch(`${url}/api/submissions`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json', ...headers },
+                body: JSON.stringify({ studentName: 'Test', moduleNumber: 17, answers: {} })
+            });
+            assert.strictEqual(sub.status, 403);
+        }
+        const owner = await loginHere('owner@example.com');
+        const ownerList = await list(owner);
+        for (const n of hidden) {
+            const m = ownerList.find(x => x.moduleNumber === n);
+            assert.ok(m && m.preview && m.comingSoon && m.content, `owner should preview module ${n}`);
+        }
+        assert.strictEqual((await fetch(`${url}/api/modules/16/quiz`, { headers: { Cookie: owner } })).status, 200);
+    } finally {
+        srv.close();
+    }
+});
+
+test('lesson images are served from /assets, and missing files return 404', async () => {
+    const img = await fetch(`${base}/assets/m16-chart-he.png`);
+    assert.strictEqual(img.status, 200);
+    assert.match(img.headers.get('content-type'), /image\/png/);
+    assert.strictEqual((await fetch(`${base}/assets/nope.png`)).status, 404);
+    assert.strictEqual((await fetch(`${base}/assets/../server.js`)).status, 404);
+});
+
 test('a code works once: it binds to the first account and is refused for others', async () => {
     assert.strictEqual((await post('/api/access/redeem', { code: CODE })).status, 401);
 
