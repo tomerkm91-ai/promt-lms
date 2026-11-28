@@ -352,7 +352,9 @@
                 recorded: 'הציון נרשם בגיליון הקורס.',
                 savedLocally: 'הציון נשמר בדפדפן שלכם.',
                 serverError: 'שגיאה בתקשורת מול השרת. בדקו את החיבור ונסו שוב.',
-                submit: 'הגשת המבחן לבדיקה'
+                submit: 'הגשת המבחן לבדיקה',
+                copied: '✅ הועתק',
+                copyFailed: 'לא הצלחנו להעתיק - סמנו את הטקסט והעתיקו ידנית'
             },
             en: {
                 pageTitle: 'Understanding AI Tools | ChatGPT, Claude, Gemini, MCP and prompting',
@@ -401,10 +403,29 @@
                 recorded: 'Your grade was recorded in the course sheet.',
                 savedLocally: 'Your grade was saved in your browser.',
                 serverError: 'Could not reach the server. Check your connection and try again.',
-                submit: 'Submit the quiz'
+                submit: 'Submit the quiz',
+                copied: '✅ Copied',
+                copyFailed: "Couldn't copy - select the text and copy it manually"
             }
         };
         const T = TEXT[LANG];
+
+        // 📋 כפתורי העתקה בתוך השיעורים: <button class="copy-btn" data-copy="מזהה"> מעתיק את הטקסט של האלמנט עם המזהה הזה
+        document.addEventListener('click', async e => {
+            const btn = e.target.closest('.copy-btn[data-copy]');
+            if (!btn) return;
+            const source = document.getElementById(btn.dataset.copy);
+            if (!source) return;
+            const original = btn.dataset.label || btn.textContent;
+            btn.dataset.label = original;
+            try {
+                await navigator.clipboard.writeText(source.innerText.trim());
+                btn.textContent = T.copied;
+            } catch (err) {
+                btn.textContent = T.copyFailed;
+            }
+            setTimeout(() => { btn.textContent = original; }, 2500);
+        });
 
         function applyLanguage() {
             document.documentElement.lang = LANG;
