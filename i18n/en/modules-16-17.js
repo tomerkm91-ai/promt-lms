@@ -133,7 +133,7 @@ const extras = {
                         <li>❌ <b>No values or units.</b> Someone reading the headline doesn't know from what and to what it fell.</li>
                     </ul>
 
-                    <h4>✅ An engineered prompt (Master Level):</h4>
+                    <h4>✅ An engineered prompt:</h4>
                     <div class="bg-green-50 p-4 border-l-4 border-green-500 rounded text-sm mb-2" id="m16-good-prompt"><b>Role:</b> Act as a careful data analyst.<br>
 <b>Context:</b> Attached is a chart of waiting times at a service center. I need a headline for a team meeting, and it must not contain any claim the data doesn't support.<br>
 <b>Task:</b> Stage 1, read: for each bar, list the period, value and unit, exactly as they appear in the image. Stage 2, calculate: work out the change in the original unit and in percent, and show what you divided by. Stage 3, conclude: write a headline of up to 12 words, and one question the chart leaves open.<br>
