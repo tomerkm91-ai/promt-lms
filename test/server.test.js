@@ -57,7 +57,9 @@ test('config exposes paywall settings and the Google client id', async () => {
 
 test('anonymous visitors get modules 4+ locked and without content', async () => {
     const modules = await getModules();
-    assert.strictEqual(modules.length, 17);
+    // מודולים 16-17 מוסתרים (hidden) עד שייכתבו מחדש
+    assert.strictEqual(modules.length, 15);
+    assert.ok(!modules.some(m => m.moduleNumber > 15));
     for (const m of modules) {
         if (m.moduleNumber <= 3) {
             assert.strictEqual(m.locked, false);
@@ -94,6 +96,26 @@ test('signed-in non-buyer stays locked; buyer and owner are unlocked', async () 
 
     const owner = await login('owner@example.com');
     assert.ok((await getModules(owner)).every(m => !m.locked));
+});
+
+test('hidden modules are invisible to visitors and buyers, and shown to owners as a preview', async () => {
+    const hidden = [16, 17];
+    const buyer = await login('paid@example.com');
+    for (const cookie of [undefined, buyer]) {
+        const list = await getModules(cookie);
+        assert.ok(hidden.every(n => !list.some(m => m.moduleNumber === n)));
+        const headers = cookie ? { Cookie: cookie } : {};
+        assert.strictEqual((await fetch(`${base}/api/modules/16/quiz`, { headers })).status, 403);
+        const sub = await post('/api/submissions', { studentName: 'Test', moduleNumber: 17, answers: {} }, cookie);
+        assert.strictEqual(sub.status, 403);
+    }
+    const owner = await login('owner@example.com');
+    const ownerList = await getModules(owner);
+    for (const n of hidden) {
+        const m = ownerList.find(x => x.moduleNumber === n);
+        assert.ok(m && m.preview && m.comingSoon && m.content, `owner should preview module ${n}`);
+    }
+    assert.strictEqual((await fetch(`${base}/api/modules/16/quiz`, { headers: { Cookie: owner } })).status, 200);
 });
 
 test('a code works once: it binds to the first account and is refused for others', async () => {

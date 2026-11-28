@@ -701,7 +701,7 @@
                             <span class="flex items-center justify-between gap-2">
                                 <span class="text-[11px] font-bold text-blue-600 block uppercase tracking-wider">${T.unit(m.moduleNumber)}</span>
                                 ${m.comingSoon
-                                    ? `<span class="text-[11px] font-bold text-violet-700 bg-violet-50 border border-violet-200 rounded-full px-2">${m.preview ? T.preview : T.soon} · ${formatDate(m.availableFrom)}</span>`
+                                    ? `<span class="text-[11px] font-bold text-violet-700 bg-violet-50 border border-violet-200 rounded-full px-2">${m.preview ? T.preview : T.soon}${m.availableFrom ? ' · ' + formatDate(m.availableFrom) : ''}</span>`
                                     : m.locked
                                     ? `<span class="text-[11px] font-bold text-slate-500 bg-slate-100 border border-slate-200 rounded-full px-2">${T.paidBadge}</span>`
                                     : (siteConfig.paywallEnabled && m.free ? `<span class="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-2">${T.freeBadge}</span>` : '')}

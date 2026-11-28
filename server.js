@@ -341,6 +341,8 @@ Body: { "model": "claude-x", "max_tokens": 300, "messages": [{"role":"user","con
     },
     {
         moduleNumber: 16,
+        // 🙈 מוסתר מהמבקרים עד שהשיעור ייכתב מחדש כשיעור ללומד עצמאי (בעלי הקורס רואים אותו בתצוגה מקדימה)
+        hidden: true,
         title: "לקרוא תרשים עם Google AI Studio",
         description: "מספר, יחידה וראיה: איך בודקים תשובה של מודל שקרא תמונה.",
         content: `<h3>לקרוא תרשים עם Google AI Studio</h3>
@@ -352,6 +354,8 @@ Body: { "model": "claude-x", "max_tokens": 300, "messages": [{"role":"user","con
     },
     {
         moduleNumber: 17,
+        // 🙈 מוסתר מהמבקרים עד שהשיעור ייכתב מחדש כשיעור ללומד עצמאי (בעלי הקורס רואים אותו בתצוגה מקדימה)
+        hidden: true,
         title: "ממחקרים להמלצה עם Elicit",
         description: "בונים שאלת מחקר, מחליטים מראש אילו ראיות מתאימות ובודקים כל שדה מול המקור.",
         content: `<h3>ממחקרים להמלצה עם Elicit</h3>
@@ -512,7 +516,9 @@ function createApp(options = {}) {
 
     // 📅 תזמון פרסום: מודול עם availableFrom נפתח לכולם רק מהתאריך הזה (שעון ישראל).
     // בעלי הקורס (OWNER_EMAILS) רואים אותו מראש כדי לבדוק אותו לפני כולם.
+    // מודול עם hidden: true לא פורסם בכלל: הוא לא מופיע במבקרים, ובעלי הקורס רואים אותו בתצוגה מקדימה
     function isReleased(mod) {
+        if (mod.hidden) return false;
         return !mod.availableFrom || israelDate(now()) >= mod.availableFrom;
     }
 
@@ -652,7 +658,9 @@ function createApp(options = {}) {
         const email = currentUser(req);
         const unlocked = await hasFullAccess(email);
         const owner = access.isOwner(email);
-        res.json(modulesDatabase.map(mod => publicModule(mod, unlocked, owner, reqLang(req))));
+        res.json(modulesDatabase
+            .filter(mod => !mod.hidden || owner)
+            .map(mod => publicModule(mod, unlocked, owner, reqLang(req))));
     });
 
     // התחברות: הדפדפן שולח את האסימון שקיבל מ-Google, והשרת מאמת אותו בעצמו
